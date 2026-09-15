@@ -1,0 +1,90 @@
+<div class="login-container">
+  <div class="login-card">
+    
+    <!-- COLUMNA IZQUIERDA: Propuesta de valor corporativa -->
+    <div class="login-branding">
+      <div class="branding-content">
+        <div class="logo">
+          <i class="bx bx-aperture logo-icon"></i>
+          <span>SmartAdmin</span>
+        </div>
+        <h1>Soluciones inteligentes para equipos modernos</h1>
+        <p>Optimiza tus flujos de trabajo, gestiona tus locales y toma decisiones basadas en datos — todo desde un solo panel de control unificado.</p>
+        
+        <div class="features-list">
+          <div class="feature-item"><i class="bx bx-trending-up"></i> Análisis en Tiempo Real</div>
+          <div class="feature-item"><i class="bx bx-group"></i> Control Multi-empresa y Multi-local</div>
+          <div class="feature-item"><i class="bx bx-shield-quarter"></i> Seguridad de Nivel Empresarial</div>
+        </div>
+      </div>
+      <div class="branding-footer">
+        © 2026 SmartAdmin. Todos los derechos reservados.
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: Formulario Reactivo de Acceso -->
+    <div class="login-form-section">
+      <div class="form-wrapper">
+        <div class="form-header">
+          <h2>¡Bienvenido de nuevo!</h2>
+          <p>Ingresa tus credenciales para acceder a tu panel maestro</p>
+        </div>
+
+        <!-- Alerta de Error del Servidor -->
+        <div class="alert-error" *ngIf="errorMessage">
+          <i class="bx bx-error-circle"></i> {{ errorMessage }}
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          
+          <!-- Campo: Email -->
+          <div class="form-group" [class.has-error]="isFieldInvalid('email')">
+            <label for="email">Correo Electrónico</label>
+            <div class="input-wrapper">
+              <i class="bx bx-envelope input-icon"></i>
+              <input type="email" id="email" formControlName="email" placeholder="ejemplo@holding.com" autocomplete="email">
+            </div>
+            <span class="error-text" *ngIf="isFieldInvalid('email')">
+              Por favor, ingresa un correo electrónico válido.
+            </span>
+          </div>
+
+          <!-- Campo: Password -->
+          <div class="form-group" [class.has-error]="isFieldInvalid('password')">
+            <label for="password">Contraseña</label>
+            <div class="input-wrapper">
+              <i class="bx bx-lock-alt input-icon"></i>
+              <input type="password" id="password" formControlName="password" placeholder="••••••••">
+            </div>
+            <span class="error-text" *ngIf="isFieldInvalid('password')">
+              La contraseña es obligatoria (Mínimo 6 caracteres).
+            </span>
+          </div>
+
+          <!-- Opciones extras -->
+          <div class="form-actions-helper">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="rememberMe">
+              <span>Recordarme</span>
+            </label>
+            <a routerLink="/auth/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</a>
+          </div>
+
+          <!-- Botón de Envío -->
+          <button type="submit" class="btn-submit" [disabled]="isLoading">
+            <span *ngIf="!isLoading">Iniciar Sesión</span>
+            <span *ngIf="isLoading" class="spinner-text">
+              <i class="bx bx-loader-alt spinner-icon"></i> Autenticando...
+            </span>
+          </button>
+        </form>
+
+        <div class="form-footer">
+          <p>¿Aún no tienes una cuenta corporativa?</p>
+          <a routerLink="/auth/subscribe" class="link-register">Suscribir mi Holding / Empresa</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

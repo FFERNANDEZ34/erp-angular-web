@@ -1,0 +1,167 @@
+<div class="erp-main-wrapper" [class.sidebar-collapsed-state]="isSidebarCollapsed">
+  
+  <!-- SIDEBAR IZQUIERDO DINÁMICO EXPANDIBLE (CORTINA SUAVE) -->
+  <aside class="erp-sidebar-core">
+    <div class="sidebar-brand-zone">
+      <i class="bx bx-cube-alt logo-brand-icon"></i>
+      <span class="logo-brand-text">SaaS ERP</span>
+    </div>
+    
+     <div class="sidebar-links-list" *ngIf="renderMenu">
+      <!-- 🌲 LOOP NIVEL 1: Categorías Macro (Dashboard, Módulos Catálogo) -->
+      <div *ngFor="let item of menuTree" class="menu-macro-block">
+        
+        <small class="sidebar-tag-title">{{ item.title }}</small>
+        
+        <!-- CASO A: Opción principal es un LINK DIRECTO sin hijos (Ej: Dashboard) -->
+        <a *ngIf="(!item.children || item.children.length === 0) && item.path" 
+           [routerLink]="item.path" routerLinkActive="active" class="sidebar-single-link" [title]="item.title">
+          <i [class]="item.icon || 'bx bx-radio-circle'" class="link-nav-icon"></i>
+          <span class="link-nav-text">{{ item.title }}</span>
+        </a>
+
+        <!-- CASO B: Opción principal TIENE HIJOS (Acordeón Expandible con CSS Animado) -->
+        <div *ngIf="item.children && item.children.length > 0" class="menu-sub-group" [class.is-expanded]="isMenuExpanded(item.id)">
+          
+          <!-- Disparador del Acordeón (Modo Extendido) -->
+          <div class="sidebar-single-link header-expandable-trigger" (click)="toggleMenuExpand(item.id, $event)">
+            <i [class]="item.icon || 'bx bx-folder'" class="link-nav-icon"></i>
+            <span class="link-nav-text">{{ item.title }}</span>
+            <i class="bx arrow-accordion-indicator ms-auto" [ngClass]="isMenuExpanded(item.id) ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
+          </div>
+
+          <!-- Icono Único (Modo Mini-Sidebar Colapsado) -->
+          <div class="sidebar-mini-icon-only" [title]="item.title" (click)="toggleMenuExpand(item.id, $event)">
+            <i [class]="item.icon || 'bx bx-folder'" class="link-nav-icon"></i>
+          </div>
+
+          <!-- CONTENEDOR CON ANIMACIÓN SUAVE CSS (Hijos de Segundo Nivel) -->
+          <div class="animated-accordion-wrapper" [class.open-accordion]="isMenuExpanded(item.id)">
+            <ul class="sidebar-submenu-list">
+              <li *ngFor="let subItem of item.children">
+                
+                <!-- Sub-enlace Plano (Ej: Entidades Comerciales) -->
+                <a *ngIf="!subItem.children || subItem.children.length === 0"
+                   [routerLink]="subItem.path" routerLinkActive="active" class="sidebar-sub-link">
+                  <i class="bx bx-radio-circle sub-link-bullet"></i>
+                  <span>{{ subItem.title }}</span>
+                </a>
+
+                <!-- TERCER NIVEL COLAPSABLE (Nietos: Facturación) -->
+                <div *ngIf="subItem.children && subItem.children.length > 0" class="nested-grandson-box" [class.grandson-expanded]="isSubMenuExpanded(subItem.id)">
+                  <span class="grandson-header-title" (click)="toggleSubMenuExpand(subItem.id, $event)">
+                    <i class="bx" [ngClass]="isSubMenuExpanded(subItem.id) ? 'bx-folder-open text-primary' : 'bx-folder'"></i> 
+                    {{ subItem.title }}
+                    <i class="bx micro-arrow" [ngClass]="isSubMenuExpanded(subItem.id) ? 'bx-chevron-up' : 'bx-chevron-down'"></i>
+                  </span>
+                  
+                  <div class="animated-accordion-wrapper" [class.open-accordion]="isSubMenuExpanded(subItem.id)">
+                    <ul class="grandson-ul-list">
+                      <li *ngFor="let grandson of subItem.children">
+                        <a [routerLink]="grandson.path" routerLinkActive="active" class="grandson-link-item">
+                          <i class="bx bx-minus small-bullet"></i> {{ grandson.title }}
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </aside>
+
+  <!-- PANEL DE CONTENIDO OPERATIVO DERECHO -->
+  <div class="erp-content-viewport">
+    
+    <!-- NAVBAR SUPERIOR RESPONSIVE -->
+    <nav class="erp-navbar-top">
+      
+      <!-- LADO IZQUIERDO: HAMBURGUESA NATIVA + SELECTORES ESTILO BOTÓN SEGUROS -->
+      <div class="navbar-left-zone">
+        <button class="btn-hamburger-toggle" type="button" (click)="toggleSidebar($event)" title="Alternar Menú">
+          <svg xmlns="http://w3.org" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+
+        <!-- SELECTOR 1: COMPAÑÍA MATRIZ REAL (Protegido contra nulos) -->
+        <div class="selector-container-wrapper custom-dropdown-click" *ngIf="companiesList && companiesList.length > 0">
+          <select class="form-select btn-premium-inline-selector shadow-none text-dark bg-white" 
+                  [ngModel]="selectedCompanyId" 
+                  (change)="onCompanyChange(+$any($event.target).value)">
+            <option *ngFor="let comp of companiesList" [value]="comp.id">🏢 {{ comp.name }}</option>
+          </select>
+        </div>
+
+        <!-- SELECTOR 2: LOCAL COMERCIAL REAL (Protegido contra nulos) -->
+        <div class="selector-container-wrapper custom-dropdown-click" *ngIf="branchesList && branchesList.length > 0">
+          <select class="form-select btn-premium-inline-selector shadow-none text-secondary bg-white" 
+                  [ngModel]="selectedBranchId" 
+                  (change)="onBranchChange(+$any($event.target).value)">
+            <option *ngFor="let branch of branchesList" [value]="branch.id">📍 {{ branch.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- LADO DERECHO: CONMUTADORES, MULTI-PERFIL Y AVATAR -->
+      <div class="navbar-right-zone">
+        
+        <!-- Conmutador Anti-Fatiga Visual -->
+        <button class="btn-nav-circle-action" type="button" (click)="toggleDarkMode()" [title]="isDarkModeActive ? 'Modo Claro' : 'Modo Oscuro'">
+          <i class="bx" [ngClass]="isDarkModeActive ? 'bx-sun text-warning' : 'bx-moon'"></i>
+        </button>
+
+        <div class="custom-divider-line"></div>
+
+        <!-- Dropdown Perfiles Dinámicos -->
+        <div class="dropdown custom-dropdown-click" *ngIf="profilesList && profilesList.length > 0">
+          <button class="btn-profile-badge" type="button" (click)="isProfileDropdownOpen = !isProfileDropdownOpen; isUserDropdownOpen = false; $event.stopPropagation()">
+            <i class="bx bx-shield-quarter icon-shield-color"></i>
+            <span class="text-truncate-profile">{{ selectedProfileRole | uppercase }}</span>
+            <i class="bx bx-chevron-down arrow-indicator"></i>
+          </button>
+          <ul class="dropdown-menu-custom" [class.show-menu]="isProfileDropdownOpen">
+            <li class="menu-custom-header">Perfiles del Holding</li>
+            <li *ngFor="let profile of profilesList">
+              <button class="menu-custom-item" type="button" (click)="onProfileChange(profile)">
+                <i class="bx bx-check-circle" [class.active-check]="selectedProfileRole === profile" [style.opacity]="selectedProfileRole === profile ? '1' : '0.15'"></i>
+                {{ profile | uppercase }}
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Dropdown Avatar de Cuenta -->
+        <div class="dropdown custom-dropdown-click">
+          <button class="btn-avatar-trigger" type="button" (click)="isUserDropdownOpen = !isUserDropdownOpen; isProfileDropdownOpen = false; $event.stopPropagation()">
+            <div class="user-avatar-initials shadow-sm">
+              {{ currentUser.name.charAt(0) | uppercase }}
+            </div>
+          </button>
+          <ul class="dropdown-menu-custom anchor-right-side" [class.show-menu]="isUserDropdownOpen">
+            <li class="menu-user-profile-header">
+              <strong class="d-block text-dark-title">{{ currentUser.name }}</strong>
+              <small class="d-block text-muted-sub">{{ currentUser.email }}</small>
+            </li>
+            <li>
+              <button class="menu-custom-item text-danger border-0 bg-transparent w-100 text-start d-flex align-items-center gap-2" type="button" (click)="onSignOut()">
+                <i class="bx bx-log-out fs-5"></i> Cerrar Sesión
+              </button>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </nav>
+
+    <!-- ZONA OPERATIVA DINÁMICA DEL CONTENIDO DEL PANEL -->
+    <main class="content-body-viewport fade-in-animation">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+</div>

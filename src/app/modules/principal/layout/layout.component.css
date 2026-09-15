@@ -1,0 +1,443 @@
+@import url('https://unpkg.com');
+
+.erp-main-wrapper {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* --- SIDEBAR FLEXBOX CONTROLADO --- */
+.erp-sidebar-core {
+  width: 250px;
+  min-width: 250px;
+  background-color: #0f172a;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-brand-zone {
+  height: 65px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #1e293b;
+  white-space: nowrap;
+}
+.logo-brand-icon { color: #2563eb; font-size: 24px; }
+.logo-brand-text { font-weight: 700; font-size: 16px; letter-spacing: -0.5px; }
+
+.sidebar-links-list { flex: 1; padding: 15px 10px; display: flex; flex-direction: column; gap: 4px; }
+.sidebar-tag-title { font-size: 10.5px; text-transform: uppercase; color: #475569; font-weight: 700; padding: 8px 12px 4px 12px; letter-spacing: 0.5px; }
+
+.sidebar-single-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  color: #94a3b8;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.sidebar-single-link:hover { background-color: #1e293b; color: #ffffff; }
+.sidebar-single-link.active { background-color: #2563eb; color: #ffffff; font-weight: 600; }
+.link-nav-icon { font-size: 18px; }
+
+/* ========================================================================= */
+/* 🎛️ ESTADO COLLAPSED / HIDDEN (CIERRE MAESTRO DEL SIDEBAR)                 */
+/* ========================================================================= */
+.sidebar-hidden-state .erp-sidebar-core {
+  width: 0px;
+  min-width: 0px;
+  overflow: hidden; /* Se esconde de forma limpia sin romper layouts */
+}
+
+/* CONTENIDO DERECHO */
+.erp-content-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* NAVBAR SUPERIOR FIJA */
+.erp-navbar-top {
+  height: 65px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+}
+
+.navbar-left-zone { display: flex; align-items: center; gap: 8px; flex: 1; }
+
+/* BOTÓN HAMBURGUESA RESILIENTE */
+.btn-hamburger-toggle {
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #475569;
+  transition: background-color 0.15s;
+  padding: 0;
+}
+.btn-hamburger-toggle:hover { background-color: #f1f5f9; color: #0f172a; }
+
+/* SELECTORES COMPACTOS INLINE (SIEMPRE VISIBLES) */
+.compact-selector-box {
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 2px 6px;
+  display: flex;
+  align-items: center;
+  max-width: 145px;
+  width: 100%;
+}
+
+.compact-selector-box select {
+  border: none;
+  background: none;
+  width: 100%;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e293b;
+  outline: none;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+/* ACCIONES LADO DERECHO NAVBAR */
+.navbar-right-zone { display: flex; align-items: center; gap: 10px; }
+
+.btn-nav-circle-action {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background-color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: #475569;
+}
+.btn-nav-circle-action:hover { background-color: #e2e8f0; }
+
+.custom-divider-line { width: 1px; height: 20px; background-color: #e2e8f0; }
+
+/* SELECCIÓN DE PERFIL FLUIDO */
+.btn-profile-badge {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  max-width: 160px;
+}
+.icon-shield-color { color: #2563eb; font-size: 14px; }
+.text-truncate-profile { max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.arrow-indicator { font-size: 12px; color: #94a3b8; }
+
+.btn-avatar-trigger { background: none; border: none; padding: 0; cursor: pointer; }
+.user-avatar-initials {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* DROPDOWNS MANUALES 100% FIJOS SIN DESBORDE */
+.dropdown { position: relative; }
+.dropdown-menu-custom {
+  position: absolute;
+  top: 100%;
+  margin-top: 8px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05);
+  min-width: 180px;
+  list-style: none;
+  padding: 4px 0;
+  display: none;
+  z-index: 1000;
+}
+.dropdown-menu-custom.anchor-right-side { right: 0; }
+.dropdown-menu-custom.show-menu { display: block; animation: dropFade 0.12s ease-out; }
+
+.menu-custom-header { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700; padding: 6px 14px 2px 14px; letter-spacing: 0.5px; }
+.menu-custom-item { width: 100%; padding: 8px 14px; font-size: 13px; color: #334155; text-align: left; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.menu-custom-item:hover { background-color: #f1f5f9; color: #0f172a; }
+.active-check { color: #16a34a; font-size: 14px; }
+
+.menu-user-profile-header { padding: 8px 14px; border-bottom: 1px solid #f1f5f9; margin-bottom: 4px; line-height: 1.3; }
+.text-dark-title { font-size: 13px; color: #0f172a; }
+.text-muted-sub { font-size: 11px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 150px; }
+
+.content-body-viewport { flex: 1; padding: 20px; overflow-y: auto; }
+.fade-in-animation { animation: pageFadeIn 0.2s ease-out forwards; }
+@keyframes pageFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ========================================================================= */
+/* 🌙 MODO OSCURO EN BASE A HERENCIA SEMÁNTICA (RESILIENTE)                  */
+/* ========================================================================= */
+::ng-deep .dark-theme-mode .erp-navbar-top { background-color: #1e293b !important; border-color: #334155 !important; }
+::ng-deep .dark-theme-mode .erp-content-viewport { background-color: #0f172a !important; }
+::ng-deep .dark-theme-mode .compact-selector-box { background-color: #334155 !important; border-color: #475569 !important; }
+::ng-deep .dark-theme-mode .compact-selector-box select { color: #f8fafc !important; }
+::ng-deep .dark-theme-mode .compact-selector-box option { background-color: #1e293b !important; color: #f8fafc !important; }
+::ng-deep .dark-theme-mode .btn-nav-circle-action { background-color: #334155 !important; color: #cbd5e1 !important; }
+::ng-deep .dark-theme-mode .btn-profile-badge { background-color: #1e293b !important; border-color: #475569 !important; color: #cbd5e1 !important; }
+::ng-deep .dark-theme-mode .dropdown-menu-custom { background-color: #1e293b !important; border-color: #334155 !important; }
+::ng-deep .dark-theme-mode .menu-custom-item { color: #cbd5e1 !important; }
+::ng-deep .dark-theme-mode .menu-custom-item:hover { background-color: #334155 !important; color: #ffffff !important; }
+::ng-deep .dark-theme-mode .text-dark-title { color: #ffffff !important; }
+::ng-deep .dark-theme-mode .menu-user-profile-header { border-color: #334155 !important; }
+::ng-deep .dark-theme-mode .btn-hamburger-toggle { border-color: #334155 !important; color: #cbd5e1 !important; }
+
+/* ========================================================================= */
+/* 🎛️ ESTADO COLLAPSED INTERACTIVO: REGLAS DEL MINI-SIDEBAR DE ICONOS       */
+/* ========================================================================= */
+
+/* 1. Encogemos el ancho del Sidebar de 250px a 70px */
+.sidebar-collapsed-state .erp-sidebar-core {
+  width: 70px;
+  min-width: 70px;
+}
+
+/* 2. Ocultamos el texto de la marca y la etiqueta de sección */
+.sidebar-collapsed-state .logo-brand-text,
+.sidebar-collapsed-state .sidebar-tag-title {
+  display: none !important;
+}
+
+/* 3. Centramos el icono principal de la marca en la cabecera */
+.sidebar-collapsed-state .sidebar-brand-zone {
+  justify-content: center;
+  padding: 0;
+}
+.sidebar-collapsed-state .logo-brand-icon {
+  font-size: 26px; /* Un poco más grande para que destaque solo */
+  margin: 0;
+}
+
+/* 4. Estilizamos los enlaces para que actúen como botones de iconos centrados */
+.sidebar-collapsed-state .sidebar-single-link {
+  justify-content: center;
+  padding: 12px 0;
+  margin: 0 4px;
+}
+
+/* 5. Aumentamos sutilmente el tamaño del icono de navegación en modo mini */
+.sidebar-collapsed-state .link-nav-icon {
+  font-size: 20px;
+  margin: 0;
+}
+
+/* 6. Desvanecemos por completo los textos de los enlaces */
+.sidebar-collapsed-state .link-nav-text {
+  display: none !important;
+}
+
+/* --- ADAPTACIÓN ADICIONAL PARA DISPOSITIVOS MÓVILES --- */
+@media (max-width: 768px) {
+  /* En pantallas móviles, si no está colapsado, escondemos el menú fuera de pantalla */
+  .erp-sidebar-core {
+    margin-left: 0;
+  }
+  
+  /* Si el administrador activa el colapso en celular, escondemos la barra por completo */
+  .sidebar-collapsed-state .erp-sidebar-core {
+    width: 0px;
+    min-width: 0px;
+    margin-left: -70px;
+  }
+}
+
+/* ESTILOS DE SUBMENÚS Y ÁRBOLES RECURSIVOS */
+.menu-macro-block { display: flex; flex-direction: column; margin-bottom: 12px; }
+
+.sidebar-submenu-list { list-style: none; padding: 0; margin: 4px 0 0 0; display: flex; flex-direction: column; gap: 2px; }
+
+.sidebar-sub-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 24px; /* Desplazado a la derecha por jerarquía */
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 13px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.sidebar-sub-link:hover, .sidebar-sub-link.active { color: #ffffff; background-color: #1e293b; }
+.sub-link-bullet { font-size: 10px; color: #475569; }
+.sidebar-sub-link.active .sub-link-bullet { color: #2563eb; }
+
+/* JERARQUÍA DE NIETOS (FACTURACIÓN) */
+.nested-grandson-box { padding: 4px 0 4px 24px; }
+.grandson-header-title { font-size: 12.5px; color: #475569; font-weight: 600; display: block; margin-bottom: 4px; }
+.grandson-ul-list { list-style: none; padding-left: 12px; display: flex; flex-direction: column; gap: 2px; margin: 0; }
+.grandson-link-item { display: block; padding: 5px 10px; font-size: 12.5px; color: #64748b; text-decoration: none; border-radius: 4px; }
+.grandson-link-item:hover, .grandson-link-item.active { color: #2563eb; background-color: #1e293b; }
+
+/* 🎛️ CONTROL DE ICONO REMEDIO PARA MODO COLLAPSED (MINI-SIDEBAR) */
+.sidebar-mini-icon-only {
+  display: none; /* Oculto por defecto en modo normal */
+}
+
+/* ========================================================================= */
+/* REGLAS ESTRICTAS DE COMPRESIÓN EN MODO MINI-SIDEBAR                      */
+/* ========================================================================= */
+.sidebar-collapsed-state .sidebar-submenu-list,
+.sidebar-collapsed-state .sidebar-single-link .link-nav-text {
+  display: none !important; /* Esconde los sub-árboles y textos de golpe */
+}
+
+/* Revela el icono unificado centrado en el canal de 70px */
+.sidebar-collapsed-state .sidebar-mini-icon-only {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 0;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 22px;
+}
+.sidebar-collapsed-state .sidebar-mini-icon-only:hover { color: #ffffff; }
+
+/* Novedades estéticas del Header y Sidebar Acordeón */
+
+.header-expandable-trigger {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.arrow-accordion-indicator {
+  font-size: 14px;
+  color: #64748b;
+  transition: transform 0.2s ease;
+}
+
+/* Rediseño de los selectores integrados estilo botón premium */
+.btn-premium-inline-selector {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: #1e293b !important;
+  padding: 6px 12px !important;
+  cursor: pointer;
+  outline: none;
+  max-width: 210px;
+}
+.btn-premium-inline-selector:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06);
+}
+
+/* Ocultar flechas del acordeón e hijos al colapsar el menú en modo Mini-Sidebar */
+.sidebar-collapsed-state .arrow-accordion-indicator,
+.sidebar-collapsed-state .sidebar-submenu-list {
+  display: none !important;
+}
+
+/* Integración de variables oscuras para los nuevos botones selectores */
+::ng-deep .dark-theme-mode .btn-premium-inline-selector {
+  background-color: #1e293b !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+/* ========================================================================= */
+/* ⏳ TRANSICIÓN DE CORTINA SUAVE PARA ACORDEONES (Efecto Despliegue)         */
+/* ========================================================================= */
+.animated-accordion-wrapper {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease-out;
+}
+
+/* Cuando se activa la clase abierta, la cortina se expande suavemente */
+.open-accordion {
+  max-height: 500px; /* Altura máxima permitida para calcular la transición */
+  opacity: 1;
+}
+
+/* CONTROL ADICIONAL DE PERFILES INTERNOS */
+.grandson-header-title {
+  font-size: 13px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.grandson-header-title:hover { color: #ffffff; background-color: #1e293b; }
+.micro-arrow { font-size: 12px; margin-left: auto; color: #475569; }
+
+.small-bullet { font-size: 10px; opacity: 0.3; }
+.grandson-link-item:hover .small-bullet { color: #2563eb; opacity: 1; }
+
+/* Forzar anulación de la transición cuando el sidebar se vuelve Mini-Sidebar */
+.sidebar-collapsed-state .animated-accordion-wrapper {
+  max-height: 0 !important;
+  opacity: 0 !important;
+}
+/* Limpieza estricta de alineaciones para los combo-boxes inline */
+.selector-container-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.btn-premium-inline-selector option {
+  padding: 8px 12px !important;
+  margin: 0 !important;
+  font-weight: 500;
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+}
+
+/* Modo oscuro adaptativo para las opciones de los combos */
+::ng-deep .dark-theme-mode .btn-premium-inline-selector option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}

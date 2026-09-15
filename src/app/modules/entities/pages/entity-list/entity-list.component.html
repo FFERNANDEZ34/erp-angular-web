@@ -1,0 +1,451 @@
+<div class="page-header-title mb-4">
+  <h1 class="h4 fw-bold text-dark mb-1">Catálogo Maestro de Entidades</h1>
+  <p class="text-muted small m-0">
+    Gestione la base de datos unificada de clientes y proveedores compartida de
+    su Holding
+  </p>
+</div>
+
+<div class="table-container-wrapper shadow-sm border rounded-3 bg-white">
+  <!-- 🔍 BARRA DE FILTROS AVANZADOS INTEGRADOS (HORIZONTAL) -->
+  <div
+    class="table-advanced-filters-toolbar p-3 bg-light rounded-top border-bottom"
+  >
+    <div class="row g-2 align-items-center">
+      <!-- Filtro 1: Tipo de Documento -->
+      <div class="col-md-2">
+        <select
+          class="form-select form-select-sm shadow-none border bg-white text-dark fw-semibold"
+          [(ngModel)]="filterDocumentType"
+          (change)="onFilterChange()"
+        >
+          <option value="">📁 Todos los Documentos</option>
+          <option value="dni">DNI</option>
+          <option value="ruc">RUC</option>
+          <option value="pasaporte">Pasaporte</option>
+          <option value="ce">C.E.</option>
+        </select>
+      </div>
+
+      <!-- Filtro 2: Número de Documento -->
+      <div class="col-md-2">
+        <input
+          type="text"
+          class="form-control form-control-sm shadow-none border bg-white text-dark"
+          [(ngModel)]="filterDocumentNumber"
+          (input)="onFilterChange()"
+          placeholder="Nro Documento..."
+        />
+      </div>
+
+      <!-- Filtro 3: Razón Social / Nombres -->
+      <div class="col-md-4">
+        <input
+          type="text"
+          class="form-control form-control-sm shadow-none border bg-white text-dark"
+          [(ngModel)]="filterName"
+          (input)="onFilterChange()"
+          placeholder="Buscar Razón Social o Nombres Completos..."
+        />
+      </div>
+
+      <!-- Filtro 4: Correo de Contacto -->
+      <div class="col-md-2">
+        <input
+          type="text"
+          class="form-control form-control-sm shadow-none border bg-white text-dark"
+          [(ngModel)]="filterEmail"
+          (input)="onFilterChange()"
+          placeholder="Buscar por Correo..."
+        />
+      </div>
+
+      <!-- Acción: Botón Nuevo Registro -->
+      <div class="col-md-2 text-end">
+        <button
+          class="btn btn-primary btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1 border-0"
+          style="background-color: #2563eb; border-radius: 6px"
+          type="button"
+          (click)="openCreateModal()"
+        >
+          <i class="bx bx-plus-circle fs-5"></i> Nuevo Registro
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR DE LA TABLA DINÁMICA -->
+  <div class="table-responsive text-start">
+    <table
+      class="table table-hover align-middle m-0"
+      style="min-width: 900px; font-size: 13px"
+    >
+      <thead class="table-light text-secondary border-bottom">
+        <tr>
+          <th
+            (click)="changeOrder('id')"
+            class="py-3 px-4 cursor-pointer"
+            style="width: 90px; user-select: none"
+          >
+            ID
+            <i
+              class="bx"
+              [ngClass]="
+                sortField === 'id'
+                  ? sortOrder === 'asc'
+                    ? 'bx-chevron-up text-primary'
+                    : 'bx-chevron-down text-primary'
+                  : 'bx-minus opacity-25'
+              "
+            ></i>
+          </th>
+          <th
+            (click)="changeOrder('name')"
+            class="py-3 cursor-pointer"
+            style="user-select: none"
+          >
+            Entidad Comercial / Razón Social
+            <i
+              class="bx"
+              [ngClass]="
+                sortField === 'name'
+                  ? sortOrder === 'asc'
+                    ? 'bx-chevron-up text-primary'
+                    : 'bx-chevron-down text-primary'
+                  : 'bx-sort-alt opacity-25'
+              "
+            ></i>
+          </th>
+          <th style="width: 140px">Estructura</th>
+          <th style="width: 130px">Documento</th>
+          <th style="width: 160px">Identificación</th>
+          <th>Canal de Contacto</th>
+          <th class="text-center" style="width: 110px">Operaciones</th>
+        </tr>
+      </thead>
+      <tbody class="border-0">
+        <!-- ⏳ EFECTO VISUAL: EN ESPERA DE DATOS -->
+        <tr *ngIf="isLoading">
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i
+              class="bx bx-loader-alt bx-spin text-primary fs-3 d-block mb-2"
+            ></i>
+            <span class="fw-semibold"
+              >Consultando catálogo maestro en MySQL...</span
+            >
+          </td>
+        </tr>
+
+        <!-- 📂 ESTADO VACÍO -->
+        <tr *ngIf="!isLoading && entities.length === 0">
+          <td colspan="7" class="text-center py-5 bg-white">
+            <div class="py-4">
+              <i
+                class="bx bx-data text-muted opacity-25 d-block mb-2"
+                style="font-size: 48px"
+              ></i>
+              <h6 class="text-dark fw-bold m-0">
+                No se encontraron entidades comerciales
+              </h6>
+              <p class="text-muted small m-0">
+                Intente modificando los filtros de búsqueda avanzados o cambie
+                de local.
+              </p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 🚀 REGISTROS REALES EN VIVO -->
+        <tr *ngFor="let entity of entities">
+          <td class="px-4 text-secondary fw-semibold">#{{ entity.id }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <span class="text-dark fw-bold">{{ entity.name }}</span>
+            </div>
+          </td>
+          <td>
+            <span>
+              {{ entity.entityType }}
+            </span>
+          </td>
+          <td>
+            <span class="text-muted text-uppercase fw-semibold">{{
+              entity.documentType
+            }}</span>
+          </td>
+          <td>
+            <span class="text-dark font-monospace fw-semibold">{{
+              entity.documentNumber
+            }}</span>
+          </td>
+          <td>
+            <!-- ✅ ENLACE DE CONTACTO LIMPIO SIN DIVS HUÉRFANOS -->
+            <span>
+              <i class="bx bx-envelope text-muted me-1"></i>{{ entity.email }}
+            </span>
+
+            <ng-template #sinCorreo>
+              <span class="text-muted opacity-50 small">Sin correo</span>
+            </ng-template>
+          </td>
+          <td class="text-center">
+            <div class="d-inline-flex gap-1">
+              <button class="btn btn-outline-primary btn-sm me-2" (click)="onEdit(entity)">
+                ✏️<i class="bx bx-pencil fs-6"></i>
+              </button>
+              <button class="btn btn-outline-danger btn-sm">
+                🗑️<i class="bx bx-trash-alt fs-6"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 📑 PIE DE PAGINACIÓN PREMIUM CON SELECTOR DINÁMICO DE FILAS -->
+  <div
+    class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3"
+    *ngIf="totalRecords > 0"
+  >
+    <!-- Lado Izquierdo: Contador + Selector de Tamaño (10, 20, 30, 50) -->
+    <div
+      class="d-flex align-items-center gap-3 text-secondary"
+      style="font-size: 12px"
+    >
+      <div>
+        Mostrando
+        <span class="fw-bold text-dark">{{
+          (currentPage - 1) * pageSize + 1
+        }}</span>
+        al
+        <span class="fw-bold text-dark">{{
+          currentPage * pageSize > totalRecords
+            ? totalRecords
+            : currentPage * pageSize
+        }}</span>
+        de
+        <span
+          class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-2 py-1"
+          >{{ totalRecords }} registros</span
+        >
+      </div>
+
+      <div class="d-flex align-items-center gap-2 border-start ps-3">
+        <span>Filas por página:</span>
+        <select
+          class="form-select form-select-sm shadow-none border bg-white text-dark py-0.5"
+          style="
+            width: 65px;
+            font-size: 12px;
+            font-weight: 600;
+            height: 24px;
+            border-radius: 4px;
+          "
+          [ngModel]="pageSize"
+          (change)="onPageSizeChange(+$any($event.target).value)"
+        >
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+          <option [value]="30">30</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Lado Derecho: Controles Navigacionales -->
+    <div class="d-flex align-items-center gap-2">
+      <!-- Botón Izquierdo (Retroceder) -->
+      <button
+        class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)"
+        style="width: 32px; height: 32px"
+      >
+        <i class="bx bx-chevron-left fs-4" style="line-height: 1"></i>
+      </button>
+
+      <div
+        class="text-secondary fw-semibold mx-1"
+        style="font-size: 12px; user-select: none"
+      >
+        Página <span class="text-dark fw-bold">{{ currentPage }}</span> de
+        {{ totalPages }}
+      </div>
+
+      <!-- Botón Derecho (Avanzar) -->
+      <button
+        class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)"
+        style="width: 32px; height: 32px"
+      >
+        <i class="bx bx-chevron-right fs-4" style="line-height: 1"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 🚪 VENTANA MODAL EMERGENTE: FORMULARIO REACTIVO DE DATAENTRY (COMPLETO)    -->
+<!-- ========================================================================= -->
+<div
+  class="modal fade"
+  [class.show]="showModal"
+  [style.display]="showModal ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div
+      class="modal-content border-0 shadow-lg modal-premium-radius bg-white text-dark"
+    >
+      <!-- Encabezado -->
+      <div
+        class="modal-header border-bottom border-light px-4 py-3 bg-light rounded-top d-flex align-items-center justify-content-between"
+      >
+        <h5 class="modal-title fw-bold text-dark fs-6 m-0">
+          {{
+            isEditing
+              ? "📝 Modificar Ficha de Entidad"
+              : "🚀 Registrar Nueva Entidad Comercial"
+          }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close shadow-none border-0 bg-transparent text-secondary fs-4"
+          (click)="closeModal()"
+        ></button>
+      </div>
+
+      <!-- Cuerpo del Formulario Reactivo -->
+      <form [formGroup]="entityForm" (ngSubmit)="onFormSubmit()">
+        <div class="modal-body p-4 text-start">
+          <div
+            class="alert alert-danger p-2 small border-0 mb-3"
+            *ngIf="formErrorMessage"
+          >
+            <strong>Error:</strong> {{ formErrorMessage }}
+          </div>
+
+          <!-- Selector: Estructura Comercial -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary d-block mb-1"
+              >Estructura Comercial</label
+            >
+            <div class="d-flex gap-4 align-items-center">
+              <label class="form-check-label small text-dark cursor-pointer">
+                Persona Natural
+              </label>
+              <label class="form-check-label small text-dark cursor-pointer">
+                Persona Jurídica (Empresa)
+              </label>
+            </div>
+          </div>
+
+          <!-- Fila de Tipo de Documento y Número -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-5">
+              <label class="form-label small fw-bold text-secondary mb-1"
+                >Tipo Documento</label
+              >
+              <select
+                class="form-select bg-light text-dark border-light fw-semibold"
+                formControlName="documentType"
+              >
+                <option value="dni">DNI</option>
+                <option value="ruc">RUC</option>
+                <option value="pasaporte">Pasaporte</option>
+                <option value="ce">C.E.</option>
+              </select>
+            </div>
+            <div
+              class="col-md-7"
+              [class.has-error-input]="isFieldInvalid('documentNumber')"
+            >
+              <label class="form-label small fw-bold text-secondary mb-1"
+                >Nro Identificación</label
+              >
+              <input
+                type="text"
+                class="form-control bg-light text-dark border-light fw-medium"
+                formControlName="documentNumber"
+                placeholder="Ej: 20604859321"
+              />
+              <small
+                class="text-danger extra-small-err"
+                *ngIf="isFieldInvalid('documentNumber')"
+              >
+                Identificación requerida (DNI: 8 dígitos / RUC: 11 dígitos).
+              </small>
+            </div>
+          </div>
+
+          <!-- Nombre Dinámico Reactivo -->
+          <div class="mb-3" [class.has-error-input]="isFieldInvalid('name')">
+            <label class="form-label small fw-bold text-secondary mb-1">
+              {{
+                entityForm.get("entityType")?.value === "empresa"
+                  ? "Razón Social / Nombre Comercial"
+                  : "Nombres y Apellidos Completos"
+              }}
+            </label>
+            <input
+              type="text"
+              class="form-control bg-light text-dark border-light fw-medium"
+              formControlName="name"
+              placeholder="Ej: Distribuidora del Norte"
+            />
+            <small
+              class="text-danger extra-small-err"
+              *ngIf="isFieldInvalid('name')"
+              >El nombre comercial es obligatorio (mín. 3 letras).</small
+            >
+          </div>
+
+          <!-- Canal de Contacto -->
+          <div class="mb-2" [class.has-error-input]="isFieldInvalid('email')">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Canal de Contacto (Email)</label
+            >
+            <input
+              type="email"
+              class="form-control bg-light text-dark border-light fw-medium"
+              formControlName="email"
+              placeholder="correo@empresa.com"
+            />
+            <small
+              class="text-danger extra-small-err"
+              *ngIf="isFieldInvalid('email')"
+              >Ingrese un formato de correo válido.</small
+            >
+          </div>
+        </div>
+
+        <!-- Acciones del Modal -->
+        <div
+          class="modal-footer border-top border-light px-4 py-3 bg-light rounded-bottom d-flex justify-content-end gap-2"
+        >
+          <button
+            type="button"
+            class="btn btn-light btn-sm px-3 border text-secondary shadow-none"
+            (click)="closeModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary btn-sm px-4 text-white"
+            style="background-color: #2563eb; border-radius: 6px"
+            [disabled]="isLoading"
+          >
+            {{ isEditing ? "Guardar Cambios" : "Registrar Entidad" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fade show" *ngIf="showModal"></div>

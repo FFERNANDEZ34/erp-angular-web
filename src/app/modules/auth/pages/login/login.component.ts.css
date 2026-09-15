@@ -1,0 +1,162 @@
+@import url('https://unpkg.com');
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  padding: 20px;
+}
+
+.login-card {
+  display: flex;
+  width: 100%;
+  max-width: 1050px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  min-height: 620px;
+}
+
+/* --- SECCIÓN IZQUIERDA: BRANDING --- */
+.login-branding {
+  flex: 1;
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  color: #ffffff;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+@media (max-width: 850px) {
+  .login-branding { display: none; }
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.logo-icon { color: #3b82f6; font-size: 28px; }
+
+.branding-content h1 {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-top: 60px;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.branding-content p { color: #94a3b8; line-height: 1.6; font-size: 15px; margin-bottom: 40px; }
+
+.features-list { display: flex; flex-direction: column; gap: 16px; }
+.feature-item { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #cbd5e1; }
+.feature-item i { color: #3b82f6; font-size: 18px; }
+.branding-footer { color: #64748b; font-size: 12px; }
+
+/* --- SECCIÓN DERECHA: FORMULARIO --- */
+.login-form-section {
+  flex: 1.1;
+  padding: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-wrapper { width: 100%; max-width: 400px; }
+.form-header h2 { font-size: 26px; font-weight: 700; color: #1e293b; margin-bottom: 8px; letter-spacing: -0.5px; }
+.form-header p { color: #64748b; font-size: 14px; margin-bottom: 32px; }
+
+.alert-error {
+  background-color: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.form-group label { font-size: 13px; font-weight: 600; color: #334155; }
+
+.input-wrapper { position: relative; display: flex; align-items: center; }
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  color: #94a3b8;
+  font-size: 20px;
+  transition: color 0.2s;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-wrapper input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.input-wrapper input:focus + .input-icon { color: #3b82f6; }
+
+/* Control de Errores Visuales */
+.form-group.has-error input { border-color: #ef4444; }
+.form-group.has-error input:focus { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
+.error-text { color: #ef4444; font-size: 12px; margin-top: 2px; }
+
+.form-actions-helper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+
+.checkbox-label { display: flex; align-items: center; gap: 8px; color: #475569; cursor: pointer; }
+.forgot-link { color: #3b82f6; text-decoration: none; font-weight: 500; }
+.forgot-link:hover { text-decoration: underline; }
+
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-submit:hover { background-color: #1d4ed8; }
+.btn-submit:disabled { background-color: #93c5fd; cursor: not-allowed; }
+
+.spinner-text { display: flex; align-items: center; justify-content: center; gap: 8px; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.spinner-icon { animation: spin 1s linear infinite; font-size: 18px; }
+
+.form-footer { text-align: center; margin-top: 32px; font-size: 14px; color: #64748b; }
+.link-register { color: #2563eb; text-decoration: none; font-weight: 600; display: inline-block; margin-top: 4px; }
+.link-register:hover { text-decoration: underline; }
