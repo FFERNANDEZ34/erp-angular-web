@@ -1,0 +1,53 @@
+.max-width-input-finance { max-width: 160px; }
+.hover-finance-row:hover { background-color: #f8fafc !important; }
+
+.finance-tab-fade {
+  animation: fadeFinanceTab 0.2s ease-in-out forwards;
+}
+@keyframes fadeFinanceTab {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================================================= */
+/* 🌟 COBERTURA MODO OSCURO PARA EL PANEL FINANCIERO                        */
+/* ========================================================================= */
+body.dark-theme-mode .card,
+body.dark-theme-mode .table-container-wrapper {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+body.dark-theme-mode .table-light,
+body.dark-theme-mode .bg-light {
+  background-color: #0f172a !important;
+  color: #94a3b8 !important;
+}
+
+body.dark-theme-mode .table tbody tr td {
+  color: #cbd5e1 !important;
+  border-bottom-color: #334155 !important;
+}
+
+body.dark-theme-mode .hover-finance-row:hover,
+body.dark-theme-mode .table-hover tbody tr:hover {
+  background-color: #334155 !important;
+}
+
+body.dark-theme-mode .text-dark,
+body.dark-theme-mode h5.text-dark {
+  color: #f8fafc !important;
+}
+
+body.dark-theme-mode .form-control,
+body.dark-theme-mode .input-group-text {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme-mode .btn-light {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}

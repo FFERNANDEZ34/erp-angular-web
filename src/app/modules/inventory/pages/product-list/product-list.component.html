@@ -1,0 +1,360 @@
+<div class="page-header-title mb-4">
+  <h1 class="h4 fw-bold text-dark mb-1">Catálogo de Productos e Inventario</h1>
+  <p class="text-muted small m-0">Gestione el catálogo maestro de artículos, servicios y precios exclusivos de su Empresa</p>
+</div>
+
+<div class="table-container-wrapper shadow-sm border rounded-3 bg-white">
+  
+  <!-- 🔍 BARRA DE FILTROS AVANZADOS EN LINEA HORIZONTAL -->
+  <div class="table-advanced-filters-toolbar p-3 bg-light rounded-top border-bottom">
+    <div class="row g-2 align-items-center">
+      
+      <!-- Filtro 1: Código de Producto Interno -->
+      <div class="col-md-2">
+        <input type="text" class="form-control form-control-sm shadow-none border bg-white text-dark" 
+               [(ngModel)]="filterProductCode" (input)="onFilterChange()" placeholder="Código producto...">
+      </div>
+
+      <!-- Filtro 2: Nombre del Artículo / Descripción -->
+      <div class="col-md-6">
+        <input type="text" class="form-control form-control-sm shadow-none border bg-white text-dark" 
+               [(ngModel)]="filterName" (input)="onFilterChange()" placeholder="Buscar por descripción o nombre de artículo...">
+      </div>
+
+      <!-- Acción Central: Lanzar Modal de Registro -->
+      <div class="col-md-4 text-end">
+        <button class="btn btn-primary btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1 border-0" 
+                style="background-color: #2563eb; border-radius: 6px; height: 32px;" type="button" (click)="openCreateModal()">
+          <i class="bx bx-plus-circle fs-5"></i> Registrar Nuevo Artículo
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- REJILLA DE DATOS / RESPONSIVE TABLE -->
+  <div class="table-responsive text-start">
+    <table class="table table-hover align-middle m-0" style="min-width: 1000px; font-size: 13px;">
+      <thead class="table-light text-secondary border-bottom">
+        <tr>
+          <th (click)="changeOrder('id')" class="py-3 px-4 cursor-pointer" style="width: 80px; user-select: none;">
+            ID <i class="bx" [ngClass]="sortField === 'id' ? (sortOrder === 'asc' ? 'bx-chevron-up text-primary' : 'bx-chevron-down text-primary') : 'bx-minus opacity-25'"></i>
+          </th>
+          <th (click)="changeOrder('productCode')" class="py-3 cursor-pointer" style="width: 140px; user-select: none;">
+            Código <i class="bx" [ngClass]="sortField === 'productCode' ? (sortOrder === 'asc' ? 'bx-chevron-up text-primary' : 'bx-chevron-down text-primary') : 'bx-sort-alt opacity-25'"></i>
+          </th>
+          <th (click)="changeOrder('name')" class="py-3 cursor-pointer" style="user-select: none;">
+            Descripción del Producto <i class="bx" [ngClass]="sortField === 'name' ? (sortOrder === 'asc' ? 'bx-chevron-up text-primary' : 'bx-chevron-down text-primary') : 'bx-sort-alt opacity-25'"></i>
+          </th>
+          <th style="width: 140px;">Categoría</th>
+          <th style="width: 120px;">Marca</th>
+          <th style="width: 120px;" class="text-end">P. Compra</th>
+          <th style="width: 120px;" class="text-end">P. Venta</th>
+          <th class="text-center" style="width: 110px;">Operaciones</th>
+        </tr>
+      </thead>
+      <tbody class="border-0">
+        
+        <!-- ⏳ ANIMACIÓN DE ESPERA DE RED -->
+        <tr *ngIf="isLoading">
+          <td colspan="8" class="text-center py-5 text-muted">
+            <i class="bx bx-loader-alt bx-spin text-primary fs-3 d-block mb-2"></i>
+            <span class="fw-semibold">Sincronizando existencias de almacén con MySQL...</span>
+          </td>
+        </tr>
+
+        <!-- 📂 PANEL DE CATÁLOGO VACÍO -->
+        <tr *ngIf="!isLoading && products.length === 0">
+          <td colspan="8" class="text-center py-5 bg-white">
+            <div class="py-4">
+              <i class="bx bx-package text-muted opacity-25 d-block mb-2" style="font-size: 48px;"></i>
+              <h6 class="text-dark fw-bold m-0">No se encontraron productos en esta compañía</h6>
+              <p class="text-muted small m-0">El inventario se encuentra vacío para este local comercial seleccionado.</p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 🚀 ITERACIÓN RECURSIVA EN VIVO DESDE MYSQL (CON INCLUDES) -->
+        <tr *ngFor="let prod of products" style="transition: background 0.15s;">
+          <td class="px-4 text-secondary font-monospace">#{{ prod.id }}</td>
+          <td><span class="badge bg-light text-dark border border-secondary-subtle font-monospace px-2 py-1">{{ prod.productCode }}</span></td>
+          <td>
+            <div class="fw-bold text-dark mb-0.5">{{ prod.name }}</div>
+            <small class="text-muted d-block text-truncate" style="max-width: 300px;" *ngIf="prod.description">{{ prod.description }}</small>
+          </td>
+          <td>
+            <span class="text-dark fw-medium">{{ prod.Category?.name || 'General' }}</span>
+          </td>
+          <td>
+            <span class="text-secondary small">{{ prod.Brand?.name || 'Genérico' }}</span>
+          </td>
+          <td class="text-end font-monospace text-secondary">
+            S/ {{ prod.purchasePrice | number:'1.2-2' }}
+          </td>
+          <td class="text-end font-monospace text-primary fw-bold">
+            S/ {{ prod.salesPrice | number:'1.2-2' }}
+          </td>
+          <td class="text-center">
+            <div class="d-inline-flex gap-1">
+              <button class="btn btn-sm border bg-white shadow-none p-1 d-flex align-items-center justify-content-center" 
+                      style="width: 28px; height: 28px; border-radius: 6px;" type="button" (click)="onEdit(prod)" title="Modificar Ficha">
+                <i class="bx bx-pencil text-warning fs-5"></i>
+              </button>
+              <button class="btn btn-sm border bg-white text-danger shadow-none p-1 d-flex align-items-center justify-content-center" 
+                      style="width: 28px; height: 28px; border-radius: 6px;" type="button" (click)="onDelete(prod.id)" title="Dar de Baja Lógica">
+                <i class="bx bx-trash-alt fs-5"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 📑 PIE DE PAGINACIÓN ADAPTATIVA Y FILAS DINÁMICAS -->
+  <div class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3" *ngIf="totalRecords > 0">
+    
+    <div class="d-flex align-items-center gap-3 text-secondary" style="font-size: 12px;">
+      <div>
+        Mostrando <span class="fw-bold text-dark">{{ (currentPage - 1) * pageSize + 1 }}</span> al 
+        <span class="fw-bold text-dark">{{ currentPage * pageSize > totalRecords ? totalRecords : currentPage * pageSize }}</span> 
+        de <span class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-2.5 py-1">{{ totalRecords }} artículos</span>
+      </div>
+      
+      <div class="d-flex align-items-center gap-2 border-start ps-3">
+        <span>Filas por página:</span>
+        <select class="form-select form-select-sm shadow-none border bg-white text-dark py-0.5" 
+                style="width: 65px; font-size: 12px; font-weight: 600; height: 24px; border-radius: 4px;"
+                [ngModel]="pageSize" (change)="onPageSizeChange(+$any($event.target).value)">
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+          <option [value]="30">30</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2" 
+              [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" style="width: 32px; height: 32px;">
+        <i class="bx bx-chevron-left fs-4"></i>
+      </button>
+      
+      <div class="text-secondary fw-semibold mx-1" style="font-size: 12px; user-select: none;">
+        Página <span class="text-dark fw-bold">{{ currentPage }}</span> de {{ totalPages }}
+      </div>
+
+      <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2" 
+              [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)" style="width: 32px; height: 32px;">
+        <i class="bx bx-chevron-right fs-4"></i>
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ========================================================================= -->
+<!-- 🚪 VENTANA MODAL EMERGENTE: FORMULARIO REACTIVO DE PRODUCTOS POR PESTAÑAS  -->
+<!-- ========================================================================= -->
+<div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow-lg modal-premium-radius bg-white text-dark">
+      
+      <!-- 📌 Encabezado del Modal -->
+      <div class="modal-header border-bottom border-light px-4 py-3 bg-light rounded-top d-flex align-items-center justify-content-between">
+        <h5 class="modal-title fw-bold text-dark fs-6 m-0">
+          {{ isEditing ? '📝 Modificar Ficha de Inventario' : '📦 Registrar Nuevo Artículo / Servicio' }}
+        </h5>
+        <button type="button" class="btn-close shadow-none border-0 bg-transparent text-secondary fs-4" (click)="closeModal()">×</button>
+      </div>
+
+      <!-- 🚀 Formulario Reactivo Unificado -->
+      <form [formGroup]="productForm" (ngSubmit)="onFormSubmit()">
+        <div class="modal-body p-4 text-start">
+          
+          <!-- Banner de Captura de Errores del Backend -->
+          <div class="alert alert-danger p-2 small border-0 mb-3 rounded-3" *ngIf="formErrorMessage">
+            <strong>Error del Sistema:</strong> {{ formErrorMessage }}
+          </div>
+
+          <!-- 🌟 CAMPO ESTÁTICO SUPERIOR: Nombre del Producto Visible de un Inicio -->
+          <div class="mb-4" [class.has-error-input]="isFieldInvalid('name')">
+            <label class="form-label small fw-bold text-secondary mb-1">Nombre Comercial del Artículo o Servicio</label>
+            <input type="text" class="form-control bg-light text-dark border-light fw-bold fs-6 py-2 shadow-none" 
+                   formControlName="name" placeholder="Ej: Laptop Lenovo ThinkPad E14 Gen 4 Premium">
+            <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('name')">El nombre del producto es obligatorio (mín. 3 letras).</small>
+          </div>
+
+          <!-- 🧭 BARRA DE NAVEGACIÓN ENTRE PESTAÑAS (TABS BOOTSTRAP) -->
+          <ul class="nav nav-tabs border-bottom mb-4 gap-1" style="font-size: 13px; font-weight: 600;">
+            <li class="nav-item">
+              <button type="button" class="nav-link border px-3 py-2 text-secondary" 
+                      [class.active]="activeTab === 'datos'" [class.bg-primary]="activeTab === 'datos'" [class.text-white]="activeTab === 'datos'"
+                      (click)="activeTab = 'datos'">
+                <i class="bx bx-info-circle me-1"></i> Pestaña 1: Datos Base
+              </button>
+            </li>
+            <li class="nav-item">
+              <button type="button" class="nav-link border px-3 py-2 text-secondary" 
+                      [class.active]="activeTab === 'precios'" [class.bg-primary]="activeTab === 'precios'" [class.text-white]="activeTab === 'precios'"
+                      (click)="activeTab = 'precios'">
+                <i class="bx bx-dollar-circle me-1"></i> Pestaña 2: Precios e Impuestos
+              </button>
+            </li>
+            <li class="nav-item">
+              <button type="button" class="nav-link border px-3 py-2 text-secondary" 
+                      [class.active]="activeTab === 'almacen'" [class.bg-primary]="activeTab === 'almacen'" [class.text-white]="activeTab === 'almacen'"
+                      (click)="activeTab = 'almacen'">
+                <i class="bx bx-package me-1"></i> Pestaña 3: Almacén y Control
+              </button>
+            </li>
+          </ul>
+          <!-- ========================================================================= -->
+          <!-- 📦 CONTENIDO DE PESTAÑA 1: DATOS BASE DEL PRODUCTO                        -->
+          <!-- ========================================================================= -->
+          <div *ngIf="activeTab === 'datos'" class="tab-content-fade">
+            <div class="row g-3 mb-3">
+              <div class="col-md-4" [class.has-error-input]="isFieldInvalid('productCode')">
+                <label class="form-label small fw-bold text-secondary mb-1">Código de Producto</label>
+                <input type="text" class="form-control bg-light text-dark border-light fw-semibold font-monospace" 
+                       formControlName="productCode" placeholder="Ej: PROD-LEN-001" [readOnly]="isEditing">
+                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('productCode')">Mínimo 2 letras.</small>
+              </div>
+              
+              <div class="col-md-4" [class.has-error-input]="isFieldInvalid('categoryId')">
+                <label class="form-label small fw-bold text-secondary mb-1">Categoría del Producto</label>
+                <select class="form-select bg-light text-dark border-light fw-semibold" formControlName="categoryId">
+                  <option value="" disabled>Seleccione...</option>
+                  <option *ngFor="let cat of categoriesList" [value]="cat.id">📁 {{ cat.name }}</option>
+                </select>
+              </div>
+
+              <div class="col-md-4" [class.has-error-input]="isFieldInvalid('brandId')">
+                <label class="form-label small fw-bold text-secondary mb-1">Marca / Fabricante</label>
+                <select class="form-select bg-light text-dark border-light fw-semibold" formControlName="brandId">
+                  <option value="" disabled>Seleccione...</option>
+                  <option *ngFor="let brand of brandsList" [value]="brand.id">🏷️ {{ brand.name }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label small fw-bold text-secondary mb-1">Descripción del Producto / Glosa</label>
+              <textarea class="form-control bg-light text-dark border-light small" rows="4" 
+                        formControlName="description" placeholder="Añada características físicas, glosa para facturación o detalles complementarios..."></textarea>
+            </div>
+          </div>
+
+          <!-- ========================================================================= -->
+          <!-- 💰 CONTENIDO DE PESTAÑA 2: MATRIZ DE PRECIOS, VALORES E IMPUESTOS         -->
+          <!-- ========================================================================= -->
+          <div *ngIf="activeTab === 'precios'" class="tab-content-fade">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6" [class.has-error-input]="isFieldInvalid('currencyParamId')">
+                <label class="form-label small fw-bold text-secondary mb-1">Moneda Comercial (PEN, USD, EUR)</label>
+                <select class="form-select bg-light text-dark border-light fw-semibold" formControlName="currencyParamId">
+                  <option value="" disabled>Seleccione...</option>
+                  <option *ngFor="let curr of currenciesList" [value]="curr.id">💰 {{ curr.code }} - {{ curr.name }}</option>
+                </select>
+              </div>
+
+              <div class="col-md-6" [class.has-error-input]="isFieldInvalid('taxTypeParamId')">
+                <label class="form-label small fw-bold text-secondary mb-1">Tipo de Afectación (Impuesto IGV)</label>
+                <select class="form-select bg-light text-dark border-light fw-semibold" formControlName="taxTypeParamId">
+                  <option value="" disabled>Seleccione...</option>
+                  <option *ngFor="let tax of taxesList" [value]="tax.id">⚖️ {{ tax.name }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-2">
+              <div class="col-md-6" [class.has-error-input]="isFieldInvalid('purchasePrice')">
+                <label class="form-label small fw-bold text-secondary mb-1">Precio Compra Bruto (Con IGV)</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light border-light-subtle text-secondary small">S/</span>
+                  <input type="number" step="0.01" class="form-control bg-light text-dark border-light fw-semibold" formControlName="purchasePrice">
+                </div>
+                <small class="text-muted opacity-70 d-block mt-1" style="font-size: 11px;">El sistema calculará automáticamente el Valor Compra neto sin impuestos.</small>
+              </div>
+
+              <div class="col-md-6" [class.has-error-input]="isFieldInvalid('salesPrice')">
+                <label class="form-label small fw-bold text-secondary mb-1">Precio Venta Bruto (Con IGV)</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light border-light-subtle text-secondary small">S/</span>
+                  <input type="number" step="0.01" class="form-control bg-light text-dark border-light fw-bold text-primary" formControlName="salesPrice">
+                </div>
+                <small class="text-muted opacity-70 d-block mt-1" style="font-size: 11px;">El sistema calculará automáticamente el Valor Venta neto comercial.</small>
+              </div>
+            </div>
+          </div>
+          <!-- ========================================================================= -->
+          <!-- 📦 CONTENIDO DE PESTAÑA 3: ALMACÉN, FLAGS DE CONTROL Y MULTIMEDIA          -->
+          <!-- ========================================================================= -->
+          <div *ngIf="activeTab === 'almacen'" class="tab-content-fade">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary mb-1">SKU Comercial / Ubicación de Almacén</label>
+                <input type="text" class="form-control bg-light text-dark border-light fw-medium" 
+                       formControlName="sku" placeholder="Ej: SKU-THINK-E14">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary mb-1">Código de Barras Universal (EAN/UPC)</label>
+                <input type="text" class="form-control bg-light text-dark border-light fw-medium font-monospace" 
+                       formControlName="barCode" placeholder="Ej: 7701234567890">
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6" [class.has-error-input]="isFieldInvalid('unitMeasureParamId')">
+                <label class="form-label small fw-bold text-secondary mb-1">Unidad de Medida (Unidad, Servicio)</label>
+                <select class="form-select bg-light text-dark border-light fw-semibold" formControlName="unitMeasureParamId">
+                  <option value="" disabled>Seleccione unidad...</option>
+                  <option *ngFor="let unit of unitsList" [value]="unit.id">📦 {{ unit.name }}</option>
+                </select>
+              </div>
+
+              <div class="col-md-6" [class.has-error-input]="isFieldInvalid('minimumStock')">
+                <label class="form-label small fw-bold text-secondary mb-1">Stock Mínimo de Alerta</label>
+                <input type="number" step="1" class="form-control bg-light text-dark border-light fw-semibold" formControlName="minimumStock">
+              </div>
+            </div>
+
+            <!-- Panel Informativo Polimórfico de Archivos Adjuntos -->
+            <div class="p-3 mb-3 bg-light rounded-3 border d-flex align-items-center gap-3" style="font-size: 12.5px;">
+              <i class="bx bx-paperclip fs-3 text-indigo" style="color: #4f46e5;"></i>
+              <div>
+                <strong class="text-dark d-block mb-0.5">Gestión de Archivos Polimórficos Separados</strong>
+                <span class="text-secondary d-block">Las imágenes del producto, fichas en PDF, XML y carpetas ZIP se administrarán de forma general desde el repositorio compartido de adjuntos una vez grabada la cabecera.</span>
+              </div>
+            </div>
+
+            <!-- Banderas Booleanas de Operación Directa -->
+            <div class="p-2.5 bg-light rounded-3 d-flex gap-5 align-items-center mb-2" style="font-size: 13px;">
+              <label class="form-check-label text-dark cursor-pointer d-flex align-items-center gap-1.5 m-0 fw-medium">
+                <input type="checkbox" class="form-check-input" formControlName="isPackage"> esPaquete (Agrupa productos)
+              </label>
+              <label class="form-check-label text-dark cursor-pointer d-flex align-items-center gap-1.5 m-0 fw-medium">
+                <input type="checkbox" class="form-check-input" formControlName="allowSearch"> Permitir búsqueda en el sistema
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Pie de página de acciones operativas del Formulario Modal -->
+        <div class="modal-footer border-top border-light px-4 py-3 bg-light rounded-bottom d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-light btn-sm px-3 border text-secondary shadow-none" style="border-radius: 6px;" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary btn-sm px-4 text-white" style="background-color: #2563eb; border-radius: 6px;" [disabled]="isLoading">
+            {{ isEditing ? 'Guardar Cambios' : 'Indexar Producto' }}
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fade show" *ngIf="showModal"></div>

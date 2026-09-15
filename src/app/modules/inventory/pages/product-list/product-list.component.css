@@ -1,0 +1,131 @@
+.cursor-pointer { cursor: pointer; }
+.font-monospace { font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace !important; }
+.form-select-sm, .form-control-sm { font-size: 13px !important; border-radius: 6px !important; height: 32px; }
+.modal-premium-radius { border-radius: 12px !important; }
+.has-error-input input, .has-error-input select { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
+.extra-small-err { font-size: 11px; display: block; margin-top: 4px; font-weight: 500; }
+.modal.show { overflow-x: hidden; overflow-y: auto; z-index: 1060; }
+.modal-backdrop.show { z-index: 1040; }
+.btn-close { font-weight: bold; cursor: pointer; }
+
+/* Transición suave para las pestañas */
+.tab-content-fade {
+  animation: fadeInModalTab 0.22s ease-in-out forwards;
+}
+@keyframes fadeInModalTab {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================================================= */
+/* 🌟 COBERTURA TOTAL: SOPORTE PARA MODO OSCURO (BODY.DARK-THEME-MODE)         */
+/* ========================================================================= */
+
+/* Rejilla y Contenedores Base */
+body.dark-theme-mode .table-container-wrapper {
+  background-color: #1e293b !important; /* Slate 800 */
+  border-color: #334155 !important;    /* Slate 700 */
+}
+
+body.dark-theme-mode .table-advanced-filters-toolbar {
+  background-color: #0f172a !important; /* Slate 900 */
+  border-bottom-color: #334155 !important;
+}
+
+/* Tabla de Datos, Filas y Textos */
+body.dark-theme-mode .table {
+  color: #e2e8f0 !important; /* Slate 200 */
+}
+
+body.dark-theme-mode .table-light {
+  background-color: #0f172a !important;
+  color: #94a3b8 !important; /* Slate 400 */
+}
+
+body.dark-theme-mode .table tbody tr td {
+  color: #cbd5e1 !important; /* Slate 300 */
+  border-bottom-color: #334155 !important;
+}
+
+body.dark-theme-mode .table-hover tbody tr:hover {
+  background-color: #334155 !important; /* Slate 700 al pasar el mouse */
+}
+
+body.dark-theme-mode .text-dark {
+  color: #f8fafc !important; /* Forzar blanco en títulos y nombres */
+}
+
+/* Pie de Paginación e Inputs de la Barra de Filtros */
+body.dark-theme-mode .bg-light {
+  background-color: #0f172a !important;
+}
+
+body.dark-theme-mode .table-container-wrapper .form-control,
+body.dark-theme-mode .table-container-wrapper .form-select,
+body.dark-theme-mode .table-container-wrapper .btn-white {
+  background-color: #0f172a !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+/* 🚪 PROTECCIÓN DEL MODAL EN MODO OSCURO */
+body.dark-theme-mode .modal-content {
+  background-color: #1e293b !important; /* Fondo del búnker flotante */
+  color: #f8fafc !important;
+}
+
+body.dark-theme-mode .modal-header,
+body.dark-theme-mode .modal-footer {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme-mode .modal-body {
+  background-color: #1e293b !important;
+}
+
+body.dark-theme-mode .modal-body .form-label {
+  color: #94a3b8 !important; /* Etiquetas grises elegantes */
+}
+
+/* Inputs, Selects y Textareas dentro del Modal */
+body.dark-theme-mode .modal-body .form-control,
+body.dark-theme-mode .modal-body .form-select,
+body.dark-theme-mode .modal-body .input-group-text {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+/* Desactivar el color rojo de error si el input está limpio en modo oscuro */
+body.dark-theme-mode .has-error-input input:focus,
+body.dark-theme-mode .has-error-input select:focus {
+  border-color: #ef4444 !important;
+}
+
+body.dark-theme-mode .btn-close {
+  filter: invert(1) grayscale(1) brightness(2); /* Vuelve la equis blanca */
+}
+
+body.dark-theme-mode .modal-body .form-check-label {
+  color: #cbd5e1 !important;
+}
+
+body.dark-theme-mode .modal-body .bg-light {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+/* 🌟 FORZAR COLORES EN LOS TÍTULOS Y CABECERAS DE INVENTARIO */
+body.dark-theme-mode .page-header-title h1,
+body.dark-theme-mode .page-header-title .text-dark,
+body.dark-theme-mode h1.text-dark {
+  color: #f8fafc !important; /* Blanco Nítido (Slate 50) */
+}
+
+body.dark-theme-mode .page-header-title p,
+body.dark-theme-mode .page-header-title .text-muted,
+body.dark-theme-mode .table-container-wrapper p.text-muted {
+  color: #94a3b8 !important; /* Gris Tenue Elegante (Slate 400) */
+}

@@ -199,11 +199,39 @@
 }
 
 
-/*******************************************************/
-.modal-premium-radius { border-radius: 12px !important; }
-.cursor-pointer { cursor: pointer; }
-.has-error-input input { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
-.extra-small-err { font-size: 11px; display: block; margin-top: 4px; font-weight: 500; }
-.modal.show { overflow-x: hidden; overflow-y: auto; z-index: 1060; }
-.modal-backdrop.show { z-index: 1040; }
-.btn-close { font-weight: bold; cursor: pointer; }
+/* 🌟 FORZAR COLORES EN LOS TÍTULOS Y CABECERAS DE ENTIDADES */
+body.dark-theme-mode .page-header-title h1,
+body.dark-theme-mode .page-header-title .text-dark,
+body.dark-theme-mode h1.text-dark {
+  color: #f8fafc !important;
+}
+
+body.dark-theme-mode .page-header-title p,
+body.dark-theme-mode .page-header-title .text-muted,
+body.dark-theme-mode .table-container-wrapper p.text-muted {
+  color: #94a3b8 !important;
+}
+
+/* Soporte extendido para el contenedor base de la tabla de entidades */
+body.dark-theme-mode .table-container-wrapper {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+body.dark-theme-mode .table-advanced-filters-toolbar {
+  background-color: #0f172a !important;
+  border-bottom-color: #334155 !important;
+}
+body.dark-theme-mode .table tbody tr td {
+  color: #cbd5e1 !important;
+  border-bottom-color: #334155 !important;
+}
+body.dark-theme-mode .table-hover tbody tr:hover {
+  background-color: #334155 !important;
+}
+body.dark-theme-mode .bg-light {
+  background-color: #0f172a !important;
+}
+body.dark-theme-mode .table-light {
+  background-color: #0f172a !important;
+  color: #94a3b8 !important;
+}

@@ -1,0 +1,224 @@
+<div class="page-header-title mb-4">
+  <h1 class="h4 fw-bold text-dark mb-1">Mantenimiento de Tipo de Cambio Diario</h1>
+  <p class="text-muted small m-0">Establezca las cotizaciones obligatorias del holding para la valuación transaccional y facturación electrónica</p>
+</div>
+
+<!-- 🧭 CONMUTADOR DE NAVEGACIÓN DE FINANZAS (TABS PREMIUM) -->
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+  <div class="btn-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
+    <button type="button" class="btn btn-sm px-4 py-2 fw-bold" 
+            [ngClass]="activeView === 'diario' ? 'btn-primary text-white border-0' : 'btn-light border text-secondary'"
+            style="font-size: 13px; background-color: #2563eb;"
+            *ngIf="activeView === 'diario'" (click)="switchView('diario')">
+      <i class="bx bx-calendar-check me-1"></i> Cotización del Día
+    </button>
+    <button type="button" class="btn btn-sm px-4 py-2 fw-bold btn-light border text-secondary" 
+            style="font-size: 13px;"
+            *ngIf="activeView !== 'diario'" (click)="switchView('diario')">
+      <i class="bx bx-calendar-check me-1"></i> Cotización del Día
+    </button>
+
+    <button type="button" class="btn btn-sm px-4 py-2 fw-bold" 
+            [ngClass]="activeView === 'historial' ? 'btn-primary text-white border-0' : 'btn-light border text-secondary'"
+            style="font-size: 13px; background-color: #2563eb;"
+            *ngIf="activeView === 'historial'" (click)="switchView('historial')">
+      <i class="bx bx-history me-1"></i> Historial Cronológico
+    </button>
+    <button type="button" class="btn btn-sm px-4 py-2 fw-bold btn-light border text-secondary" 
+            style="font-size: 13px;"
+            *ngIf="activeView !== 'historial'" (click)="switchView('historial')">
+      <i class="bx bx-history me-1"></i> Historial Cronológico
+    </button>
+  </div>
+
+  <!-- Distintivo de fecha del sistema -->
+  <div class="badge bg-light border text-dark fw-bold px-3 py-2 font-monospace shadow-sm" style="font-size: 12.5px;">
+    📅 Fecha Operativa: {{ todayDateStr }}
+  </div>
+</div>
+
+<!-- Banners de Notificaciones Globales -->
+<div class="alert alert-success border-0 shadow-sm p-3 mb-4 rounded-3 d-flex align-items-center gap-2 small" *ngIf="successMessage">
+  <i class="bx bx-check-circle fs-4"></i> <strong>Operación Exitosa:</strong> {{ successMessage }}
+</div>
+
+<div class="alert alert-danger border-0 shadow-sm p-3 mb-4 rounded-3 d-flex align-items-center gap-2 small" *ngIf="errorMessage">
+  <i class="bx bx-error-circle fs-4"></i> <strong>Alerta Financiera:</strong> {{ errorMessage }}
+</div>
+
+<!-- ========================================================================= -->
+<!-- SECCIÓN A: FORMULARIO DE MATRIZ DE DIVISAS DIARIAS                         -->
+<!-- ========================================================================= -->
+<div *ngIf="activeView === 'diario'" class="finance-tab-fade text-start">
+  <form [formGroup]="exchangeForm" (ngSubmit)="onFormSubmit()">
+    
+    <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4">
+      <div class="border-bottom border-light pb-3 mb-4 d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="fw-bold text-dark m-0 fs-6">Matriz de Cotizaciones Multimoneda</h5>
+          <p class="text-muted small m-0">Ingrese los valores referenciales de compra y venta fijados por Tesorería</p>
+        </div>
+        <!-- Indicador de Carga Asíncrona -->
+        <div *ngIf="isLoading" class="text-primary small fw-semibold">
+          <i class="bx bx-loader-alt bx-spin me-1"></i> Sincronizando con MySQL...
+        </div>
+      </div>
+
+      <!-- Encabezado de Columnas Tipo ERP Premium -->
+      <div class="row g-3 px-3 py-2 bg-light rounded-3 fw-bold text-secondary mb-3 align-items-center border" style="font-size: 12.5px;">
+        <div class="col-md-3">Divisa Extranjera</div>
+        <div class="col-md-4 text-center">Precio Compra (S/.)</div>
+        <div class="col-md-4 text-center">Precio Venta (S/.)</div>
+      </div>
+
+      <!-- 🔄 CONTENEDOR RECURSIVO DEL ARRAR DE FORMULARIOS (FORARRAY) -->
+      <div formArrayName="rates">
+        <div *ngFor="let rateGroup of ratesArray.controls; let i = index" [formGroupName]="i" 
+             class="row g-3 px-3 py-3 border rounded-3 mb-2 align-items-center bg-white hover-finance-row" style="transition: all 0.15s;">
+          
+          <!-- Columna Divisa -->
+          <div class="col-md-3">
+            <div class="d-flex align-items-center gap-2">
+              <div class="d-flex align-items-center justify-content-center text-white fw-bold shadow-sm rounded-circle font-monospace bg-indigo"
+                   style="width: 34px; height: 34px; font-size: 11px; background-color: #4f46e5;">
+                {{ rateGroup.get('currencyCode')?.value }}
+              </div>
+              <div>
+                <strong class="text-dark font-monospace">{{ rateGroup.get('currencyCode')?.value }}</strong>
+                <span class="text-muted extra-small-lbl d-block" style="font-size: 11px;">Moneda Extranjera</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input Precio Compra -->
+          <div class="col-md-4">
+            <div class="input-group input-group-sm max-width-input-finance mx-auto">
+              <span class="input-group-text bg-light border-light-subtle text-secondary font-monospace fw-semibold">S/</span>
+              <input type="number" step="0.0001" class="form-control bg-light text-dark border-light fw-bold text-center font-monospace" 
+                     formControlName="buyPrice" placeholder="0.0000" style="font-size: 14px;">
+            </div>
+          </div>
+
+          <!-- Input Precio Venta -->
+          <div class="col-md-4">
+            <div class="input-group input-group-sm max-width-input-finance mx-auto">
+              <span class="input-group-text bg-light border-light-subtle text-secondary font-monospace fw-semibold">S/</span>
+              <input type="number" step="0.0001" class="form-control bg-light text-dark border-light fw-bold text-center font-monospace text-primary" 
+                     formControlName="sellPrice" placeholder="0.0000" style="font-size: 14px;">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Botón Transaccional Unificado Maestro -->
+      <div class="border-top border-light pt-4 mt-4 text-end">
+        <button type="submit" class="btn btn-primary btn-sm px-5 fw-bold text-white border-0 shadow-sm" 
+                style="background-color: #2563eb; height: 36px; border-radius: 6px;"
+                [disabled]="isLoading || ratesArray.length === 0">
+          <i class="bx bx-save me-1"></i> APLICAR Y GUARDAR COTIZACIONES
+        </button>
+      </div>
+
+    </div>
+
+  </form>
+</div>
+<!-- ========================================================================= -->
+<!-- SECCIÓN B: HISTORIAL CRONOLÓGICO DE REPORTES AUDITABLES                  -->
+<!-- ========================================================================= -->
+<div *ngIf="activeView === 'historial'" class="finance-tab-fade text-start">
+  
+  <!-- 🔍 BARRA HORIZONTAL DE FILTROS CRONOLÓGICOS -->
+  <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-3 mb-3">
+    <div class="row g-2 align-items-center">
+      
+      <div class="col-md-3">
+        <label class="form-label extra-small-lbl fw-bold text-secondary mb-1" style="font-size: 11px;">Fecha Inicial (Desde)</label>
+        <input type="date" class="form-control form-control-sm bg-light text-dark border-light font-monospace" 
+               [(ngModel)]="filterStartDate" placeholder="YYYY-MM-DD">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label extra-small-lbl fw-bold text-secondary mb-1" style="font-size: 11px;">Fecha Final (Hasta)</label>
+        <input type="date" class="form-control form-control-sm bg-light text-dark border-light font-monospace" 
+               [(ngModel)]="filterEndDate" placeholder="YYYY-MM-DD">
+      </div>
+
+      <div class="col-md-2 pt-3">
+        <button type="button" class="btn btn-primary btn-sm w-100 fw-bold border-0 d-flex align-items-center justify-content-center gap-1" 
+                style="background-color: #2563eb; height: 32px; border-radius: 6px;" (click)="loadHistory()" [disabled]="isLoading">
+          <i class="bx bx-search-alt fs-5"></i> Filtrar
+        </button>
+      </div>
+
+      <div class="col-md-2 pt-3">
+        <button type="button" class="btn btn-light btn-sm w-100 fw-bold border text-secondary d-flex align-items-center justify-content-center gap-1" 
+                style="height: 32px; border-radius: 6px; background-color: #f8fafc;" 
+                (click)="filterStartDate = ''; filterEndDate = ''; loadHistory()" [disabled]="isLoading">
+          Limpiar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- REJILLA DE DATOS HISTÓRICOS -->
+  <div class="table-container-wrapper shadow-sm border rounded-3 bg-white">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle m-0" style="min-width: 800px; font-size: 13px;">
+        <thead class="table-light text-secondary border-bottom">
+          <tr>
+            <th class="py-3 px-4" style="width: 140px;">Fecha Registro</th>
+            <th style="width: 120px;">Divisa</th>
+            <th class="text-center" style="width: 160px;">Precio Compra (S/.)</th>
+            <th class="text-center" style="width: 160px;">Precio Venta (S/.)</th>
+            <th>Marca de Tiempo (Auditoría)</th>
+          </tr>
+        </thead>
+        <tbody class="border-0">
+          
+          <!-- ⏳ SPINNER INTERNO -->
+          <tr *ngIf="isLoading">
+            <td colspan="5" class="text-center py-5 text-muted">
+              <span class="fw-semibold">Consultando libro de cotizaciones en MySQL...</span>
+            </td>
+          </tr>
+
+          <!-- 📂 REGISTROS VACÍOS -->
+          <tr *ngIf="!isLoading && exchangeHistory.length === 0">
+            <td colspan="5" class="text-center py-5 bg-white">
+              <div class="py-4">
+                <i class="bx bx-history text-muted opacity-25 d-block mb-2" style="font-size: 44px;"></i>
+                <h6 class="text-dark fw-bold m-0">No hay historial para el rango seleccionado</h6>
+                <p class="text-muted small m-0">Intente modificando los filtros del calendario superior.</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 🚀 RENDERIZADO CRONOLÓGICO REAL -->
+          <tr *ngFor="let item of exchangeHistory" style="transition: background 0.15s;">
+            <td class="px-4 font-monospace fw-bold text-dark">{{ item.exchangeDate }}</td>
+            <td>
+              <span class="badge bg-indigo-subtle border border-indigo-subtle text-indigo font-monospace px-2.5 py-1 fw-bold"
+                    style="background-color: #e0e7ff; color: #4f46e5; border-radius: 4px;">
+                {{ item.currencyCode }}
+              </span>
+            </td>
+            <td class="text-center font-monospace text-secondary fw-semibold">
+              S/ {{ item.buyPrice | number:'1.4-4' }}
+            </td>
+            <td class="text-center font-monospace text-primary fw-bold">
+              S/ {{ item.sellPrice | number:'1.4-4' }}
+            </td>
+            <td class="text-muted small">
+              <i class="bx bx-time-five me-1"></i>Sincronizado: {{ item.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
