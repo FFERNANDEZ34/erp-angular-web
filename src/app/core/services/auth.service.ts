@@ -1,13 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:3000/api/auth';
+  private readonly API_URL = `${environment.apiUrl}/auth`;
 
   // Estados reactivos globales
   public activeCompanyId$ = new BehaviorSubject<number | null>(null);
@@ -93,7 +94,7 @@ export class AuthService {
 
   refreshSessionToken(refreshToken: string): Observable<any> {
     // Ajusta la URL según cómo se llame el endpoint de refresco en tu API de Express (Ej: /api/auth/refresh)
-    return this.http.post<any>('http://localhost:3000/api/auth/refresh', {
+    return this.http.post<any>(`${this.API_URL}/refresh`, {
       refreshToken,
     });
   }

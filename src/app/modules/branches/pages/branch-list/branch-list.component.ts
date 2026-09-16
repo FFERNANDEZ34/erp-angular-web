@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, Subscription, combineLatest } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { AuthService } from '../../../../core/services/auth.service';
+import { environment } from '../../../../../environments/environment';
 
 export interface BranchItem {
   id: number;
@@ -28,8 +29,8 @@ export class BranchListComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
   
-  private readonly API_URL = 'http://localhost:3000/api/branches';
-  private readonly API_COMPANIES_URL = 'http://localhost:3000/api/companies';
+  private readonly API_URL = `${environment.apiUrl}/branches`;
+  private readonly API_COMPANIES_URL = `${environment.apiUrl}/companies`;
 
   // Colecciones y Rejilla
   branches: BranchItem[] = [];

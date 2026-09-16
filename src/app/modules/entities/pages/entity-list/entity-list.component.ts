@@ -10,6 +10,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, Subscription, combineLatest } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { AuthService } from '../../../../core/services/auth.service';
+import { environment } from '../../../../../environments/environment'; 
 
 export interface EntityCustomer {
   id: number;
@@ -30,7 +31,7 @@ export class EntityListComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private fb = inject(FormBuilder); // 👈 Inyectamos FormBuilder para el DataEntry
   private cdr = inject(ChangeDetectorRef);
-  private readonly API_URL = 'http://localhost:3000/api/entities';
+  private readonly API_URL = `${environment.apiUrl}/entities`;
 
   // Colección de datos reales de MySQL
   entities: EntityCustomer[] = [];

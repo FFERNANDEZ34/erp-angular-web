@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { environment } from '../../../../../environments/environment';
 
 export interface ExchangeHistoryItem {
   id: number;
@@ -21,8 +22,8 @@ export class CurrencyExchangeComponent implements OnInit {
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
 
-  private readonly API_EXCHANGE_URL = 'http://localhost:3000/api/exchanges';
-  private readonly API_PARAMS_URL = 'http://localhost:3000/api/products/parameters';
+  private readonly API_EXCHANGE_URL = `${environment.apiUrl}/exchanges`;
+  private readonly API_PARAMS_URL = `${environment.apiUrl}/products/parameters`;
 
   // 🧭 Vista activa de la pantalla: Matriz Diaria o Historial Cronológico
   activeView: 'diario' | 'historial' = 'diario';

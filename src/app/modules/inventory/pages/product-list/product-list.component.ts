@@ -10,6 +10,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, Subscription, combineLatest } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { AuthService } from '../../../../core/services/auth.service';
+import { environment } from '../../../../../environments/environment'; // 👈 1. IMPORTAR
 
 export interface ProductItem {
   id: number;
@@ -50,7 +51,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
 
-  private readonly API_URL = 'http://localhost:3000/api/products';
+  private readonly API_URL = `${environment.apiUrl}/products`;
+  private readonly ATTACHMENT_API_URL = `${environment.apiUrl}/attachments`;
+  public readonly STORAGE_BASE = environment.storageUrl; 
+  
 
   products: ProductItem[] = [];
   totalRecords = 0;
@@ -88,7 +92,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
   unitsList: ParameterOption[] = [];
 
   private loadFormParameters(): void {
-    const url = 'http://localhost:3000/api/products/parameters';
+
+    const url = `${environment.apiUrl}/products/parameters`;
 
     // El interceptor adjuntará de forma transparente las cabeceras de seguridad
     combineLatest([
@@ -254,7 +259,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
   loadProductAttachments(): void {
     if (!this.selectedProductId) return;
 
-    const url = `http://localhost:3000/api/attachments?module=PRODUCTOS&recordId=${this.selectedProductId}`;
+    // private readonly API_URL = `${environment.apiUrl}/products`;
+
+    const url = `${this.ATTACHMENT_API_URL}?module=PRODUCTOS&recordId=${this.selectedProductId}`;
     this.http.get<{ data: any[] }>(url).subscribe({
       next: (res) => {
         this.productImages = res?.data || [];
@@ -283,7 +290,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
       'x-is-main-photo': (this.productImages.length === 0).toString()
     };
 
-    this.http.post('http://localhost:3000/api/attachments/upload', formData, { headers }).subscribe({
+    
+
+    this.http.post(`${this.ATTACHMENT_API_URL}/upload`, formData, { headers }).subscribe({
       next: () => {
         this.isUploadingFile = false;
         this.loadProductAttachments(); // Recarga la grilla
@@ -301,7 +310,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
    setMainPhoto(attachmentId: number): void {
     if (!this.selectedProductId) return;
 
-    const url = `http://localhost:3000/api/attachments/${attachmentId}/main`;
+    const url = `${this.ATTACHMENT_API_URL}/${attachmentId}/main`;
     const payload = { relatedRecordId: this.selectedProductId };
 
     this.http.patch(url, payload).subscribe({

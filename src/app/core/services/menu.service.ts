@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment'; 
 
 export interface MenuNode {
   id: number;
@@ -16,7 +17,7 @@ export interface MenuNode {
 })
 export class MenuService {
   private http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:3000/api/menus';
+  private readonly API_URL = `${environment.apiUrl}/menus`;
 
   getSidebarMenu(): Observable<{ status: string; data: MenuNode[] }> {
     // 💥 EL TRUCO ANTICACHÉ DEFINITIVO: Generamos una semilla basada en el milisegundo actual
