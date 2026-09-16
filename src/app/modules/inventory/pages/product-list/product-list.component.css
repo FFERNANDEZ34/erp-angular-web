@@ -1,20 +1,55 @@
-.cursor-pointer { cursor: pointer; }
-.font-monospace { font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace !important; }
-.form-select-sm, .form-control-sm { font-size: 13px !important; border-radius: 6px !important; height: 32px; }
-.modal-premium-radius { border-radius: 12px !important; }
-.has-error-input input, .has-error-input select { border-color: #ef4444 !important; background-color: #fef2f2 !important; }
-.extra-small-err { font-size: 11px; display: block; margin-top: 4px; font-weight: 500; }
-.modal.show { overflow-x: hidden; overflow-y: auto; z-index: 1060; }
-.modal-backdrop.show { z-index: 1040; }
-.btn-close { font-weight: bold; cursor: pointer; }
+.cursor-pointer {
+  cursor: pointer;
+}
+.font-monospace {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+.form-select-sm,
+.form-control-sm {
+  font-size: 13px !important;
+  border-radius: 6px !important;
+  height: 32px;
+}
+.modal-premium-radius {
+  border-radius: 12px !important;
+}
+.has-error-input input,
+.has-error-input select {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+.extra-small-err {
+  font-size: 11px;
+  display: block;
+  margin-top: 4px;
+  font-weight: 500;
+}
+.modal.show {
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 1060;
+}
+.modal-backdrop.show {
+  z-index: 1040;
+}
+.btn-close {
+  font-weight: bold;
+  cursor: pointer;
+}
 
 /* Transición suave para las pestañas */
 .tab-content-fade {
   animation: fadeInModalTab 0.22s ease-in-out forwards;
 }
 @keyframes fadeInModalTab {
-  from { opacity: 0; transform: translateY(3px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ========================================================================= */
@@ -24,7 +59,7 @@
 /* Rejilla y Contenedores Base */
 body.dark-theme-mode .table-container-wrapper {
   background-color: #1e293b !important; /* Slate 800 */
-  border-color: #334155 !important;    /* Slate 700 */
+  border-color: #334155 !important; /* Slate 700 */
 }
 
 body.dark-theme-mode .table-advanced-filters-toolbar {
@@ -128,4 +163,57 @@ body.dark-theme-mode .page-header-title p,
 body.dark-theme-mode .page-header-title .text-muted,
 body.dark-theme-mode .table-container-wrapper p.text-muted {
   color: #94a3b8 !important; /* Gris Tenue Elegante (Slate 400) */
+}
+/* Contenedores de la Galería Multimedia */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+}
+.gallery-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  transition: all 0.15s ease-in-out;
+}
+.gallery-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+.gallery-img-wrapper {
+  width: 100%;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+}
+.gallery-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.gallery-actions-bar {
+  padding: 6px;
+  background-color: #ffffff;
+  border-top: 1px solid #e2e8f0;
+}
+.btn-star-active {
+  color: #eab308 !important;
+} /* Amarillo Oro */
+.btn-star-inactive {
+  color: #94a3b8 !important;
+}
+
+/* Inyección pasiva para que el carrete mute a tonos Slate en Modo Oscuro */
+body.dark-theme-mode .gallery-card {
+  border-color: #334155 !important;
+  background-color: #0f172a !important;
+}
+body.dark-theme-mode .gallery-img-wrapper,
+body.dark-theme-mode .gallery-actions-bar {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
 }

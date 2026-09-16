@@ -73,10 +73,13 @@ export class ProductListComponent implements OnInit, OnDestroy {
   formErrorMessage: string | null = null;
 
   // Nace posicionada por defecto en la primera pestaña 'datos'
-  activeTab: 'datos' | 'precios' | 'almacen' = 'datos';
+  activeTab: 'datos' | 'precios' | 'almacen' | 'adjuntos' = 'datos';
 
   private searchSubject = new Subject<void>();
   private contextSubscription!: Subscription;
+
+  productImages: any[] = [];
+  isUploadingFile = false;
 
   categoriesList: ParameterOption[] = [];
   brandsList: ParameterOption[] = [];
@@ -248,11 +251,76 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  loadProductAttachments(): void {
+    if (!this.selectedProductId) return;
+
+    const url = `http://localhost:3000/api/attachments?module=PRODUCTOS&recordId=${this.selectedProductId}`;
+    this.http.get<{ data: any[] }>(url).subscribe({
+      next: (res) => {
+        this.productImages = res?.data || [];
+        this.cdr.detectChanges();
+      },
+      error: (err) =>
+        console.error('Error al recuperar galería de adjuntos:', err),
+    });
+  }
+
+  // E. 📥 EMISIÓN MULTIPART BINARIA VIA FORM-DATA CONTRA EL BÚNKER POLIMÓRFICO
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (!file || !this.selectedProductId) return;
+
+    this.isUploadingFile = true;
+    this.cdr.detectChanges();
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // 🌟 LA REGLA DE ORO: Inyectamos la metadata en los HEADERS para la API transversal polimórfica
+    const headers = {
+      'x-related-module': 'PRODUCTOS',
+      'x-related-record-id': this.selectedProductId.toString(),
+      'x-is-main-photo': (this.productImages.length === 0).toString()
+    };
+
+    this.http.post('http://localhost:3000/api/attachments/upload', formData, { headers }).subscribe({
+      next: () => {
+        this.isUploadingFile = false;
+        this.loadProductAttachments(); // Recarga la grilla
+        event.target.value = '';
+      },
+      error: (err) => {
+        this.isUploadingFile = false;
+        alert(err?.error?.message || 'Error en la subida binaria.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // F. ⭐ CONMUTAR FOTO PRINCIPAL POR DEFAULT EN CALIENTE
+   setMainPhoto(attachmentId: number): void {
+    if (!this.selectedProductId) return;
+
+    const url = `http://localhost:3000/api/attachments/${attachmentId}/main`;
+    const payload = { relatedRecordId: this.selectedProductId };
+
+    this.http.patch(url, payload).subscribe({
+      next: () => {
+        // 🌟 Refresca de inmediato la galería en pantalla para recalcular las estrellas en vivo
+        this.loadProductAttachments();
+      },
+      error: (err) => console.error('Error al conmutar la foto por default:', err)
+    });
+  }
+
   onEdit(product: ProductItem): void {
     this.isEditing = true;
     this.selectedProductId = product.id;
     this.formErrorMessage = null;
+    this.activeTab = 'datos'; // Nace en la pestaña 1
+    this.productImages = []; // Resetea el carrete previo
     this.productForm.patchValue(product);
+    this.loadProductAttachments();
     this.showModal = true;
     this.cdr.detectChanges();
   }

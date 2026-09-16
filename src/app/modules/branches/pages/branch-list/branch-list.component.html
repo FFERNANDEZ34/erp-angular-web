@@ -1,0 +1,489 @@
+<div class="page-header-title mb-4">
+  <h1 class="h4 fw-bold text-dark mb-1">
+    Establecimientos, Sucursales y Almacenes
+  </h1>
+  <p class="text-muted small m-0">
+    Organice los puntos de venta de sus empresas y asocie sus respectivos
+    almacenes para el control del Kardex
+  </p>
+</div>
+
+<div class="table-container-wrapper shadow-sm border rounded-3 bg-white">
+  <!-- 🔍 BARRA DE FILTROS AVANZADOS EN LÍNEA HORIZONTAL -->
+  <div
+    class="table-advanced-filters-toolbar p-3 bg-light rounded-top border-bottom"
+  >
+    <div class="row g-2 align-items-center">
+      <!-- Filtro 1: Empresa Relacionada -->
+      <div class="col-md-3">
+        <select
+          class="form-select form-select-sm shadow-none border bg-white text-dark fw-semibold"
+          [(ngModel)]="filterCompanyId"
+          (change)="onFilterChange()"
+        >
+          <option value="">🏢 Todas las Empresas</option>
+          <option *ngFor="let comp of companiesList" [value]="comp.id">
+            {{ comp.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Filtro 2: Nombre del Establecimiento -->
+      <div class="col-md-5">
+        <input
+          type="text"
+          class="form-control form-control-sm shadow-none border bg-white text-dark"
+          [(ngModel)]="filterName"
+          (input)="onFilterChange()"
+          placeholder="Buscar por nombre de sucursal o almacén..."
+        />
+      </div>
+
+      <!-- Acción Central: Lanzar Modal de Registro -->
+      <div class="col-md-4 text-end">
+        <button
+          class="btn btn-primary btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1 border-0"
+          style="background-color: #2563eb; border-radius: 6px; height: 32px"
+          type="button"
+          (click)="openCreateModal()"
+        >
+          <i class="bx bx-plus-circle fs-5"></i> Registrar Establecimiento
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REJILLA DE DATOS / RESPONSIVE TABLE -->
+  <div class="table-responsive text-start">
+    <table
+      class="table table-hover align-middle m-0"
+      style="min-width: 1000px; font-size: 13px"
+    >
+      <thead class="table-light text-secondary border-bottom">
+        <tr>
+          <th
+            (click)="changeOrder('id')"
+            class="py-3 px-4 cursor-pointer"
+            style="width: 80px; user-select: none"
+          >
+            ID
+            <i
+              class="bx"
+              [ngClass]="
+                sortField === 'id'
+                  ? sortOrder === 'asc'
+                    ? 'bx-chevron-up text-primary'
+                    : 'bx-chevron-down text-primary'
+                  : 'bx-minus opacity-25'
+              "
+            ></i>
+          </th>
+          <th
+            (click)="changeOrder('name')"
+            class="py-3 cursor-pointer"
+            style="user-select: none"
+          >
+            Nombre del Establecimiento
+            <i
+              class="bx"
+              [ngClass]="
+                sortField === 'name'
+                  ? sortOrder === 'asc'
+                    ? 'bx-chevron-up text-primary'
+                    : 'bx-chevron-down text-primary'
+                  : 'bx-sort-alt opacity-25'
+              "
+            ></i>
+          </th>
+          <th>Empresa / Razón Social</th>
+          <th>Dirección</th>
+          <th style="width: 150px" class="text-center">Roles Activos</th>
+          <th>Almacén Despacho POS</th>
+          <th class="text-center" style="width: 110px">Operaciones</th>
+        </tr>
+      </thead>
+      <tbody class="border-0">
+        <!-- ⏳ ANIMACIÓN DE ESPERA DE RED -->
+        <tr *ngIf="isLoading">
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i
+              class="bx bx-loader-alt bx-spin text-primary fs-3 d-block mb-2"
+            ></i>
+            <span class="fw-semibold"
+              >Consultando mapa logístico en MySQL...</span
+            >
+          </td>
+        </tr>
+
+        <!-- 📂 PANEL DE CATÁLOGO VACÍO -->
+        <tr *ngIf="!isLoading && branches.length === 0">
+          <td colspan="7" class="text-center py-5 bg-white">
+            <div class="py-4">
+              <i
+                class="bx bx-map-pin text-muted opacity-25 d-block mb-2"
+                style="font-size: 48px"
+              ></i>
+              <h6 class="text-dark fw-bold m-0">
+                No se encontraron establecimientos registrados
+              </h6>
+              <p class="text-muted small m-0">
+                Su holding no cuenta con sucursales o almacenes asignados para
+                esta selección.
+              </p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 🚀 RENDERIZADO EN VIVO DESDE MYSQL (CON INCLUDES) -->
+        <tr *ngFor="let br of branches" style="transition: background 0.15s">
+          <td class="px-4 text-secondary font-monospace">#{{ br.id }}</td>
+          <td>
+            <span class="text-dark fw-bold">{{ br.name }}</span>
+          </td>
+          <td>
+            <div class="text-dark fw-semibold">
+              {{ br.Company?.name || "Holding Global" }}
+            </div>
+            <small class="text-muted font-monospace" style="font-size: 11px"
+              >RUC: {{ br.Company?.ruc }}</small
+            >
+          </td>
+          <td>
+            <span class="text-secondary" *ngIf="br.address">{{
+              br.address
+            }}</span>
+            <span class="text-muted opacity-50 small" *ngIf="!br.address"
+              >Sin dirección física</span
+            >
+          </td>
+          <td class="text-center">
+            <div
+              class="d-flex flex-column gap-1 justify-content-center align-items-center"
+            >
+              <span
+                *ngIf="br.isPointOfSale"
+                class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 rounded"
+                style="font-size: 10px; min-width: 85px"
+                >🛒 TIENDA (POS)</span
+              >
+              <span
+                *ngIf="br.isWarehouse"
+                class="badge bg-primary-subtle text-indigo border border-primary-subtle px-2 py-0.5 rounded"
+                style="
+                  font-size: 10px;
+                  min-width: 85px;
+                  background-color: #e0e7ff;
+                  color: #4f46e5;
+                "
+                >📦 ALMACÉN</span
+              >
+            </div>
+          </td>
+          <td>
+            <!-- Jala el nombre del almacén relacionado de forma autorreferencial -->
+            <span
+              class="text-dark fw-medium"
+              *ngIf="br.isPointOfSale && br.DefaultWarehouse"
+            >
+              <i class="bx bx-link-alt text-muted small me-1"></i
+              >{{ br.DefaultWarehouse.name }}
+            </span>
+            <span class="text-muted opacity-50 small" *ngIf="!br.isPointOfSale"
+              >No aplica (Es Almacén)</span
+            >
+            <span
+              class="text-warning small"
+              *ngIf="br.isPointOfSale && !br.DefaultWarehouse"
+              >⚠️ Sin almacén asignado</span
+            >
+          </td>
+          <td class="text-center">
+            <div class="d-inline-flex gap-1">
+              <button
+                class="btn btn-sm border bg-white shadow-none p-1 d-flex align-items-center justify-content-center"
+                style="width: 28px; height: 28px; border-radius: 6px"
+                type="button"
+                (click)="onEdit(br)"
+                title="Modificar Ficha"
+              >
+                <i class="bx bx-pencil text-warning fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm border bg-white text-danger shadow-none p-1 d-flex align-items-center justify-content-center"
+                style="width: 28px; height: 28px; border-radius: 6px"
+                type="button"
+                (click)="onDelete(br.id)"
+                title="Dar de Baja Lógica"
+              >
+                <i class="bx bx-trash-alt fs-5"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 📑 PIE DE PAGINACIÓN ADAPTATIVA Y FILAS DINÁMICAS -->
+  <div
+    class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3"
+    *ngIf="totalRecords > 0"
+  >
+    <div
+      class="d-flex align-items-center gap-3 text-secondary"
+      style="font-size: 12px"
+    >
+      <div>
+        Mostrando
+        <span class="fw-bold text-dark">{{
+          (currentPage - 1) * pageSize + 1
+        }}</span>
+        al
+        <span class="fw-bold text-dark">{{
+          currentPage * pageSize > totalRecords
+            ? totalRecords
+            : currentPage * pageSize
+        }}</span>
+        de
+        <span
+          class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-2.5 py-1"
+          >{{ totalRecords }} locales</span
+        >
+      </div>
+
+      <div class="d-flex align-items-center gap-2 border-start ps-3">
+        <span>Filas por página:</span>
+        <select
+          class="form-select form-select-sm shadow-none border bg-white text-dark py-0.5"
+          style="
+            width: 65px;
+            font-size: 12px;
+            font-weight: 600;
+            height: 24px;
+            border-radius: 4px;
+          "
+          [ngModel]="pageSize"
+          (change)="onPageSizeChange(+$any($event.target).value)"
+        >
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+          <option [value]="30">30</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <button
+        class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)"
+        style="width: 32px; height: 32px"
+      >
+        <i class="bx bx-chevron-left fs-4"></i>
+      </button>
+
+      <div
+        class="text-secondary fw-semibold mx-1"
+        style="font-size: 12px; user-select: none"
+      >
+        Página <span class="text-dark fw-bold">{{ currentPage }}</span> de
+        {{ totalPages }}
+      </div>
+
+      <button
+        class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)"
+        style="width: 32px; height: 32px"
+      >
+        <i class="bx bx-chevron-right fs-4"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 🚪 VENTANA MODAL EMERGENTE: FORMULARIO REACTIVO DE BRANCHES (DATAENTRY)   -->
+<!-- ========================================================================= -->
+<div
+  class="modal fade"
+  [class.show]="showModal"
+  [style.display]="showModal ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div
+      class="modal-content border-0 shadow-lg modal-premium-radius bg-white text-dark"
+    >
+      <!-- Encabezado del Modal -->
+      <div
+        class="modal-header border-bottom border-light px-4 py-3 bg-light rounded-top d-flex align-items-center justify-content-between"
+      >
+        <h5 class="modal-title fw-bold text-dark fs-6 m-0">
+          {{
+            isEditing
+              ? "📝 Modificar Establecimiento"
+              : "🚀 Registrar Nuevo Establecimiento"
+          }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close shadow-none border-0 bg-transparent text-secondary fs-4"
+          (click)="closeModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      <!-- Cuerpo del Formulario Reactivo -->
+      <form [formGroup]="branchForm" (ngSubmit)="onFormSubmit()">
+        <div class="modal-body p-4 text-start">
+          <!-- Alerta de Errores del Backend -->
+          <div
+            class="alert alert-danger p-2 small border-0 mb-3 rounded-3"
+            *ngIf="formErrorMessage"
+          >
+            <strong>Error del Sistema:</strong> {{ formErrorMessage }}
+          </div>
+
+          <!-- Campo 1: Selección de Empresa -->
+          <div
+            class="mb-3"
+            [class.has-error-input]="isFieldInvalid('companyId')"
+          >
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Empresa / Razón Social Asociada</label
+            >
+            <select
+              class="form-select bg-light text-dark border-light fw-semibold"
+              formControlName="companyId"
+            >
+              <option value="" disabled>Seleccione una empresa...</option>
+              <option *ngFor="let comp of companiesList" [value]="comp.id">
+                🏢 {{ comp.name }}
+              </option>
+            </select>
+            <small
+              class="text-danger extra-small-err"
+              *ngIf="isFieldInvalid('companyId')"
+              >La empresa es obligatoria.</small
+            >
+          </div>
+
+          <!-- Campo 2: Nombre de la Sucursal / Almacén -->
+          <div class="mb-3" [class.has-error-input]="isFieldInvalid('name')">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Nombre del Establecimiento Comercial</label
+            >
+            <input
+              type="text"
+              class="form-control bg-light text-dark border-light fw-bold"
+              formControlName="name"
+              placeholder="Ej: Tienda Principal San Isidro u Almacén Central"
+            />
+            <small
+              class="text-danger extra-small-err"
+              *ngIf="isFieldInvalid('name')"
+              >El nombre es obligatorio (mín. 3 letras).</small
+            >
+          </div>
+
+          <!-- Campo 3: Dirección Física -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Dirección Física del Local</label
+            >
+            <input
+              type="text"
+              class="form-control bg-light text-dark border-light fw-medium"
+              formControlName="address"
+              placeholder="Ej: Av. Javier Prado Este 1230, San Borja"
+            />
+          </div>
+
+          <!-- Campo 4: Roles / Banderas Operativas -->
+          <div
+            class="p-2.5 bg-light rounded-3 d-flex gap-4 align-items-center mb-3"
+            style="font-size: 13px; border: 1px solid #e2e8f0"
+          >
+            <label
+              class="form-check-label text-dark cursor-pointer d-flex align-items-center gap-1.5 m-0 fw-medium"
+            >
+              <input
+                type="checkbox"
+                class="form-check-input"
+                formControlName="isPointOfSale"
+              />
+              🛒 Es Punto de Venta (POS)
+            </label>
+            <label
+              class="form-check-label text-dark cursor-pointer d-flex align-items-center gap-1.5 m-0 fw-medium"
+            >
+              <input
+                type="checkbox"
+                class="form-check-input"
+                formControlName="isWarehouse"
+              />
+              📦 Es Almacén / Depósito
+            </label>
+          </div>
+
+          <!-- Campo 5: Almacén de Despacho por Defecto (Condicional para Puntos de Venta) -->
+          <div class="mb-2" *ngIf="branchForm.get('isPointOfSale')?.value">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Almacén de Despacho por Defecto (POS)</label
+            >
+            <select
+              class="form-select bg-light text-dark border-light fw-semibold"
+              formControlName="defaultWarehouseId"
+            >
+              <option value="">
+                -- Ninguno / Seleccione Almacén Físico --
+              </option>
+              <!-- 🌟 CORRECCIÓN DE BUCLE: Usamos selectedBranchId para bloquear la auto-selección cíclica de forma limpia -->
+              <option
+                *ngFor="let wh of warehousesList"
+                [value]="wh.id"
+                [disabled]="selectedBranchId === wh.id"
+              >
+                📦 {{ wh.name }}
+                {{ selectedBranchId === wh.id ? "(Este local)" : "" }}
+              </option>
+            </select>
+            <small class="text-muted d-block mt-1" style="font-size: 11px">
+              Define de qué depósito físico se restará el stock de manera
+              automática en el Kardex al vender.
+            </small>
+          </div>
+        </div>
+
+        <!-- Pie de página de acciones operativas -->
+        <div
+          class="modal-footer border-top border-light px-4 py-3 bg-light rounded-bottom d-flex justify-content-end gap-2"
+        >
+          <button
+            type="button"
+            class="btn btn-light btn-sm px-3 border text-secondary shadow-none"
+            style="border-radius: 6px"
+            (click)="closeModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary btn-sm px-4 text-white"
+            style="background-color: #2563eb; border-radius: 6px"
+            [disabled]="isLoading"
+          >
+            {{ isEditing ? "Guardar Cambios" : "Registrar Local" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fade show" *ngIf="showModal"></div>

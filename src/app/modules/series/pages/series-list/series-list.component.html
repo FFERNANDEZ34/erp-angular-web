@@ -1,0 +1,464 @@
+<div class="page-header-title mb-4">
+  <h1 class="h4 fw-bold text-dark mb-1">Talonarios y Series Correlativas</h1>
+  <p class="text-muted small m-0">
+    Configure los prefijos y controle los contadores de numeración automática
+    para sus comprobantes comerciales e internos
+  </p>
+</div>
+
+<div class="table-container-wrapper shadow-sm border rounded-3 bg-white">
+  <!-- 🔍 BARRA DE FILTROS AVANZADOS EN LÍNEA HORIZONTAL -->
+  <div
+    class="table-advanced-filters-toolbar p-3 bg-light rounded-top border-bottom"
+  >
+    <div class="row g-2 align-items-center">
+      <!-- Filtro 1: Tipo de Documento -->
+      <div class="col-md-3">
+        <select
+          class="form-select form-select-sm shadow-none border bg-white text-dark fw-semibold"
+          [(ngModel)]="filterDocumentType"
+          (change)="onFilterChange()"
+        >
+          <option value="">📄 Todos los Documentos</option>
+          <option *ngFor="let doc of documentTypesList" [value]="doc.code">
+            {{ doc.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Filtro 2: Código de Serie -->
+      <div class="col-md-5">
+        <input
+          type="text"
+          class="form-control form-control-sm shadow-none border bg-white text-dark font-monospace text-uppercase"
+          [(ngModel)]="filterSeries"
+          (input)="onFilterChange()"
+          placeholder="Buscar prefijo de serie (Ej: F001, NP01)..."
+          maxLength="4"
+        />
+      </div>
+
+      <!-- Acción Central: Lanzar Modal de Registro -->
+      <div class="col-md-4 text-end">
+        <button
+          class="btn btn-primary btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1 border-0"
+          style="background-color: #2563eb; border-radius: 6px; height: 32px"
+          type="button"
+          (click)="openCreateModal()"
+        >
+          <i class="bx bx-plus-circle fs-5"></i> Crear Nuevo Talonario
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REJILLA DE DATOS / RESPONSIVE TABLE -->
+  <div class="table-responsive text-start">
+    <table
+      class="table table-hover align-middle m-0"
+      style="min-width: 900px; font-size: 13px"
+    >
+      <thead class="table-light text-secondary border-bottom">
+        <tr>
+          <th
+            class="py-3 px-4 font-monospace"
+            style="width: 80px; user-select: none"
+          >
+            ID
+          </th>
+          <th style="width: 140px">Prefijo Serie</th>
+          <th>Tipo de Documento / Registro</th>
+          <th>Próximo Correlativo a Emitir</th>
+          <th>Glosa de Identificación</th>
+          <th>Fecha Registro</th>
+          <th class="text-center" style="width: 110px">Operaciones</th>
+        </tr>
+      </thead>
+      <tbody class="border-0">
+        <!-- ⏳ ANIMACIÓN DE ESPERA DE RED -->
+        <tr *ngIf="isLoading">
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i
+              class="bx bx-loader-alt bx-spin text-primary fs-3 d-block mb-2"
+            ></i>
+            <span class="fw-semibold"
+              >Consultando matriz de numeración en MySQL...</span
+            >
+          </td>
+        </tr>
+
+        <!-- 📂 PANEL DE CATÁLOGO VACÍO -->
+        <tr *ngIf="!isLoading && seriesList.length === 0">
+          <td colspan="7" class="text-center py-5 bg-white">
+            <div class="py-4">
+              <i
+                class="bx bx-receipt text-muted opacity-25 d-block mb-2"
+                style="font-size: 48px"
+              ></i>
+              <h6 class="text-dark fw-bold m-0">
+                No se encontraron series para esta empresa
+              </h6>
+              <p class="text-muted small m-0">
+                Su holding no cuenta con talonarios configurados que cumplan
+                estos criterios.
+              </p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 🚀 RENDERIZADO EN VIVO DESDE MYSQL -->
+        <tr
+          *ngFor="let item of seriesList"
+          style="transition: background 0.15s"
+        >
+          <td class="px-4 text-secondary font-monospace">#{{ item.id }}</td>
+          <td>
+            <!-- Insignias inteligentes dinámicas según el tipo de documento -->
+            <span
+              class="badge font-monospace px-2.5 py-1.5 border fw-bold text-uppercase"
+              [ngClass]="
+                item.series.startsWith('F') || item.series.startsWith('B')
+                  ? 'bg-success-subtle text-success border-success-subtle'
+                  : 'bg-primary-subtle text-indigo border-primary-subtle'
+              "
+              style="
+                font-size: 12px;
+                border-radius: 4px;
+                min-width: 65px;
+                display: inline-block;
+                text-center: center;
+              "
+            >
+              {{ item.series }}
+            </span>
+          </td>
+          <td>
+            <div class="text-dark fw-bold mb-0.5">{{ item.documentType }}</div>
+            <small
+              class="text-muted small"
+              *ngIf="item.series.startsWith('F') || item.series.startsWith('B')"
+              >💼 Documento Oficial SUNAT</small
+            >
+            <small
+              class="text-muted small"
+              *ngIf="
+                !item.series.startsWith('F') && !item.series.startsWith('B')
+              "
+              >🛡️ Control Interno ERP</small
+            >
+          </td>
+          <td>
+            <!-- Simulamos cómo se formateará con ceros a la izquierda en la facturación real -->
+            <span class="font-monospace fw-bold text-primary fs-6">
+              {{ item.series }}-{{
+                (item.currentNumber + 1).toString().padStart(8, "0")
+              }}
+            </span>
+            <small class="text-muted d-block small" style="font-size: 11px"
+              >Contador base actual: {{ item.currentNumber }}</small
+            >
+          </td>
+          <td>
+            <span class="text-secondary" *ngIf="item.description">{{
+              item.description
+            }}</span>
+            <span class="text-muted opacity-50 small" *ngIf="!item.description"
+              >Sin especificación</span
+            >
+          </td>
+          <td class="text-secondary font-monospace">
+            {{ item.createdAt | date: "dd/MM/yyyy" }}
+          </td>
+          <td class="text-center">
+            <div class="d-inline-flex gap-1">
+              <button
+                class="btn btn-sm border bg-white shadow-none p-1 d-flex align-items-center justify-content-center"
+                style="width: 28px; height: 28px; border-radius: 6px"
+                type="button"
+                (click)="onEdit(item)"
+                title="Modificar Ficha"
+              >
+                <i class="bx bx-pencil text-warning fs-5"></i>
+              </button>
+              <button
+                class="btn btn-sm border bg-white text-danger shadow-none p-1 d-flex align-items-center justify-content-center"
+                style="width: 28px; height: 28px; border-radius: 6px"
+                type="button"
+                (click)="onDelete(item.id)"
+                title="Dar de Baja Lógica"
+              >
+                <i class="bx bx-trash-alt fs-5"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 📑 PIE DE PAGINACIÓN ADAPTATIVA Y FILAS DINÁMICAS -->
+  <div
+    class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3"
+    *ngIf="totalRecords > 0"
+  >
+    <div
+      class="d-flex align-items-center gap-3 text-secondary"
+      style="font-size: 12px"
+    >
+      <div>
+        Mostrando
+        <span class="fw-bold text-dark">{{
+          (currentPage - 1) * pageSize + 1
+        }}</span>
+        al
+        <span class="fw-bold text-dark">{{
+          currentPage * pageSize > totalRecords
+            ? totalRecords
+            : currentPage * pageSize
+        }}</span>
+        de
+        <span
+          class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-2.5 py-1"
+          >{{ totalRecords }} talonarios</span
+        >
+      </div>
+
+      <div class="d-flex align-items-center gap-2 border-start ps-3">
+        <span>Filas por página:</span>
+        <select
+          class="form-select form-select-sm shadow-none border bg-white text-dark py-0.5"
+          style="
+            width: 65px;
+            font-size: 12px;
+            font-weight: 600;
+            height: 24px;
+            border-radius: 4px;
+          "
+          [ngModel]="pageSize"
+          (change)="onPageSizeChange(+$any($event.target).value)"
+        >
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+          <option [value]="30">30</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <button
+        class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)"
+        style="width: 32px; height: 32px"
+      >
+        <i class="bx bx-chevron-left fs-4"></i>
+      </button>
+
+      <div
+        class="text-secondary fw-semibold mx-1"
+        style="font-size: 12px; user-select: none"
+      >
+        Página <span class="text-dark fw-bold">{{ currentPage }}</span> de
+        {{ totalPages }}
+      </div>
+
+      <button
+        class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)"
+        style="width: 32px; height: 32px"
+      >
+        <i class="bx bx-chevron-right fs-4"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 🚪 VENTANA MODAL EMERGENTE: FORMULARIO REACTIVO DE SERIES (DATAENTRY)      -->
+<!-- ========================================================================= -->
+<div
+  class="modal fade"
+  [class.show]="showModal"
+  [style.display]="showModal ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div
+      class="modal-content border-0 shadow-lg modal-premium-radius bg-white text-dark"
+    >
+      <!-- Encabezado del Modal -->
+      <div
+        class="modal-header border-bottom border-light px-4 py-3 bg-light rounded-top d-flex align-items-center justify-content-between"
+      >
+        <h5 class="modal-title fw-bold text-dark fs-6 m-0">
+          {{
+            isEditing
+              ? "📝 Modificar Parámetros de Serie"
+              : "🚀 Configurar Nuevo Talonario Comercial"
+          }}
+        </h5>
+        <button
+          type="button"
+          class="btn-close shadow-none border-0 bg-transparent text-secondary fs-4"
+          (click)="closeModal()"
+        >
+          ×
+        </button>
+      </div>
+
+      <!-- Cuerpo del Formulario Reactivo -->
+      <form [formGroup]="seriesForm" (ngSubmit)="onFormSubmit()">
+        <div class="modal-body p-4 text-start">
+          <!-- Alerta de Errores del Backend -->
+          <div
+            class="alert alert-danger p-2 small border-0 mb-3 rounded-3"
+            *ngIf="formErrorMessage"
+          >
+            <strong>Error del Sistema:</strong> {{ formErrorMessage }}
+          </div>
+
+          <!-- Campo 1: Selección de Tipo de Documento -->
+          <div
+            class="mb-3"
+            [class.has-error-input]="isFieldInvalid('documentType')"
+          >
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Tipo de Comprobante / Registro</label
+            >
+            <select
+              class="form-select bg-light text-dark border-light fw-semibold"
+              formControlName="documentType"
+              [attr.disabled]="isEditing ? true : null"
+            >
+              <option value="" disabled>Seleccione tipo de registro...</option>
+              <option *ngFor="let doc of documentTypesList" [value]="doc.code">
+                📄 {{ doc.name }}
+              </option>
+            </select>
+            <small
+              class="text-danger extra-small-err"
+              *ngIf="isFieldInvalid('documentType')"
+              >El tipo de documento es obligatorio.</small
+            >
+          </div>
+
+          <!-- Fila de Prefijo Serie y Contador Inicial -->
+          <div class="row g-3 mb-3">
+            <!-- Campo 2: Prefijo de la Serie -->
+            <div
+              class="col-md-6"
+              [class.has-error-input]="isFieldInvalid('series')"
+            >
+              <label class="form-label small fw-bold text-secondary mb-1"
+                >Prefijo de Serie (Máx. 4 caracteres)</label
+              >
+              <input
+                type="text"
+                class="form-control bg-light text-dark border-light fw-bold text-uppercase font-monospace"
+                formControlName="series"
+                placeholder="Ej: F001, NP01"
+                maxLength="4"
+                [readOnly]="isEditing"
+              />
+              <small
+                class="text-danger extra-small-err"
+                *ngIf="isFieldInvalid('series')"
+              >
+                Prefijo obligatorio (2-4 caracteres alfanuméricos puros).
+              </small>
+            </div>
+
+            <!-- Campo 3: Contador Base Actual -->
+            <div
+              class="col-md-6"
+              [class.has-error-input]="isFieldInvalid('currentNumber')"
+            >
+              <label class="form-label small fw-bold text-secondary mb-1"
+                >Último Número Emitido (Contador Base)</label
+              >
+              <input
+                type="number"
+                step="1"
+                class="form-control bg-light text-dark border-light fw-semibold font-monospace text-center"
+                formControlName="currentNumber"
+                placeholder="0"
+                style="font-size: 14px"
+              />
+              <small
+                class="text-danger extra-small-err"
+                *ngIf="isFieldInvalid('currentNumber')"
+                >El contador no puede ser menor a 0.</small
+              >
+            </div>
+          </div>
+
+          <!-- Campo 4: Descripción / Glosa de Identificación -->
+          <div class="mb-2">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Glosa Informativa / Ubicación de Uso</label
+            >
+            <input
+              type="text"
+              class="form-control bg-light text-dark border-light fw-medium"
+              formControlName="description"
+              placeholder="Ej: Facturas Electrónicas - Caja Sede Central"
+            />
+            <small class="text-muted d-block mt-1" style="font-size: 11px">
+              Utilice este campo para identificar internamente la finalidad de
+              esta numeración correlativa.
+            </small>
+          </div>
+
+          <!-- Panel de Alerta Transaccional Informativo -->
+          <div
+            class="p-3 bg-light rounded-3 border d-flex align-items-center gap-2.5 mt-3"
+            style="font-size: 12px"
+            *ngIf="!isEditing"
+          >
+            <i class="bx bx-info-circle text-primary fs-4"></i>
+            <span class="text-secondary">
+              Al guardar, el primer documento que se emita utilizando esta
+              configuración tomará el formato
+              <strong class="text-dark font-monospace">
+                {{ seriesForm.get("series")?.value || "SERIE" }}-{{
+                  ((+seriesForm.get("currentNumber")?.value || 0) + 1)
+                    .toString()
+                    .padStart(8, "0")
+                }}
+              </strong>
+              de manera automática.
+            </span>
+          </div>
+        </div>
+
+        <!-- Pie de página de acciones operativas -->
+        <div
+          class="modal-footer border-top border-light px-4 py-3 bg-light rounded-bottom d-flex justify-content-end gap-2"
+        >
+          <button
+            type="button"
+            class="btn btn-light btn-sm px-3 border text-secondary shadow-none"
+            style="border-radius: 6px"
+            (click)="closeModal()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary btn-sm px-4 text-white"
+            style="background-color: #2563eb; border-radius: 6px"
+            [disabled]="isLoading"
+          >
+            {{ isEditing ? "Guardar Cambios" : "Inicializar Talonario" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fade show" *ngIf="showModal"></div>

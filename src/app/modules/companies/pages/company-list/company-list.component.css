@@ -1,0 +1,77 @@
+.cursor-pointer {
+  cursor: pointer;
+}
+.font-monospace {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+.form-select-sm,
+.form-control-sm {
+  font-size: 13px !important;
+  border-radius: 6px !important;
+  height: 32px;
+}
+.modal-premium-radius {
+  border-radius: 12px !important;
+}
+.has-error-input input {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+.extra-small-err {
+  font-size: 11px;
+  display: block;
+  margin-top: 4px;
+  font-weight: 500;
+}
+.modal.show {
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 1060;
+}
+.modal-backdrop.show {
+  z-index: 1040;
+}
+.btn-close {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* 🌟 COBERTURA GLOBAL MODO OSCURO */
+body.dark-theme-mode .table-container-wrapper,
+body.dark-theme-mode .modal-content {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+body.dark-theme-mode .table-advanced-filters-toolbar,
+body.dark-theme-mode .table-light,
+body.dark-theme-mode .bg-light,
+body.dark-theme-mode .modal-header,
+body.dark-theme-mode .modal-footer {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+body.dark-theme-mode .table tbody tr td {
+  color: #cbd5e1 !important;
+  border-bottom-color: #334155 !important;
+}
+body.dark-theme-mode .table-hover tbody tr:hover {
+  background-color: #334155 !important;
+}
+body.dark-theme-mode .text-dark,
+body.dark-theme-mode h1.text-dark,
+body.dark-theme-mode h5.text-dark {
+  color: #f8fafc !important;
+}
+body.dark-theme-mode .form-control,
+body.dark-theme-mode .form-select {
+  background-color: #0f172a !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+body.dark-theme-mode .btn-close {
+  filter: invert(1) grayscale(1) brightness(2);
+}
+body.dark-theme-mode .page-header-title p {
+  color: #94a3b8 !important;
+}

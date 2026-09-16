@@ -3,7 +3,21 @@ import { RouterModule, Routes } from '@angular/router';
 import { EntityListComponent } from './pages/entity-list/entity-list.component';
 
 const routes: Routes = [
-  { path: '', component: EntityListComponent } // ✅ Al entrar a /principal/entities se pintará este componente
+  {
+    path: '',
+    children: [
+      { 
+        path: 'entity-list', 
+        component: EntityListComponent, 
+        title: 'Holding - Clientes y Proveedores' 
+      },
+      { 
+        path: '', 
+        redirectTo: 'entity-list', 
+        pathMatch: 'full' 
+      }
+    ]
+  }
 ];
 
 @NgModule({

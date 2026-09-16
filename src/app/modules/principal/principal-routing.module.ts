@@ -23,6 +23,18 @@ const routes: Routes = [
         path: 'finance', 
         loadChildren: () => import('../finance/finance.module').then(m => m.FinanceModule) 
       },
+      { 
+        path: 'companies', 
+        loadChildren: () => import('../companies/companies.module').then(m => m.CompaniesModule) 
+      },
+       { 
+        path: 'branches', 
+        loadChildren: () => import('../branches/branches.module').then(m => m.BranchesModule) 
+      },
+       { 
+        path: 'series', 
+        loadChildren: () => import('../series/series.module').then(m => m.SeriesModule) 
+      },
       { path: '', redirectTo: 'entities', pathMatch: 'full' },
     ],
   },
