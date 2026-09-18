@@ -1,4 +1,11 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; // 🚀 CORRECCIÓN: Apunta a core
+import {
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
+} from '@angular/core'; // 🚀 CORRECCIÓN: Apunta a core
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router'; // 🚀 El Router sí pertenece a router
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
@@ -12,6 +19,13 @@ import { catchError } from 'rxjs/operators';
   styleUrls: ['./invoice-form.component.css'],
 })
 export class InvoiceFormComponent implements OnInit {
+  @ViewChild('errorBannerAnchor', { static: false }) errorBanner:
+    | ElementRef
+    | undefined;
+  @ViewChild('successToastAnchor', { static: false }) successToastElement:
+    | ElementRef
+    | undefined;
+
   private http = inject(HttpClient);
   private fb = inject(FormBuilder);
   private router = inject(Router);
@@ -51,69 +65,97 @@ export class InvoiceFormComponent implements OnInit {
   customerExpressForm!: FormGroup;
   isSavingCustomer = false;
 
+  // 🌟 VARIABLES DE ESTADO PARA NOTIFICACIÓN PREMIUM
+  showSuccessToast = false;
+  successToastMessage = '';
+  successInvoiceNumber = '';
+  successInvoiceTotal = 0;
+
   // B. Inicializa el formulario express de clientes (Llama a esto al final de tu ngOnInit)
- initCustomerExpressForm(): void {
+  initCustomerExpressForm(): void {
     this.customerExpressForm = this.fb.group({
-      documentType: ['1', [Validators.required]], 
+      documentType: ['1', [Validators.required]],
       // 🌟 REAJUSTE ESTRICTO: El signo $ va libre sin la barra invertida
-      documentNumber: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]], 
+      documentNumber: [
+        '',
+        [Validators.required, Validators.pattern('^[0-9]{8}$')],
+      ],
       name: ['', [Validators.required, Validators.minLength(3)]],
       address: [''],
       email: ['', [Validators.email]],
-      phone: ['']
+      phone: [''],
     });
 
-    this.customerExpressForm.get('documentType')?.valueChanges.subscribe((type) => {
-      const numControl = this.customerExpressForm.get('documentNumber');
-      if (!numControl) return;
+    this.customerExpressForm
+      .get('documentType')
+      ?.valueChanges.subscribe((type) => {
+        const numControl = this.customerExpressForm.get('documentNumber');
+        if (!numControl) return;
 
-      
+        const typeStr = String(type);
 
-      
-      const typeStr = String(type);
+        console.log(
+          '================ 🕵️‍♂️ RADAR POS EXPRESS: CAMBIO DE COMBO ================',
+        );
+        console.log(
+          '1. Código de documento seleccionado en el select:',
+          `"${typeStr}"`,
+        );
+        console.log(
+          '2. ¿Qué valor lee el HTML en este milisegundo?:',
+          this.customerExpressForm.get('documentType')?.value,
+        );
 
-      console.log('================ 🕵️‍♂️ RADAR POS EXPRESS: CAMBIO DE COMBO ================');
-      console.log('1. Código de documento seleccionado en el select:', `"${typeStr}"`);
-      console.log('2. ¿Qué valor lee el HTML en este milisegundo?:', this.customerExpressForm.get('documentType')?.value);
-      
-      numControl.clearValidators();
+        numControl.clearValidators();
 
+        if (typeStr === '6') {
+          console.log(
+            '➔ Aplicando validadores estrictos para: RUC (11 dígitos)',
+          );
+          numControl.setValidators([
+            Validators.required,
+            // 🌟 REAJUSTE ESTRICTO RUC: Exactamente 11 dígitos que empiecen con 10, 15, 17 o 20
+            Validators.pattern('^(10|15|17|20)[0-9]{9}$'),
+          ]);
+        } else if (typeStr === '1') {
+          console.log(
+            '➔ Aplicando validadores estrictos para: DNI (8 dígitos)',
+          );
+          numControl.setValidators([
+            Validators.required,
+            // 🌟 REAJUSTE ESTRICTO DNI: Exactamente 8 dígitos
+            Validators.pattern('^[0-9]{8}$'),
+          ]);
+        } else {
+          console.log(
+            '➔ Aplicando validadores flexibles para: Extranjería/Pasaporte',
+          );
+          numControl.setValidators([
+            Validators.required,
+            // 🌟 REAJUSTE ESTRICTO EXTRANJERÍA/PASAPORTE: Alfanumérico de 6 a 15
+            Validators.pattern('^[a-zA-Z0-9]{6,15}$'),
+          ]);
+        }
 
-      if (typeStr === '6') {
-         console.log('➔ Aplicando validadores estrictos para: RUC (11 dígitos)');
-       numControl.setValidators([
-          Validators.required,
-          // 🌟 REAJUSTE ESTRICTO RUC: Exactamente 11 dígitos que empiecen con 10, 15, 17 o 20
-          Validators.pattern('^(10|15|17|20)[0-9]{9}$') 
-        ]);
-      } else if (typeStr === '1') {
-        console.log('➔ Aplicando validadores estrictos para: DNI (8 dígitos)');
-        numControl.setValidators([
-          Validators.required,
-          // 🌟 REAJUSTE ESTRICTO DNI: Exactamente 8 dígitos
-          Validators.pattern('^[0-9]{8}$')
-        ]);
-      } else {
-        console.log('➔ Aplicando validadores flexibles para: Extranjería/Pasaporte');
-        numControl.setValidators([
-          Validators.required,
-          // 🌟 REAJUSTE ESTRICTO EXTRANJERÍA/PASAPORTE: Alfanumérico de 6 a 15
-          Validators.pattern('^[a-zA-Z0-9]{6,15}$')
-        ]);
-      }
+        console.log(
+          '3. ¿El control documentNumber quedó inválido?:',
+          numControl.invalid,
+        );
+        console.log(
+          '4. Errores activos del input ahora mismo:',
+          numControl.errors,
+        );
+        console.log(
+          '========================================================================',
+        );
 
-      console.log('3. ¿El control documentNumber quedó inválido?:', numControl.invalid);
-      console.log('4. Errores activos del input ahora mismo:', numControl.errors);
-      console.log('========================================================================');
-     
-
-      numControl.updateValueAndValidity();
-      this.cdr.detectChanges();
-    });
+        numControl.updateValueAndValidity();
+        this.cdr.detectChanges();
+      });
   }
   openCustomerExpressModal(): void {
     this.formErrorMessage = null; // 💥 Pulveriza el mensaje de error anterior
-    
+
     if (this.customerExpressForm) {
       this.customerExpressForm.reset({
         documentType: '1', // Setea DNI por defecto
@@ -121,10 +163,10 @@ export class InvoiceFormComponent implements OnInit {
         name: '',
         address: '',
         email: '',
-        phone: ''
+        phone: '',
       });
     }
-    
+
     this.showCustomerModal = true;
     this.cdr.detectChanges();
   }
@@ -150,7 +192,7 @@ export class InvoiceFormComponent implements OnInit {
   }
 
   // D. 💾 GRABADO EXPRESS DE CLIENTE CONTRA TU API DE ENTITIES
- onSubmitExpressCustomer(): void {
+  onSubmitExpressCustomer(): void {
     if (this.customerExpressForm.invalid) {
       this.customerExpressForm.markAllAsTouched();
       this.cdr.detectChanges();
@@ -159,31 +201,33 @@ export class InvoiceFormComponent implements OnInit {
 
     this.isSavingCustomer = true;
     this.formErrorMessage = null; // Limpiamos ruidos previos
-    
+
     const formValues = this.customerExpressForm.value;
     const finalDocType = String(formValues.documentType).trim();
     const tipoEntidadReal = finalDocType === '6' ? 'empresa' : 'persona';
 
     const payload = {
-      entityType: tipoEntidadReal, 
-      documentType: finalDocType,     
+      entityType: tipoEntidadReal,
+      documentType: finalDocType,
       documentNumber: String(formValues.documentNumber).trim(),
       name: formValues.name.trim(),
       address: formValues.address?.trim() || null,
       email: formValues.email?.trim() || null,
-      phone: formValues.phone?.trim() || null
+      phone: formValues.phone?.trim() || null,
     };
 
     this.http.post(`${environment.apiUrl}/entities`, payload).subscribe({
       next: (res: any) => {
-
         const serverEntity = res?.data || res;
         //const newEntity = res?.data || res;
         this.isSavingCustomer = false;
-        
+
         const newEntity = {
           ...serverEntity,
-          address: serverEntity.address || formValues.address?.trim() || 'DIRECCIÓN FISCAL NO REGISTRADA'
+          address:
+            serverEntity.address ||
+            formValues.address?.trim() ||
+            'DIRECCIÓN FISCAL NO REGISTRADA',
         };
 
         this.customersList.unshift(newEntity);
@@ -191,7 +235,7 @@ export class InvoiceFormComponent implements OnInit {
         this.filteredCustomers = [...this.customersList];
 
         this.invoiceForm.patchValue({ customerId: newEntity.id });
-        
+
         this.showCustomerModal = false;
         this.customerExpressForm.reset();
         this.cdr.detectChanges();
@@ -200,9 +244,10 @@ export class InvoiceFormComponent implements OnInit {
       error: (err) => {
         this.isSavingCustomer = false;
         // Captura amigáble el rebote controlado de tu caso de uso
-        this.formErrorMessage = err?.error?.message || err?.message || 'Error físico en el holding.';
+        this.formErrorMessage =
+          err?.error?.message || err?.message || 'Error físico en el holding.';
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
@@ -493,19 +538,89 @@ export class InvoiceFormComponent implements OnInit {
 
     this.http.post(this.API_URL, this.invoiceForm.value).subscribe({
       next: (res: any) => {
+        // this.isLoading = false;
+        // alert(res?.message || 'Comprobante emitido con éxito.');
+        // this.router.navigate(['/principal/invoices/invoice-list']); // Volvemos al historial
+
         this.isLoading = false;
-        alert(res?.message || 'Comprobante emitido con éxito.');
-        this.router.navigate(['/principal/invoices/invoice-list']); // Volvemos al historial
+
+        const invoiceResult = res?.data || res;
+
+        // 1. 🚀 CONFIGURAMOS EL RADAR DEL TOAST PREMIUM
+        this.successToastMessage =
+          res?.message || 'Comprobante emitido con éxito.';
+        this.successInvoiceNumber =
+          invoiceResult.fullDocumentNumber || 'N° Generado';
+        this.successInvoiceTotal = Number(invoiceResult.totalVenta || 0);
+
+        // 2. Encendemos el interruptor visual en la RAM
+        this.showSuccessToast = true;
+        this.cdr.detectChanges();
+
+        // Si el Toast de éxito se ha pintado, obligamos al navegador a subir suave y elegantemente
+        if (this.successToastElement) {
+          this.successToastElement.nativeElement.scrollIntoView({
+            behavior: 'smooth', // Desplazamiento animado y limpio
+            block: 'start', // Posiciona la parte superior de la pantalla a esta altura
+          });
+        }
+
+        // 3. Limpiamos por completo el carrito de compras del POS para la siguiente venta
+        this.clearInvoiceFormAndCart();
+
+        // 4. ⏳ TEMPORIZADOR AUTOMÁTICO: Después de 4 segundos, el cartel se apaga solo
+        setTimeout(() => {
+          this.showSuccessToast = false;
+          this.cdr.detectChanges();
+        }, 4000);
       },
       error: (err) => {
         this.isLoading = false;
         this.formErrorMessage =
           err?.error?.message || 'Error crítico al emitir la venta.';
         this.cdr.detectChanges();
+
+        if (this.errorBanner) {
+          this.errorBanner.nativeElement.scrollIntoView({
+            behavior: 'smooth', // Desplazamiento animado y elegante, no un salto brusco
+            block: 'center', // Centra el cartel perfectamente en el monitor del cajero
+          });
+        }
       },
     });
   }
 
+  clearInvoiceFormAndCart(): void {
+    console.log(
+      '🧹 RADAR POS - Limpiando carrito de compras y reseteando variables contables...',
+    );
+
+    // 1. Vaciamos por completo el arreglo en RAM que sostiene los productos del carrito
+    // Reemplaza 'cartItems' por el nombre exacto de tu variable del array del carrito
+    if (this.detailsFormArray) {
+      this.detailsFormArray.clear();
+    }
+
+    // 2. Reseteamos el FormGroup principal a sus condiciones iniciales de fábrica
+    this.invoiceForm.reset({
+      seriesId: '', // Limpia la serie para obligar a seleccionar o re-filtrar
+      dueDate: null,
+      customerId: '', // Remueve al cliente de la venta anterior
+      customerIdentityType: '',
+      customerIdentityNumber: '',
+      customerName: '',
+      customerAddress: '',
+      currencyCode: 'PEN', // Vuelve por defecto a la moneda nacional Soles
+      exchangeRate: 1.0, // Tipo de cambio plano base
+      totalLetras: '',
+    });
+
+    // 3. Si manejas campos o alertas de error pegados, los pulverizamos aquí
+    this.formErrorMessage = null;
+
+    // 4. Forzamos a Angular a redibujar toda la pantalla del POS en limpio inmediatamente
+    this.cdr.detectChanges();
+  }
   cancelForm(): void {
     this.router.navigate(['/principal/invoices/invoice-list']);
   }

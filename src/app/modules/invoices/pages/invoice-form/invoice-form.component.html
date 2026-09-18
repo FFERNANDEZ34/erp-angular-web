@@ -11,7 +11,7 @@
 <!-- Formulario Reactivo Maestro de Ventas -->
 <form [formGroup]="invoiceForm" (ngSubmit)="onSubmitInvoice()">
   <!-- Banner de Captura de Errores Críticos del Backend -->
-  <div
+  <div  #errorBannerAnchor
     class="alert alert-danger p-2 small border-0 mb-3 rounded-3"
     *ngIf="formErrorMessage"
   >
@@ -661,3 +661,39 @@
 </div>
 
 <div class="modal-backdrop fade show" *ngIf="showCustomerModal"></div>
+
+
+<!-- 🌟 BANNER FLOTANTE DE ÉXITO EMISIÓN COMPROBANTES (TOAST PREMIUM) -->
+<div #successToastAnchor class="position-fixed top-0 end-0 p-4" style="z-index: 9999;" *ngIf="showSuccessToast">
+  <div class="toast show border-0 bg-white shadow-lg rounded-3 tab-content-fade animate-slide-in" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 320px;">
+    
+    <!-- Cabecera del Mensaje -->
+    <div class="toast-header bg-success text-white border-0 py-2.5 px-3 rounded-top-3 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bx bx-check-shield fs-4 text-white"></i>
+        <strong class="me-auto fw-bold font-monospace small" style="letter-spacing: 0.5px;">SISTEMA TRANSACCIONAL</strong>
+      </div>
+      <button type="button" class="btn-close btn-close-white shadow-none small" (click)="showSuccessToast = false" aria-label="Close"></button>
+    </div>
+    
+    <!-- Cuerpo Detallado del Éxito Comercial -->
+    <div  class="toast-body p-3">
+      <div class="d-flex align-items-start gap-2.5">
+        <div class="bg-success bg-opacity-10 p-2 rounded-circle text-success mt-0.5">
+          <i class="bx bx-receipt fs-3"></i>
+        </div>
+        <div class="flex-fill">
+          <h6 class="text-dark fw-bold mb-0.5" style="font-size: 14px;">¡Emisión Completada!</h6>
+          <p class="text-secondary small mb-2" style="line-height: 1.4;">{{ successToastMessage }}</p>
+          
+          <!-- Ficha Resumen del Comprobante Guardado -->
+          <div class="bg-light p-2 rounded-2 border border-light d-flex justify-content-between align-items-center font-monospace" style="font-size: 11.5px;">
+            <span class="text-muted fw-semibold">{{ successInvoiceNumber }}</span>
+            <span class="text-dark fw-bold">S/ {{ successInvoiceTotal | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
