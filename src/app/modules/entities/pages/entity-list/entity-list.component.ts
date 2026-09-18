@@ -10,15 +10,24 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, Subscription, combineLatest } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { AuthService } from '../../../../core/services/auth.service';
-import { environment } from '../../../../../environments/environment'; 
+import { environment } from '../../../../../environments/environment';
+
+export interface ParameterOption {
+  id: number;
+  code: string;
+  name: string;
+}
 
 export interface EntityCustomer {
   id: number;
   entityType: 'persona' | 'empresa';
-  documentType: 'dni' | 'ruc' | 'pasaporte' | 'ce' | 'otros';
+  documentType: string;
   documentNumber: string;
   name: string;
   email: string | null;
+  DocumentParameter?: {
+    name: string;
+  };
 }
 
 @Component({
@@ -35,7 +44,7 @@ export class EntityListComponent implements OnInit, OnDestroy {
 
   // Colección de datos reales de MySQL
   entities: EntityCustomer[] = [];
-
+  identityTypesList: ParameterOption[] = [];
   // Variables del estado de la Rejilla de Datos
   totalRecords = 0;
   currentPage = 1;
@@ -63,9 +72,11 @@ export class EntityListComponent implements OnInit, OnDestroy {
   private searchSubject = new Subject<void>();
   private contextSubscription!: Subscription;
 
+  activeCommercialTab: 'perfil' | 'credito' = 'perfil';
+
   ngOnInit(): void {
     this.initForm(); // 🚀 Inicializamos los validadores reactivos de entrada
-
+    this.loadEntityParametricCatalogs();
     this.contextSubscription = combineLatest([
       this.authService.activeCompanyId$,
       this.authService.activeBranchId$,
@@ -91,38 +102,124 @@ export class EntityListComponent implements OnInit, OnDestroy {
   // 📝 ESTRUCTURA DE VALIDACIONES REACTIVAS DNI / RUC
   private initForm(): void {
     this.entityForm = this.fb.group({
-      entityType: ['persona', [Validators.required]],
-      documentType: ['dni', [Validators.required]],
-      documentNumber: [
-        '',
-        [Validators.required, Validators.pattern(/^\d{8}$/)],
-      ], // 8 dígitos numéricos de inicio
+      entityType: ['persona', [Validators.required]], // Nace como persona por defecto
+      documentType: ['', [Validators.required]],
+      documentNumber: ['', [Validators.required]],
       name: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.email]],
+      address: [''],
+      phone: ['']
     });
 
-    // 🔄 ESCUCHA REACTIVA: Si el usuario cambia el radio button, mutamos las reglas en caliente
-    this.entityForm.get('entityType')?.valueChanges.subscribe((type) => {
-      const docTypeControl = this.entityForm.get('documentType');
+    // 🚀 ESCUCHADOR MAESTRO CORREGIDO PARA EL MAESTRO DE ENTIDADES
+    this.entityForm.get('documentType')?.valueChanges.subscribe((type) => {
       const docNumControl = this.entityForm.get('documentNumber');
+      const typeControl = this.entityForm.get('entityType');
+      if (!docNumControl || !typeControl) return;
 
-      if (type === 'empresa') {
-        docTypeControl?.setValue('ruc');
-        // Exige estrictamente 11 dígitos numéricos puros para Empresas (RUC)
-        docNumControl?.setValidators([
+      docNumControl.clearValidators();
+      const typeStr = String(type);
+
+      if (typeStr === '6') {
+        // 🏢 Si selecciona RUC, forzamos de forma automatizada que el tipo sea 'empresa'
+        typeControl.setValue('empresa', { emitEvent: false });
+        docNumControl.setValidators([
           Validators.required,
-          Validators.pattern(/^\d{11}$/),
+          Validators.pattern('^(10|15|17|20)[0-9]{9}$') // 🌟 Formato string nativo de Angular
         ]);
       } else {
-        docTypeControl?.setValue('dni');
-        // Exige estrictamente 8 dígitos numéricos puros para Personas (DNI)
-        docNumControl?.setValidators([
-          Validators.required,
-          Validators.pattern(/^\d{8}$/),
-        ]);
+        // 👤 Si es DNI, Pasaporte o CE, forzamos de forma automatizada que sea 'persona'
+        typeControl.setValue('persona', { emitEvent: false });
+        
+        if (typeStr === '1') {
+          docNumControl.setValidators([
+            Validators.required,
+            Validators.pattern('^[0-9]{8}$') // 🌟 Formato string nativo para DNI
+          ]);
+        } else {
+          docNumControl.setValidators([
+            Validators.required,
+            Validators.pattern('^[a-zA-Z0-9]{6,15}$')
+          ]);
+        }
       }
-      docTypeControl?.updateValueAndValidity();
-      docNumControl?.updateValueAndValidity();
+
+      docNumControl.updateValueAndValidity();
+      this.cdr.detectChanges();
+    });
+  }
+
+  private handleEntityFormError(err: any): void {
+    this.isLoading = false;
+
+    // 🌟 CAPTURA RADAR EXTREMA: Extraemos el 'message' detallado que envía el middleware
+    this.formErrorMessage =
+      err?.error?.message ||
+      err?.error?.error ||
+      err?.message ||
+      'Error de comunicación con la API.';
+
+    console.error('🕵️‍♂️ RADAR CLIENTE - Detalle de error capturado:', err);
+    this.cdr.detectChanges();
+  }
+
+  changeEntityTypeMode(mode: 'persona' | 'empresa'): void {
+    const typeControl = this.entityForm.get('entityType');
+    const docTypeControl = this.entityForm.get('documentType');
+
+    if (!typeControl || !docTypeControl) return;
+
+    if (mode === 'empresa') {
+      // Si es empresa, forzamos la propiedad y clavamos estrictamente el RUC ('6')
+      typeControl.setValue('empresa');
+      docTypeControl.setValue('6');
+    } else {
+      // Si es persona natural, abrimos el formulario y pre-seleccionamos DNI ('1')
+      typeControl.setValue('persona');
+      docTypeControl.setValue('1');
+    }
+
+    this.formErrorMessage = null; // Limpiamos alertas para dar fluidez
+    this.cdr.detectChanges(); // Fuerza a Angular a redibujar el modal
+  }
+
+  loadEntityParametricCatalogs(): void {
+    // Apuntamos directo al router que ya tiene la lógica de filtrado por mayúsculas
+    const url = `${environment.apiUrl}/products/parameters?type=TIPO_DOCUMENTO_IDENTIDAD`;
+
+    this.http.get<{ status: string; data: ParameterOption[] }>(url).subscribe({
+      next: (res) => {
+        const wrapper = res?.data || res;
+        this.identityTypesList = Array.isArray(wrapper) ? wrapper : [];
+
+        // Fallback defensivo por si la tabla de parámetros estuviera vacía en el entorno
+        if (this.identityTypesList.length === 0) {
+          this.identityTypesList = [
+            { id: 12, code: '1', name: 'DNI' },
+            { id: 13, code: '6', name: 'RUC' },
+            { id: 14, code: '4', name: 'CARNET EXTRANJERIA' },
+          ];
+        }
+
+        // Si es modo creación, pre-posicionamos el primer parámetro válido en el formulario
+        if (
+          this.identityTypesList.length > 0 &&
+          this.entityForm.get('documentType')?.value === ''
+        ) {
+          this.entityForm
+            .get('documentType')
+            ?.setValue(this.identityTypesList[0].code);
+        }
+
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error(
+          'Error al recuperar catálogo de identidades para entidades:',
+          err,
+        );
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -164,7 +261,7 @@ export class EntityListComponent implements OnInit, OnDestroy {
     this.isEditing = false;
     this.selectedEntityId = null;
     this.formErrorMessage = null;
-    
+
     // Reseteamos el formulario posicionando los valores limpios por defecto
     this.entityForm.reset({
       entityType: 'persona',

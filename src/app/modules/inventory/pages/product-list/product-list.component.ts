@@ -100,7 +100,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
       this.http.get<{ data: ParameterOption[] }>(`${url}?type=CATEGORIA`),
       this.http.get<{ data: ParameterOption[] }>(`${url}?type=MARCA`),
       this.http.get<{ data: ParameterOption[] }>(`${url}?type=MONEDA`),
-      this.http.get<{ data: ParameterOption[] }>(`${url}?type=AFECTACION`),
+      this.http.get<{ data: ParameterOption[] }>(`${url}?type=TIPO_AFECTACION_IGV`),
       this.http.get<{ data: ParameterOption[] }>(`${url}?type=UNIDAD_MEDIDA`),
     ]).subscribe({
       next: ([cats, brands, curs, taxes, units]) => {
@@ -384,7 +384,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
             this.closeModal();
             this.loadEntities();
           },
-          error: (err) => this.handleError(err),
+          error: (err) => this.handleProductFormError(err),
         });
     } else {
       this.http.post(this.API_URL, payload).subscribe({
@@ -393,11 +393,21 @@ export class ProductListComponent implements OnInit, OnDestroy {
           this.closeModal();
           this.loadEntities();
         },
-        error: (err) => this.handleError(err),
+        error: (err) => this.handleProductFormError(err),
       });
     }
   }
 
+   private handleProductFormError(err: any): void {
+    this.isLoading = false;
+    
+    // Extraemos el mensaje literal enviado por el throw new Error de tu CreateProductUseCase
+    this.formErrorMessage = err?.error?.message || err?.message || 'Error inesperado al procesar el inventario.';
+    
+    console.error('Radar Inventario - Captura de excepción controlada:', err);
+    this.cdr.detectChanges(); // Forzamos a Angular a pintar el cartel de alerta en pantalla
+  }
+  
   onDelete(id: number): void {
     if (
       confirm(

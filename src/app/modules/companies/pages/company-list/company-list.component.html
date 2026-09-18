@@ -1,11 +1,11 @@
 <div class="page-header-title mb-4">
   <h1 class="h4 fw-bold text-dark mb-1">Control de Compañías (Holding)</h1>
-  <p class="text-muted small m-0">Gestione y audite las diferentes razones sociales y empresas jurídicas vinculadas a su Holding corporativo</p>
+  <p class="text-muted small m-0">Gestione las razones sociales jurídicas de su holding y configure sus credenciales de firma electrónica SUNAT</p>
 </div>
 
 <div class="table-container-wrapper shadow-sm border rounded-3 bg-white">
   
-  <!-- 🔍 BARRA DE FILTROS AVANZADOS EN LINEA HORIZONTAL -->
+  <!-- 🔍 BARRA DE FILTROS AVANZADOS EN LÍNEA HORIZONTAL -->
   <div class="table-advanced-filters-toolbar p-3 bg-light rounded-top border-bottom">
     <div class="row g-2 align-items-center">
       
@@ -109,14 +109,12 @@
 
   <!-- 📑 PIE DE PAGINACIÓN ADAPTATIVA Y FILAS DINÁMICAS -->
   <div class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3" *ngIf="totalRecords > 0">
-    
     <div class="d-flex align-items-center gap-3 text-secondary" style="font-size: 12px;">
       <div>
         Mostrando <span class="fw-bold text-dark">{{ (currentPage - 1) * pageSize + 1 }}</span> al 
         <span class="fw-bold text-dark">{{ currentPage * pageSize > totalRecords ? totalRecords : currentPage * pageSize }}</span> 
         de <span class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-2.5 py-1">{{ totalRecords }} empresas</span>
       </div>
-      
       <div class="d-flex align-items-center gap-2 border-start ps-3">
         <span>Filas por página:</span>
         <select class="form-select form-select-sm shadow-none border bg-white text-dark py-0.5" 
@@ -135,91 +133,223 @@
               [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" style="width: 32px; height: 32px;">
         <i class="bx bx-chevron-left fs-4"></i>
       </button>
-      
       <div class="text-secondary fw-semibold mx-1" style="font-size: 12px; user-select: none;">
         Página <span class="text-dark fw-bold">{{ currentPage }}</span> de {{ totalPages }}
       </div>
-
       <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2" 
               [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)" style="width: 32px; height: 32px;">
         <i class="bx bx-chevron-right fs-4"></i>
       </button>
     </div>
-
   </div>
 
 </div>
+
 <!-- ========================================================================= -->
-<!-- 🚪 VENTANA MODAL EMERGENTE: FORMULARIO REACTIVO DE COMPAÑÍAS (DATAENTRY)   -->
+<!-- 🚪 VENTANA MODAL EMERGENTE: FORMULARIO REACTIVO DE COMPAÑÍAS (TABS 1 y 2) -->
 <!-- ========================================================================= -->
 <div class="modal fade" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content border-0 shadow-lg modal-premium-radius bg-white text-dark">
       
-      <!-- Encabezado del Modal -->
+      <!-- Encabezado Fijo del Modal -->
       <div class="modal-header border-bottom border-light px-4 py-3 bg-light rounded-top d-flex align-items-center justify-content-between">
         <h5 class="modal-title fw-bold text-dark fs-6 m-0">
-          {{ isEditing ? '📝 Modificar Ficha de Empresa' : '🚀 Registrar Nueva Empresa en el Holding' }}
+          {{ isEditing ? '📝 Configuración de Razón Social' : '🚀 Registrar Nueva Empresa en el Holding' }}
         </h5>
         <button type="button" class="btn-close shadow-none border-0 bg-transparent text-secondary fs-4" (click)="closeModal()">×</button>
       </div>
 
-      <!-- Cuerpo del Formulario Reactivo -->
+      <!-- Formulario Reactivo Unificado -->
       <form [formGroup]="companyForm" (ngSubmit)="onFormSubmit()">
         <div class="modal-body p-4 text-start">
           
-          <!-- Alerta de Errores del Backend -->
+          <!-- Banner Central de Captura de Errores de Red o Servidor -->
           <div class="alert alert-danger p-2 small border-0 mb-3 rounded-3" *ngIf="formErrorMessage">
             <strong>Error del Sistema:</strong> {{ formErrorMessage }}
           </div>
 
-          <!-- Campo 1: RUC de la Empresa -->
-          <div class="mb-3" [class.has-error-input]="isFieldInvalid('ruc')">
-            <label class="form-label small fw-bold text-secondary mb-1">Registro Único de Contribuyente (RUC)</label>
-            <input type="text" class="form-control bg-light text-dark border-light fw-semibold font-monospace" 
-                   formControlName="ruc" placeholder="Ej: 20604859321" maxLength="11" [readOnly]="isEditing">
-            <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('ruc')">
-              El RUC es obligatorio y debe contener estrictamente 11 dígitos numéricos.
-            </small>
-          </div>
+          <!-- 🧭 BARRA DE NAVEGACIÓN EN PESTAÑAS (3 TABS MAESTRAS) -->
+          <ul class="nav nav-tabs border-bottom mb-4 gap-1" style="font-size: 13px; font-weight: 600;">
+            <li class="nav-item">
+              <button type="button" class="nav-link border px-3 py-2 text-secondary" 
+                      [class.active]="activeTab === 'datos'" [class.bg-primary]="activeTab === 'datos'" [class.text-white]="activeTab === 'datos'"
+                      (click)="activeTab = 'datos'">
+                <i class="bx bx-file me-1"></i> Datos Fiscales
+              </button>
+            </li>
+            <li class="nav-item">
+              <button type="button" class="nav-link border px-3 py-2 text-secondary" 
+                      [class.active]="activeTab === 'credenciales'" [class.bg-primary]="activeTab === 'credenciales'" [class.text-white]="activeTab === 'credenciales'"
+                      (click)="activeTab = 'credenciales'">
+                <i class="bx bx-key me-1"></i> Credenciales SOL
+              </button>
+            </li>
+            <li class="nav-item">
+              <button type="button" class="nav-link border px-3 py-2 text-secondary" 
+                      [class.active]="activeTab === 'adjuntos'" [class.bg-primary]="activeTab === 'adjuntos'" [class.text-white]="activeTab === 'adjuntos'"
+                      (click)="activeTab = 'adjuntos'">
+                <i class="bx bx-cloud-upload me-1"></i> Logotipo y Certificado (.pfx)
+              </button>
+            </li>
+          </ul>
 
-          <!-- Campo 2: Razón Social -->
-          <div class="mb-3" [class.has-error-input]="isFieldInvalid('name')">
-            <label class="form-label small fw-bold text-secondary mb-1">Razón Social / Denominación Legal</label>
-            <input type="text" class="form-control bg-light text-dark border-light fw-bold" 
-                   formControlName="name" placeholder="Ej: Innova Tecnología y Sistemas S.A.C.">
-            <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('name')">La razón social es obligatoria (mín. 3 letras).</small>
-          </div>
+          <!-- ========================================================================= -->
+          <!-- 🏢 SOLAPA 1: DATOS FISCALES / IDENTIFICACIÓN COMERCIAL                   -->
+          <!-- ========================================================================= -->
+          <div *ngIf="activeTab === 'datos'" class="tab-content-fade">
+            <div class="row g-3 mb-3">
+              <!-- RUC Obligatorio (11 dígitos) -->
+              <div class="col-md-4" [class.has-error-input]="isFieldInvalid('ruc')">
+                <label class="form-label small fw-bold text-secondary mb-1">Número de RUC</label>
+                <input type="text" class="form-control bg-light text-dark border-light fw-semibold font-monospace" 
+                       formControlName="ruc" placeholder="Ej: 20604859321" maxLength="11" [readOnly]="isEditing">
+                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('ruc')">
+                  Requiere exactamente 11 dígitos numéricos.
+                </small>
+              </div>
 
-          <!-- Campo 3: Dirección Fiscal -->
-          <div class="mb-3">
-            <label class="form-label small fw-bold text-secondary mb-1">Dirección Fiscal Legal</label>
-            <input type="text" class="form-control bg-light text-dark border-light fw-medium" 
-                   formControlName="address" placeholder="Ej: Av. Canaval y Moreyra 150, San Isidro, Lima">
-          </div>
-
-          <!-- Fila de Teléfono y Correo Electrónico -->
-          <div class="row g-3 mb-2">
-            <div class="col-md-5">
-              <label class="form-label small fw-bold text-secondary mb-1">Teléfono / Central</label>
-              <input type="text" class="form-control bg-light text-dark border-light fw-medium font-monospace" 
-                     formControlName="phone" placeholder="Ej: 01-4455662">
+              <!-- Razón Social Legal -->
+              <div class="col-md-8" [class.has-error-input]="isFieldInvalid('name')">
+                <label class="form-label small fw-bold text-secondary mb-1">Razón Social / Denominación Legal</label>
+                <input type="text" class="form-control bg-light text-dark border-light fw-bold" 
+                       formControlName="name" placeholder="Ej: Innova Tecnología y Sistemas S.A.C.">
+                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('name')">La denominación es requerida.</small>
+              </div>
             </div>
-            <div class="col-md-7" [class.has-error-input]="isFieldInvalid('email')">
-              <label class="form-label small fw-bold text-secondary mb-1">Email Institucional</label>
-              <input type="email" class="form-control bg-light text-dark border-light fw-medium" 
-                     formControlName="email" placeholder="contacto@empresa.com">
-              <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('email')">Formato de correo electrónico no válido.</small>
+
+            <!-- Dirección Fiscal -->
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-secondary mb-1">Dirección Fiscal Legal</label>
+              <input type="text" class="form-control bg-light text-dark border-light fw-medium" 
+                     formControlName="address" placeholder="Ej: Av. Canaval y Moreyra 150, San Isidro, Lima">
+            </div>
+
+            <!-- Fila de Teléfono y Correo Electrónico Corporativo -->
+            <div class="row g-3 mb-2">
+              <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary mb-1">Central Telefónica</label>
+                <input type="text" class="form-control bg-light text-dark border-light fw-medium font-monospace" 
+                       formControlName="phone" placeholder="Ej: 01-4455662">
+              </div>
+              <div class="col-md-8" [class.has-error-input]="isFieldInvalid('email')">
+                <label class="form-label small fw-bold text-secondary mb-1">Email Institucional para Comprobantes</label>
+                <input type="email" class="form-control bg-light text-dark border-light fw-medium" 
+                       formControlName="email" placeholder="facturacion@tuempresa.com">
+                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('email')">Formato de correo inválido.</small>
+              </div>
+            </div>
+          </div>
+          <!-- ========================================================================= -->
+          <!-- 🔑 SOLAPA 2: CREDENCIALES SOL (ACCESO WEB SERVICE SUNAT)                 -->
+          <!-- ========================================================================= -->
+          <div *ngIf="activeTab === 'credenciales'" class="tab-content-fade">
+            <div class="p-3 bg-light border rounded-3 mb-3 text-secondary" style="font-size: 12.5px;">
+              <i class="bx bx-shield-quarter text-primary fs-5 me-1 align-middle"></i>
+              <span>Ingrese los datos del <strong>Usuario SOL Secundario</strong> creado en el portal de SUNAT con permisos para emitir comprobantes electrónicos.</span>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <!-- Usuario SOL Secundario -->
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary mb-1">Usuario SOL Secundario</label>
+                <input type="text" class="form-control bg-light text-dark border-light fw-bold font-monospace text-uppercase" 
+                       formControlName="sunatUser" placeholder="Ej: MODODATA">
+              </div>
+
+              <!-- Clave SOL -->
+              <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary mb-1">Contraseña / Clave SOL</label>
+                <input type="password" class="form-control bg-light text-dark border-light fw-semibold font-monospace" 
+                       formControlName="sunatPassword" placeholder="••••••••">
+              </div>
+            </div>
+
+            <!-- Contraseña del Certificado .pfx -->
+            <div class="mb-2">
+              <label class="form-label small fw-bold text-secondary mb-1">Contraseña Privada del Certificado Digital (.pfx / .p12)</label>
+              <input type="password" class="form-control bg-light text-dark border-light fw-semibold font-monospace" 
+                     formControlName="certificatePassword" placeholder="Contraseña de firma digital...">
+              <small class="text-muted d-block mt-1" style="font-size: 11px;">
+                Esta clave es indispensable para que el núcleo del sistema pueda abrir el archivo digital y estampar la firma XML obligatoria.
+              </small>
+            </div>
+          </div>
+
+          <!-- ========================================================================= -->
+          <!-- 📂 SOLAPA 3: LOGOTIPO Y CERTIFICADO DIGITAL EN VIVO (TRANSVERSAL)         -->
+          <!-- ========================================================================= -->
+          <div *ngIf="activeTab === 'adjuntos'" class="tab-content-fade">
+            
+            <!-- 🚫 Control preventivo para Modo Creación sin ID numérico -->
+            <div *ngIf="!isEditing" class="p-4 text-center bg-light border rounded-3 mb-2 text-secondary" style="font-size: 13px;">
+              <i class="bx bx-lock-alt text-warning d-block mb-2" style="font-size: 34px;"></i>
+              <strong class="text-dark d-block mb-1">Repositorio de Archivos Bloqueado</strong>
+              <span>Primero registre los datos fiscales básicos de la empresa. Al presionar "Registrar Razón Social", el sistema liberará el carrete multimedia.</span>
+            </div>
+
+            <div *ngIf="isEditing">
+              <!-- 📥 Botón de Carga de Streaming Binario -->
+              <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 border mb-4">
+                <div>
+                  <strong class="text-dark d-block" style="font-size: 13.5px;">Carga de Archivos de la Empresa</strong>
+                  <span class="text-secondary small d-block">Suba el logotipo (.png/.jpg) o el certificado digital (.pfx/.p12)</span>
+                </div>
+                <div>
+                  <label class="btn btn-sm btn-primary fw-bold text-white px-3 py-2 border-0 m-0 d-flex align-items-center gap-1" 
+                         style="background-color: #2563eb; cursor: pointer; border-radius: 6px;" [class.disabled]="isUploadingFile">
+                    <i class="bx" [ngClass]="isUploadingFile ? 'bx-loader-alt bx-spin' : 'bx-upload fs-5'"></i>
+                    {{ isUploadingFile ? 'Subiendo...' : 'Examinar Ficheros' }}
+                    <input type="file" accept="image/*,.pfx,.p12" style="display: none;" (change)="onFileSelected($event)" [disabled]="isUploadingFile">
+                  </label>
+                </div>
+              </div>
+
+              <!-- 📁 Carrete de Archivos Vacío -->
+              <div *ngIf="companyFiles.length === 0" class="text-center py-4 border border-dashed rounded-3 text-secondary bg-light mb-2">
+                <i class="bx bx-folder text-muted opacity-25 d-block mb-1.5" style="font-size: 38px;"></i>
+                <span class="small d-block fw-semibold">No se registran adjuntos para esta compañía</span>
+                <p class="text-muted extra-small-err m-0">Suba un certificado para activar los envíos a la SUNAT.</p>
+              </div>
+
+              <!-- 🚀 Cuadrícula Interactiva Corporativa Fiscal -->
+              <div class="fiscal-grid" *ngIf="companyFiles.length > 0">
+                <div class="fiscal-card shadow-sm border" *ngFor="let file of companyFiles">
+                  
+                  <!-- Caja de Previsualización según Extensión -->
+                  <div class="fiscal-preview-box">
+                    <!-- Si es imagen, pintamos el Logotipo Corporativo -->
+                    <img *ngIf="file.fileExtension !== 'pfx' && file.fileExtension !== 'p12'" 
+                         [src]="STORAGE_BASE + file.fileUrl" class="fiscal-img" alt="Logo de empresa">
+                    
+                    <!-- Si es certificado digital .pfx, pintamos una llave criptográfica -->
+                    <div *ngIf="file.fileExtension === 'pfx' || file.fileExtension === 'p12'" class="text-center text-primary">
+                      <i class="bx bxs-key" style="font-size: 40px; color: #4f46e5;"></i>
+                    </div>
+                  </div>
+
+                  <!-- Datos informativos del archivo inferior -->
+                  <div class="fiscal-info-footer d-flex justify-content-between align-items-center">
+                    <span class="text-dark font-monospace text-truncate d-block" style="max-width: 90px; font-weight: 500;" [title]="file.fileName">
+                      {{ file.fileName }}
+                    </span>
+                    <span class="badge text-uppercase font-monospace text-white bg-secondary py-0.5 px-1" style="font-size: 8.5px; border-radius: 2px;">
+                      .{{ file.fileExtension }}
+                    </span>
+                  </div>
+
+                </div>
+              </div>
             </div>
           </div>
 
         </div>
 
-        <!-- Pie de página de acciones operativas -->
+        <!-- Pie de Página Fijo del Formulario Modal -->
         <div class="modal-footer border-top border-light px-4 py-3 bg-light rounded-bottom d-flex justify-content-end gap-2">
           <button type="button" class="btn btn-light btn-sm px-3 border text-secondary shadow-none" style="border-radius: 6px;" (click)="closeModal()">Cancelar</button>
           <button type="submit" class="btn btn-primary btn-sm px-4 text-white" style="background-color: #2563eb; border-radius: 6px;" [disabled]="isLoading">
-            {{ isEditing ? 'Guardar Cambios' : 'Registrar Empresa' }}
+            {{ isEditing ? 'Guardar Configuración' : 'Registrar Razón Social' }}
           </button>
         </div>
       </form>

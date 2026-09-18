@@ -1,0 +1,12 @@
+.cursor-pointer { cursor: pointer; }
+.font-monospace { font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace !important; }
+.form-select-sm, .form-control-sm { font-size: 13px !important; border-radius: 6px !important; height: 32px; }
+
+/* 🌟 COBERTURA MODO OSCURO */
+body.dark-theme-mode .table-container-wrapper { background-color: #1e293b !important; border-color: #334155 !important; }
+body.dark-theme-mode .table-advanced-filters-toolbar, body.dark-theme-mode .table-light { background-color: #0f172a !important; border-color: #334155 !important; color: #94a3b8 !important; }
+body.dark-theme-mode .table tbody tr td { color: #cbd5e1 !important; border-bottom-color: #334155 !important; }
+body.dark-theme-mode .table-hover tbody tr:hover { background-color: #334155 !important; }
+body.dark-theme-mode .text-dark, body.dark-theme-mode h1.text-dark { color: #f8fafc !important; }
+body.dark-theme-mode .form-control, body.dark-theme-mode .form-select { background-color: #0f172a !important; border-color: #475569 !important; color: #f8fafc !important; }
+body.dark-theme-mode .page-header-title p { color: #94a3b8 !important; }

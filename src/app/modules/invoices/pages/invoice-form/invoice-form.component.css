@@ -1,0 +1,7 @@
+.input-group-append-btn {
+  height: 32px;
+  border-radius: 0 6px 6px 0 !important;
+  background-color: #10b981; /* Verde esmeralda premium */
+  color: white;
+}
+.input-group-append-btn:hover { background-color: #059669; color: white; }

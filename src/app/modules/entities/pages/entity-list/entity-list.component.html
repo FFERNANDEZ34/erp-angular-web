@@ -20,10 +20,9 @@
           (change)="onFilterChange()"
         >
           <option value="">📁 Todos los Documentos</option>
-          <option value="dni">DNI</option>
-          <option value="ruc">RUC</option>
-          <option value="pasaporte">Pasaporte</option>
-          <option value="ce">C.E.</option>
+          <option *ngFor="let doc of identityTypesList" [value]="doc.code">
+            {{ doc.name }}
+          </option>
         </select>
       </div>
 
@@ -170,7 +169,8 @@
           </td>
           <td>
             <span class="text-muted text-uppercase fw-semibold">{{
-              entity.documentType
+              entity.DocumentParameter?.name ||
+                (entity.documentType === "6" ? "RUC" : "DNI")
             }}</span>
           </td>
           <td>
@@ -190,7 +190,10 @@
           </td>
           <td class="text-center">
             <div class="d-inline-flex gap-1">
-              <button class="btn btn-outline-primary btn-sm me-2" (click)="onEdit(entity)">
+              <button
+                class="btn btn-outline-primary btn-sm me-2"
+                (click)="onEdit(entity)"
+              >
                 ✏️<i class="bx bx-pencil fs-6"></i>
               </button>
               <button class="btn btn-outline-danger btn-sm">
@@ -323,26 +326,77 @@
       <form [formGroup]="entityForm" (ngSubmit)="onFormSubmit()">
         <div class="modal-body p-4 text-start">
           <div
-            class="alert alert-danger p-2 small border-0 mb-3"
+            class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2"
             *ngIf="formErrorMessage"
           >
-            <strong>Error:</strong> {{ formErrorMessage }}
-          </div>
-
-          <!-- Selector: Estructura Comercial -->
-          <div class="mb-3">
-            <label class="form-label small fw-bold text-secondary d-block mb-1"
-              >Estructura Comercial</label
-            >
-            <div class="d-flex gap-4 align-items-center">
-              <label class="form-check-label small text-dark cursor-pointer">
-                Persona Natural
-              </label>
-              <label class="form-check-label small text-dark cursor-pointer">
-                Persona Jurídica (Empresa)
-              </label>
+            <i
+              class="bx bx-error-circle fs-4 mt-0.5"
+              style="color: #ef4444"
+            ></i>
+            <div>
+              <strong class="text-dark d-block mb-0.5"
+                >Validación de Registro Contable</strong
+              >
+              <span
+                class="text-secondary small d-block"
+                style="line-height: 1.4"
+                >{{ formErrorMessage }}</span
+              >
             </div>
           </div>
+
+          <!-- 🔗 INTERFAZ DE LOS 2 LINKS COMPUESTOS: ESTRUCTURA COMERCIAL -->
+          <label class="form-label small fw-bold text-secondary mb-1.5 d-block"
+            >Seleccione Perfil / Estructura Comercial</label
+          >
+          <ul
+            class="nav nav-pills mb-4 border rounded-3 p-1 bg-light"
+            role="tablist"
+            style="font-size: 13px"
+          >
+            <!-- Link 1: Persona Natural -->
+            <li class="nav-item flex-fill text-center">
+              <button
+                class="btn btn-sm w-100 fw-bold border-0 py-2 transition-all d-flex align-items-center justify-content-center gap-1.5"
+                [class.bg-white]="
+                  entityForm.get('entityType')?.value === 'persona'
+                "
+                [class.text-primary]="
+                  entityForm.get('entityType')?.value === 'persona'
+                "
+                [class.shadow-sm]="
+                  entityForm.get('entityType')?.value === 'persona'
+                "
+                [class.text-secondary]="
+                  entityForm.get('entityType')?.value !== 'persona'
+                "
+                (click)="changeEntityTypeMode('persona')"
+              >
+                <i class="bx bx-user fs-5"></i> Persona Natural
+              </button>
+            </li>
+            <!-- Link 2: Persona Jurídica (Empresa) -->
+            <li class="nav-item flex-fill text-center">
+              <button
+                class="btn btn-sm w-100 fw-bold border-0 py-2 transition-all d-flex align-items-center justify-content-center gap-1.5"
+                [class.bg-white]="
+                  entityForm.get('entityType')?.value === 'empresa'
+                "
+                [class.text-primary]="
+                  entityForm.get('entityType')?.value === 'empresa'
+                "
+                [class.shadow-sm]="
+                  entityForm.get('entityType')?.value === 'empresa'
+                "
+                [class.text-secondary]="
+                  entityForm.get('entityType')?.value !== 'empresa'
+                "
+                (click)="changeEntityTypeMode('empresa')"
+              >
+                <i class="bx bx-briefcase fs-5"></i> Persona Jurídica (Empresa)
+              </button>
+            </li>
+          </ul>
 
           <!-- Fila de Tipo de Documento y Número -->
           <div class="row g-3 mb-3">
@@ -354,12 +408,35 @@
                 class="form-select bg-light text-dark border-light fw-semibold"
                 formControlName="documentType"
               >
-                <option value="dni">DNI</option>
-                <option value="ruc">RUC</option>
-                <option value="pasaporte">Pasaporte</option>
-                <option value="ce">C.E.</option>
+                <option
+                  *ngFor="let doc of identityTypesList"
+                  [value]="doc.code"
+                >
+                  {{ doc.name }}
+                </option>
               </select>
             </div>
+            <div class="col-md-7 mb-3">
+              <label class="form-label small fw-bold text-secondary mb-1"
+                >Número de Documento Fiscal</label
+              >
+              <small
+                *ngIf="
+                  entityForm.get('documentNumber')?.invalid &&
+                  (entityForm.get('documentNumber')?.dirty ||
+                    entityForm.get('documentNumber')?.touched)
+                "
+              >
+                <span *ngIf="entityForm.get('documentType')?.value === '6'">
+                  ⚠️ El RUC exige exactamente 11 caracteres numéricos.</span
+                >
+                <span *ngIf="entityForm.get('documentType')?.value === '1'">
+                  ⚠️ El DNI exige exactamente 8 caracteres numéricos
+                  puros.</span
+                >
+              </small>
+            </div>
+
             <div
               class="col-md-7"
               [class.has-error-input]="isFieldInvalid('documentNumber')"

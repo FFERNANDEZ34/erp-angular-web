@@ -325,11 +325,12 @@
       <form [formGroup]="productForm" (ngSubmit)="onFormSubmit()">
         <div class="modal-body p-4 text-start">
           <!-- Banner de Captura de Errores del Backend -->
-          <div
-            class="alert alert-danger p-2 small border-0 mb-3 rounded-3"
-            *ngIf="formErrorMessage"
-          >
-            <strong>Error del Sistema:</strong> {{ formErrorMessage }}
+          <div class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2 tab-content-fade" *ngIf="formErrorMessage">
+            <i class="bx bx-error-circle fs-4 mt-0.5" style="color: #ef4444;"></i>
+            <div>
+              <strong class="text-dark d-block mb-0.5">Control de Unicidad de Inventarios</strong>
+              <span class="text-secondary small d-block" style="line-height: 1.4;">{{ formErrorMessage }}</span>
+            </div>
           </div>
 
           <!-- 🌟 CAMPO ESTÁTICO SUPERIOR: Nombre del Producto Visible de un Inicio -->

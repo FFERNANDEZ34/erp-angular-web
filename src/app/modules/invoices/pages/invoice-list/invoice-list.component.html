@@ -1,0 +1,175 @@
+<div class="page-header-title mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+  <div>
+    <h1 class="h4 fw-bold text-dark mb-1">Registro y Control de Ventas</h1>
+    <p class="text-muted small m-0">Audite el historial de comprobantes oficiales SUNAT y documentos de control interno emitidos por su holding</p>
+  </div>
+  <div>
+    <!-- 🚀 Botón Maestro de Redirección hacia tu Formulario Complejo POS -->
+    <button class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-1.5 border-0 shadow-sm" 
+            style="background-color: #2563eb; border-radius: 6px; padding: 0 16px; height: 36px; font-size: 13.5px;" 
+            type="button" (click)="navigateToCreate()">
+      <i class="bx bx-cart-add fs-5"></i> Emitir Nuevo Comprobante (POS)
+    </button>
+  </div>
+</div>
+
+<div class="table-container-wrapper shadow-sm border rounded-3 bg-white">
+  
+  <!-- 🔍 BARRA DE FILTROS AVANZADOS EN LÍNEA HORIZONTAL -->
+  <div class="table-advanced-filters-toolbar p-3 bg-light rounded-top border-bottom">
+    <div class="row g-2 align-items-center">
+      
+      <!-- Filtro 1: Tipo de Comprobante -->
+      <div class="col-md-3">
+        <select class="form-select form-select-sm shadow-none border bg-white text-dark fw-semibold" 
+                [(ngModel)]="filterType" (change)="onFilterChange()">
+          <option value="">📄 Todos los Documentos</option>
+          <option value="FACTURA">Facturas Electrónicas</option>
+          <option value="BOLETA">Boletas de Venta</option>
+          <option value="NOTA_PEDIDO">Notas de Pedido</option>
+          <option value="PRESUPUESTO">Presupuestos</option>
+        </select>
+      </div>
+
+      <!-- Filtro 2: Número Completo -->
+      <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm shadow-none border bg-white text-dark font-monospace text-uppercase" 
+               [(ngModel)]="filterNumber" (input)="onFilterChange()" placeholder="Buscar Número (F001-00000001)..." maxLength="15">
+      </div>
+
+      <!-- Filtro 3: Nombre del Cliente -->
+      <div class="col-md-6">
+        <input type="text" class="form-control form-control-sm shadow-none border bg-white text-dark" 
+               [(ngModel)]="filterCustomer" (input)="onFilterChange()" placeholder="Filtrar por Razón Social o RUC del Cliente...">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- REJILLA DE DATOS / RESPONSIVE TABLE -->
+  <div class="table-responsive text-start">
+    <table class="table table-hover align-middle m-0" style="min-width: 1050px; font-size: 13px;">
+      <thead class="table-light text-secondary border-bottom">
+        <tr>
+          <th class="py-3 px-4" style="width: 80px;">ID</th>
+          <th style="width: 130px;">Fecha / Hora</th>
+          <th style="width: 130px;">Comprobante</th>
+          <th>Cliente / Razón Social</th>
+          <th style="width: 120px;" class="text-end">Total Importe</th>
+          <th style="width: 130px;" class="text-center">Estado Pago</th>
+          <th style="width: 140px;" class="text-center">Validación SUNAT</th>
+          <th class="text-center" style="width: 80px;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="border-0">
+        
+        <!-- ⏳ ANIMACIÓN DE ESPERA DE RED -->
+        <tr *ngIf="isLoading">
+          <td colspan="8" class="text-center py-5 text-muted">
+            <i class="bx bx-loader-alt bx-spin text-primary fs-3 d-block mb-2"></i>
+            <span class="fw-semibold">Abriendo libros contables en MySQL...</span>
+          </td>
+        </tr>
+
+        <!-- 📂 PANEL DE CATÁLOGO VACÍO -->
+        <tr *ngIf="!isLoading && invoices.length === 0">
+          <td colspan="8" class="text-center py-5 bg-white">
+            <div class="py-4">
+              <i class="bx bx-receipt text-muted opacity-25 d-block mb-2" style="font-size: 48px;"></i>
+              <h6 class="text-dark fw-bold m-0">No se registran transacciones de venta</h6>
+              <p class="text-muted small m-0">Presione el botón superior para realizar su primera facturación en el sistema.</p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- 🚀 ITERACIÓN RECURSIVA EN VIVO DESDE MYSQL -->
+        <tr *ngFor="let inv of invoices" style="transition: background 0.15s;">
+          <td class="px-4 text-secondary font-monospace">#{{ inv.id }}</td>
+          <td>
+            <div class="text-dark fw-medium">{{ inv.issueDate | date:'dd/MM/yyyy' }}</div>
+            <small class="text-muted font-monospace" style="font-size: 11px;">{{ inv.issueTime }}</small>
+          </td>
+          <td>
+            <!-- Insignias Inteligentes de Tipo de Documento -->
+            <span class="badge font-monospace px-2 py-1 text-uppercase border"
+                  [ngClass]="inv.documentType === 'FACTURA' ? 'bg-primary-subtle text-primary border-primary-subtle' : inv.documentType === 'BOLETA' ? 'bg-success-subtle text-success border-success-subtle' : 'bg-secondary-subtle text-secondary border-secondary-subtle'"
+                  style="font-size: 11.5px; border-radius: 4px; display: inline-block; min-width: 105px; text-align: center;">
+              {{ inv.fullDocumentNumber }}
+            </span>
+          </td>
+          <td>
+            <div class="text-dark fw-bold mb-0.5">{{ inv.customerName }}</div>
+            <small class="text-muted font-monospace" style="font-size: 11px;">Doc: {{ inv.customerIdentityNumber }}</small>
+          </td>
+          <td class="text-end font-monospace fw-bold" [class.text-primary]="inv.currencyCode === 'PEN'" [class.text-success]="inv.currencyCode === 'USD'">
+            {{ inv.currencyCode === 'PEN' ? 'S/' : '$' }} {{ inv.totalVenta | number:'1.2-2' }}
+          </td>
+          <td class="text-center">
+            <!-- Estado Financiero de Caja -->
+            <span class="badge rounded-pill px-2.5 py-1 text-uppercase fw-semibold"
+                  [ngClass]="inv.paymentStatus === 'PAGADO' ? 'bg-success text-white' : inv.paymentStatus === 'ANULADO' ? 'bg-danger text-white' : 'bg-warning text-dark'"
+                  style="font-size: 10px;">
+              {{ inv.paymentStatus }}
+            </span>
+          </td>
+          <td class="text-center">
+            <!-- Estado Fiscal SUNAT -->
+            <div class="d-inline-flex align-items-center gap-1.5 border px-2 py-0.5 rounded bg-light" 
+                 [title]="inv.sunatDescription || 'Sin respuesta aún'" style="font-size: 11px; font-weight: 500;">
+              <span class="d-inline-block rounded-circle" 
+                    [ngClass]="inv.sunatStatus === 'ACEPTADO' ? 'bg-success' : inv.sunatStatus === 'ANULADO' ? 'bg-danger' : 'bg-warning'" 
+                    style="width: 7px; height: 7px;"></span>
+              <span class="text-secondary" style="font-size: 10.5px; font-weight: 600;">{{ inv.sunatStatus }}</span>
+            </div>
+          </td>
+          <td class="text-center">
+            <!-- Botón Único de Anulación Contable Segura -->
+            <button class="btn btn-sm border bg-white text-danger shadow-none p-1 d-flex align-items-center justify-content-center" 
+                    style="width: 28px; height: 28px; border-radius: 6px;" type="button" 
+                    [disabled]="inv.paymentStatus === 'ANULADO' || inv.sunatStatus === 'ACEPTADO'"
+                    (click)="onCancelInvoice(inv.id, inv.fullDocumentNumber)" title="Anular Comprobante Interno o Pendiente">
+              <i class="bx bx-block fs-5"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 📑 PIE DE PAGINACIÓN ADAPTATIVA Y FILAS DINÁMICAS -->
+  <div class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3" *ngIf="totalRecords > 0">
+    <div class="d-flex align-items-center gap-3 text-secondary" style="font-size: 12px;">
+      <div>
+        Mostrando <span class="fw-bold text-dark">{{ (currentPage - 1) * pageSize + 1 }}</span> al 
+        <span class="fw-bold text-dark">{{ currentPage * pageSize > totalRecords ? totalRecords : currentPage * pageSize }}</span> 
+        de <span class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-2.5 py-1">{{ totalRecords }} comprobantes</span>
+      </div>
+      <div class="d-flex align-items-center gap-2 border-start ps-3">
+        <span>Filas por página:</span>
+        <select class="form-select form-select-sm shadow-none border bg-white text-dark py-0.5" 
+                style="width: 65px; font-size: 12px; font-weight: 600; height: 24px; border-radius: 4px;"
+                [ngModel]="pageSize" (change)="onPageSizeChange(+$any($event.target).value)">
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+          <option [value]="30">30</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2" 
+              [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" style="width: 32px; height: 32px;">
+        <i class="bx bx-chevron-left fs-4"></i>
+      </button>
+      <div class="text-secondary fw-semibold mx-1" style="font-size: 12px; user-select: none;">
+        Página <span class="text-dark fw-bold">{{ currentPage }}</span> de {{ totalPages }}
+      </div>
+      <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2" 
+              [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)" style="width: 32px; height: 32px;">
+        <i class="bx bx-chevron-right fs-4"></i>
+      </button>
+    </div>
+  </div>
+
+</div>

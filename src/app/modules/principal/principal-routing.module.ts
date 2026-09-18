@@ -35,6 +35,10 @@ const routes: Routes = [
         path: 'series', 
         loadChildren: () => import('../series/series.module').then(m => m.SeriesModule) 
       },
+      { 
+        path: 'invoices', 
+        loadChildren: () => import('../invoices/invoices.module').then(m => m.InvoicesModule) 
+      },
       { path: '', redirectTo: 'entities', pathMatch: 'full' },
     ],
   },

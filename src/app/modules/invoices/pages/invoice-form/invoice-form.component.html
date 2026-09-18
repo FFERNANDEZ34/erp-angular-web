@@ -1,0 +1,663 @@
+<div class="page-header-title mb-4">
+  <h1 class="h4 fw-bold text-dark mb-1">
+    Módulo de Emisión Electrónica Directa (POS)
+  </h1>
+  <p class="text-muted small m-0">
+    Gatille comprobantes oficiales SUNAT o documentos comerciales de control
+    interno con cálculo contable en vivo
+  </p>
+</div>
+
+<!-- Formulario Reactivo Maestro de Ventas -->
+<form [formGroup]="invoiceForm" (ngSubmit)="onSubmitInvoice()">
+  <!-- Banner de Captura de Errores Críticos del Backend -->
+  <div
+    class="alert alert-danger p-2 small border-0 mb-3 rounded-3"
+    *ngIf="formErrorMessage"
+  >
+    <strong>Error en la Operación:</strong> {{ formErrorMessage }}
+  </div>
+
+  <div class="row g-3">
+    <!-- 🗂️ COLUMNA IZQUIERDA: CONFIGURACIÓN FISCAL Y CLIENTE RECEPTOR -->
+    <div class="col-lg-12">
+      <div class="card border shadow-sm rounded-3 bg-white p-4 mb-3">
+        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
+          <i class="bx bx-file text-primary me-1"></i> 1. Tipo de Comprobante y
+          Origen Financiero
+        </h6>
+
+        <div class="row g-3 mb-4">
+          <!-- Campo A: Tipo de Documento -->
+          <div class="col-md-3">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Tipo de Registro</label
+            >
+            <select
+              class="form-select form-select-sm bg-light text-dark border-light fw-bold"
+              formControlName="documentType"
+            >
+              <!-- 🌟 Iteración Dinámica -->
+              <option *ngFor="let doc of documentTypesList" [value]="doc.code">
+                📄 {{ doc.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Campo B: Selección del Talonario / Serie -->
+          <div
+            class="col-md-3"
+            [class.has-error-input]="isFieldInvalid('seriesId')"
+          >
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Prefijo / Serie Asignada</label
+            >
+            <select
+              class="form-select form-select-sm bg-light text-dark border-light fw-bold font-monospace"
+              formControlName="seriesId"
+            >
+              <option value="" disabled>Seleccione serie...</option>
+              <option *ngFor="let s of filteredSeries" [value]="s.id">
+                {{ s.series }} (Próximo: {{ s.currentNumber + 1 }})
+              </option>
+            </select>
+            <small
+              class="text-danger extra-small-err"
+              *ngIf="isFieldInvalid('seriesId')"
+              >Talonario obligatorio.</small
+            >
+          </div>
+
+          <!-- Campo C: Divisa / Moneda -->
+          <div class="col-md-3">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Moneda Comercial</label
+            >
+            <select
+              class="form-select form-select-sm bg-light text-dark border-light fw-semibold"
+              formControlName="currencyCode"
+              (change)="onCurrencyChange($any($event.target).value)"
+            >
+              <!-- 🌟 Iteración Dinámica -->
+              <option *ngFor="let curr of currenciesList" [value]="curr.code">
+                💰 {{ curr.name }} ({{ curr.code }})
+              </option>
+            </select>
+          </div>
+
+          <!-- Campo D: Tipo de Cambio Diario -->
+          <div class="col-md-3">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Factor Tipo Cambio</label
+            >
+            <input
+              type="number"
+              step="0.0001"
+              class="form-control form-control-sm bg-light text-dark border-light fw-semibold font-monospace"
+              formControlName="exchangeRate"
+            />
+          </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- 👤 BLOQUE ACTUALIZADO: BUSCADOR PREDICTIVO Y MODAL EXPRESS DE CLIENTE     -->
+        <!-- ========================================================================= -->
+        <h6
+          class="fw-bold text-dark border-bottom pb-2 mb-3 mt-2 d-flex align-items-center justify-content-between"
+        >
+          <span
+            ><i class="bx bx-group text-primary me-1"></i> 2. Información del
+            Cliente / Adquiriente</span
+          >
+        </h6>
+
+        <div class="row g-3">
+          <!-- Campo Predictivo Intermedio: Filtrar en caliente -->
+          <div class="col-md-4">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Filtrar por Nombre o RUC/DNI</label
+            >
+            <div class="input-group input-group-sm">
+              <!-- 🚀 El motor de filtrado: Captura las pulsaciones del cajero al vuelo -->
+              <input
+                type="text"
+                class="form-control bg-white text-dark shadow-none border"
+                [(ngModel)]="searchCustomerTerm"
+                [ngModelOptions]="{ standalone: true }"
+                (input)="onSearchCustomer()"
+                placeholder="Escriba para filtrar..."
+              />
+
+              <!-- Gatillo Express: Abre la ventana modal pequeña para registrar al vuelo -->
+              <!-- <button
+                class="btn input-group-append-btn border-0 fw-bold d-flex align-items-center px-2.5"
+                type="button"
+                (click)="showCustomerModal = true"
+                title="Registrar Cliente al Vuelo"
+              >
+                <i class="bx bx-user-plus fs-5"></i>
+              </button> -->
+              <button
+                class="btn input-group-append-btn border-0 fw-bold d-flex align-items-center px-2.5"
+                type="button"
+                (click)="openCustomerExpressModal()"
+                title="Registrar Cliente al Vuelo"
+              >
+                <i class="bx bx-user-plus fs-5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Selector Final del Cliente ya Filtrado -->
+          <div class="col-md-8">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Seleccionar Cliente Confirmado</label
+            >
+            <select
+              class="form-select form-select-sm bg-light text-dark border-light fw-bold"
+              formControlName="customerId"
+            >
+              <option value="" disabled>
+                Seleccione de la lista filtrada...
+              </option>
+              <!-- 🌟 CORRECCIÓN: Renderizamos usando 'c.name' y 'c.documentNumber' validados en Postman -->
+              <option *ngFor="let c of filteredCustomers" [value]="c.id">
+                👤 {{ c.name }} | Doc: {{ c.documentNumber }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Campos de Identidad Desglosados Fijos de Abajo -->
+        <div class="row g-3 mt-1">
+          <div class="col-md-3">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Tipo de Doc. Identidad</label
+            >
+            <select
+              class="form-select form-select-sm bg-light text-dark border-light fw-semibold"
+              formControlName="customerIdentityType"
+            >
+              <option value="" disabled>Seleccione...</option>
+              <option *ngFor="let type of identityTypesList" [value]="type.code">
+                {{ type.name }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Número de Documento</label
+            >
+            <input
+              type="text"
+              class="form-control form-control-sm bg-light text-dark border-light fw-bold"
+              formControlName="customerIdentityNumber"
+              placeholder="nro de Documento..."
+            />
+          </div>
+          <div class="col-md-5">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Dirección de Despacho / Fiscal</label
+            >
+            <input
+              type="text"
+              class="form-control form-control-sm bg-light text-dark border-light small"
+              formControlName="customerAddress"
+              readonly
+            />
+          </div>
+        </div>
+        <div class="row g-3 mt-1 mb-2">
+          <div class="col-md-12">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Razón Social / Nombre Comercial Completo</label
+            >
+            <input
+              type="text"
+              class="form-control form-control-sm bg-light text-dark border-light fw-bold text-primary"
+              formControlName="customerName"
+              readonly
+            />
+          </div>
+        </div>
+        <!-- ========================================================================= -->
+        <!-- 👤 FIN BLOQUE ACTUALIZADO: BUSCADOR PREDICTIVO Y MODAL EXPRESS DE CLIENTE -->
+        <!-- ========================================================================= -->
+      </div>
+    </div>
+  </div>
+  <!-- ========================================================================= -->
+  <!-- 🛒 PARTE 2: DETALLE MATRICIAL DE COMPRAS (CARRITO DE ARTÍCULOS)         -->
+  <!-- ========================================================================= -->
+  <div class="row g-3 mt-1">
+    <div class="col-lg-12">
+      <div class="card border shadow-sm rounded-3 bg-white p-4">
+        <div
+          class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3"
+        >
+          <h6 class="fw-bold text-dark m-0">
+            <i class="bx bx-shopping-bag text-primary me-1"></i> 3. Detalle de
+            Ítems / Productos en Carrito
+          </h6>
+          <!-- Botón operativo para añadir registros en blanco al array reactivo -->
+          <button
+            type="button"
+            class="btn btn-sm btn-success fw-bold d-flex align-items-center gap-1 border-0"
+            style="border-radius: 6px; padding: 4px 12px"
+            (click)="addDetailRow()"
+          >
+            <i class="bx bx-plus-circle fs-6"></i> Agregar Artículo
+          </button>
+        </div>
+
+        <!-- 📂 Carrete Informativo de Carrito Vacío -->
+        <div
+          *ngIf="detailsFormArray.length === 0"
+          class="text-center py-5 border border-dashed rounded-3 bg-light text-secondary mb-3"
+        >
+          <i
+            class="bx bx-cart text-muted opacity-25 d-block mb-1.5"
+            style="font-size: 42px"
+          ></i>
+          <span class="small d-block fw-semibold"
+            >El carrito de ventas se encuentra vacío</span
+          >
+          <p class="text-muted extra-small-err m-0">
+            Presione el botón "Agregar Artículo" para aperturar una fila
+            contable.
+          </p>
+        </div>
+
+        <!-- 🚀 GRILLA DEL DETALLE MATRICIAL (FormArray) -->
+        <div
+          class="table-responsive text-start"
+          *ngIf="detailsFormArray.length > 0"
+        >
+          <table
+            class="table table-hover align-middle m-0"
+            style="min-width: 1000px; font-size: 13px"
+            formArrayName="details"
+          >
+            <thead class="table-light text-secondary border-bottom">
+              <tr>
+                <th style="width: 50px" class="text-center">#</th>
+                <th style="width: 250px">Producto / Catálogo</th>
+                <th style="width: 120px">Código / SKU</th>
+                <th style="width: 110px">Afectación IGV</th>
+                <th style="width: 100px" class="text-center">Cantidad</th>
+                <th style="width: 130px" class="text-end">Precio (Con IGV)</th>
+                <th style="width: 130px" class="text-end">Importe Bruto</th>
+                <th style="width: 50px" class="text-center">Quitar</th>
+              </tr>
+            </thead>
+            <tbody class="border-0">
+              <tr
+                *ngFor="let row of detailsFormArray.controls; let i = index"
+                [formGroupName]="i"
+                style="transition: background 0.1s"
+              >
+                <!-- Índice correlativo -->
+                <td
+                  class="text-center text-secondary font-monospace fw-semibold"
+                >
+                  #{{ i + 1 }}
+                </td>
+
+                <!-- Selector dinámico de catálogo por fila -->
+                <td>
+                  <select
+                    class="form-select form-select-sm bg-light text-dark border-light fw-semibold"
+                    formControlName="productId"
+                    (change)="
+                      onProductSelectChange(i, $any($event.target).value)
+                    "
+                  >
+                    <option value="" disabled>Seleccione artículo...</option>
+                    <option *ngFor="let p of productsList" [value]="p.id">
+                      📦 {{ p.name }}
+                    </option>
+                  </select>
+                </td>
+
+                <!-- Código físico inmutable en caliente -->
+                <td>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm bg-light text-secondary border-light font-monospace small"
+                    formControlName="productCode"
+                    readonly
+                  />
+                </td>
+
+                <!-- Tipo de Afectación Tributaria (Catálogo 07 SUNAT) -->
+                <td>
+                  <select
+                    class="form-select form-select-sm bg-light text-dark border-light fw-medium"
+                    formControlName="taxTypeCode"
+                  >
+                    <!-- 🌟 Iteración Dinámica basada en Catálogo 07 SUNAT -->
+                    <option *ngFor="let tax of taxTypesList" [value]="tax.code">
+                      {{ tax.name }}
+                    </option>
+                  </select>
+                </td>
+
+                <!-- Cantidad Operativa -->
+                <td class="text-center">
+                  <input
+                    type="number"
+                    step="1"
+                    class="form-control form-control-sm bg-light text-dark border-light font-monospace text-center fw-bold"
+                    formControlName="quantity"
+                    style="max-width: 85px"
+                  />
+                </td>
+
+                <!-- Precio Unitario Bruto (Paga el cliente en caja) -->
+                <td>
+                  <div class="input-group input-group-sm">
+                    <span
+                      class="input-group-text bg-light border-light-subtle text-secondary font-monospace"
+                      style="font-size: 11px"
+                      >S/</span
+                    >
+                    <input
+                      type="number"
+                      step="0.01"
+                      class="form-control form-control-sm bg-light text-dark border-light font-monospace text-end fw-semibold"
+                      formControlName="unitPrice"
+                    />
+                  </div>
+                </td>
+
+                <!-- Subtotal Bruto por fila en vivo (Cantidad * Precio) -->
+                <td class="text-end font-monospace fw-bold text-dark pe-3">
+                  S/
+                  {{
+                    (+row.get("quantity")?.value || 0) *
+                      (+row.get("unitPrice")?.value || 0) | number: "1.2-2"
+                  }}
+                </td>
+
+                <!-- Botón eliminar fila -->
+                <td class="text-center">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-link text-danger p-0 shadow-none border-0"
+                    (click)="removeDetailRow(i)"
+                  >
+                    <i class="bx bx-trash fs-5"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- 📊 PANEL DE RESUMEN CONTABLE GLOBAL Y TOTALES FINALES                    -->
+        <!-- ========================================================================= -->
+        <div class="row mt-4 pt-3 border-top g-3 align-items-start">
+          <!-- Glosa oficial en letras requerida por SUNAT -->
+          <div class="col-md-7 text-start">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Leyenda Legal del Importe Total (Automático)</label
+            >
+            <textarea
+              class="form-control bg-light text-secondary border-light font-monospace small text-uppercase"
+              rows="3"
+              formControlName="totalLetras"
+              readonly
+              placeholder="Glosa de la moneda en letras..."
+            ></textarea>
+          </div>
+
+          <!-- Cuadro resumido de matrices contables -->
+          <div class="col-md-5">
+            <div
+              class="p-3 bg-light rounded-3 border"
+              style="font-size: 13.5px"
+            >
+              <div
+                class="d-flex justify-content-between align-items-center mb-2 text-secondary"
+              >
+                <span>Op. Gravada (Neto):</span>
+                <span class="font-monospace fw-semibold text-dark"
+                  >S/ {{ totalGravada | number: "1.2-2" }}</span
+                >
+              </div>
+              <div
+                class="d-flex justify-content-between align-items-center mb-2 text-secondary"
+                *ngIf="totalExonerada > 0"
+              >
+                <span>Op. Exonerada:</span>
+                <span class="font-monospace fw-semibold text-dark"
+                  >S/ {{ totalExonerada | number: "1.2-2" }}</span
+                >
+              </div>
+              <div
+                class="d-flex justify-content-between align-items-center mb-2 text-secondary"
+                *ngIf="totalInafecta > 0"
+              >
+                <span>Op. Inafecta:</span>
+                <span class="font-monospace fw-semibold text-dark"
+                  >S/ {{ totalInafecta | number: "1.2-2" }}</span
+                >
+              </div>
+              <div
+                class="d-flex justify-content-between align-items-center mb-2 text-secondary border-bottom pb-2"
+              >
+                <span>I.G.V. Acumulado (18%):</span>
+                <span class="font-monospace fw-semibold text-dark"
+                  >S/ {{ totalIgv | number: "1.2-2" }}</span
+                >
+              </div>
+              <div
+                class="d-flex justify-content-between align-items-center pt-1 fs-5 fw-bold text-dark"
+              >
+                <span>TOTAL A PAGAR:</span>
+                <span class="font-monospace text-primary"
+                  >S/ {{ totalVenta | number: "1.2-2" }}</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pie de página de gatillos operativos finales -->
+        <div class="d-flex justify-content-end gap-2 border-top pt-3 mt-4">
+          <button
+            type="button"
+            class="btn btn-light btn-sm px-4 border text-secondary shadow-none"
+            style="border-radius: 6px; height: 34px"
+            (click)="cancelForm()"
+          >
+            Cancelar Operación
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary btn-sm px-5 text-white fw-bold d-flex align-items-center gap-1.5 border-0 shadow-sm"
+            style="background-color: #2563eb; border-radius: 6px; height: 34px"
+            [disabled]="isLoading || detailsFormArray.length === 0"
+          >
+            <i
+              class="bx"
+              [ngClass]="
+                isLoading ? 'bx-loader-alt bx-spin' : 'bx-badge-check fs-5'
+              "
+            ></i>
+            {{
+              isLoading
+                ? "Emitiendo en MySQL..."
+                : "Firmar y Emitir Comprobante"
+            }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<!-- ========================================================================= -->
+<!-- 🚪 POPUP INTERNO MODAL: ALTA EXPRESS DE CLIENTES DESDE PUNTO DE VENTA     -->
+<!-- ========================================================================= -->
+<div
+  class="modal fade"
+  [class.show]="showCustomerModal"
+  [style.display]="showCustomerModal ? 'block' : 'none'"
+  tabindex="-1"
+  role="dialog"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div
+      class="modal-content border-0 shadow-lg modal-premium-radius bg-white text-dark"
+    >
+      <div
+        class="modal-header border-bottom border-light px-4 py-3 bg-light rounded-top d-flex align-items-center justify-content-between"
+      >
+        <h5 class="modal-title fw-bold text-dark fs-6 m-0">
+          👤 Alta Rápida de Cliente Express
+        </h5>
+
+        <button
+          type="button"
+          class="btn-close shadow-none border-0 bg-transparent text-secondary fs-4"
+          (click)="
+            showCustomerModal = false;
+            customerExpressForm.reset({ documentType: '1' })
+          "
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <form
+        [formGroup]="customerExpressForm"
+        (ngSubmit)="onSubmitExpressCustomer()"
+        *ngIf="customerExpressForm"
+      >
+        <div class="modal-body p-4 text-start">
+          <div
+            class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2 tab-content-fade"
+            *ngIf="formErrorMessage"
+          >
+            <i
+              class="bx bx-error-circle fs-4 mt-0.5"
+              style="color: #ef4444"
+            ></i>
+            <div>
+              <strong class="text-dark d-block mb-0.5"
+                >Control de Catálogo Multi-Tenant</strong
+              >
+              <span
+                class="text-secondary small d-block"
+                style="line-height: 1.4"
+                >{{ formErrorMessage }}</span
+              >
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Tipo de Documento de Identidad</label
+            >
+            <!-- Usaremos una variable local o dejamos que el TypeScript infiera por la longitud del número ingresado -->
+            <select class="form-select bg-light text-dark border-light fw-bold shadow-none" 
+                    formControlName="documentType">
+              <option value="" disabled selected>Seleccione tipo...</option>
+              <!-- 🌟 REUTILIZACIÓN: Muestra exactamente las mismas opciones de MySQL en el popup -->
+              <option *ngFor="let type of identityTypesList" [value]="type.code">
+                {{ type.name }}
+              </option>
+            </select>
+          </div>
+          <!-- RUC o DNI -->
+          <div class="mb-3">
+            <small
+              class="text-danger d-block mt-1 fw-semibold"
+              *ngIf="
+                customerExpressForm.get('documentNumber')?.invalid &&
+                (customerExpressForm.get('documentNumber')?.dirty ||
+                  customerExpressForm.get('documentNumber')?.touched)
+              "
+            >
+              <!-- Directiva RUC Express -->
+              <span
+                *ngIf="customerExpressForm.get('documentType')?.value === '6'"
+              >
+                ⚠️ El RUC comercial debe tener 11 dígitos y empezar con 10, 15,
+                17 o 20.
+              </span>
+
+              <!-- Directiva DNI Express -->
+              <span
+                *ngIf="customerExpressForm.get('documentType')?.value === '1'"
+              >
+                ⚠️ El DNI debe contener exactamente 8 caracteres numéricos.
+              </span>
+            </small>
+
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Número de Documento (RUC o DNI)</label
+            >
+            <input
+              type="text"
+              class="form-control bg-light text-dark border-light fw-bold"
+              formControlName="documentNumber"
+              placeholder="Ej: 20452368452"
+            />
+          </div>
+
+          <!-- Razón Social o Nombres -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Razón Social / Nombre Completo</label
+            >
+            <input
+              type="text"
+              class="form-control bg-light text-dark border-light fw-bold"
+              formControlName="name"
+              placeholder="Ej: Distribuidora Comercial S.A.C."
+            />
+          </div>
+
+          <!-- Dirección Fiscal -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary mb-1"
+              >Dirección Fiscal / Residencia</label
+            >
+            <input
+              type="text"
+              class="form-control bg-light text-dark border-light small"
+              formControlName="address"
+              placeholder="Ej: Av. Las Flores 450, Lima"
+            />
+          </div>
+        </div>
+
+        <div
+          class="modal-footer border-top border-light px-4 py-3 bg-light rounded-bottom d-flex justify-content-end gap-2"
+        >
+          <button
+            type="button"
+            class="btn btn-light btn-sm px-3 border text-secondary shadow-none"
+            (click)="
+              showCustomerModal = false;
+              customerExpressForm.reset({ documentType: '1' })
+            "
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn btn-success btn-sm px-4 text-white fw-bold"
+            [disabled]="isSavingCustomer"
+          >
+            {{ isSavingCustomer ? "Guardando..." : "Inyectar al POS" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fade show" *ngIf="showCustomerModal"></div>
