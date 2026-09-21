@@ -175,10 +175,10 @@
             }}</span>
           </td>
           <td class="text-end font-monospace text-secondary">
-            S/ {{ prod.purchasePrice | number: "1.2-2" }}
+            {{ getCurrencySymbol($any(prod.Currency)?.code) }} {{ prod.purchasePrice | number: "1.2-2" }}
           </td>
           <td class="text-end font-monospace text-primary fw-bold">
-            S/ {{ prod.salesPrice | number: "1.2-2" }}
+            {{ getCurrencySymbol($any(prod.Currency)?.code) }} {{ prod.salesPrice | number: "1.2-2" }}
           </td>
           <td class="text-center">
             <div class="d-inline-flex gap-1">

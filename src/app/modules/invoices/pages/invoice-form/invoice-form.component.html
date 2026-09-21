@@ -359,7 +359,8 @@
                     <span
                       class="input-group-text bg-light border-light-subtle text-secondary font-monospace"
                       style="font-size: 11px"
-                      >S/</span
+                      > {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }}
+                      </span
                     >
                     <input
                       type="number"
@@ -372,7 +373,7 @@
 
                 <!-- Subtotal Bruto por fila en vivo (Cantidad * Precio) -->
                 <td class="text-end font-monospace fw-bold text-dark pe-3">
-                  S/
+                  {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }}
                   {{
                     (+row.get("quantity")?.value || 0) *
                       (+row.get("unitPrice")?.value || 0) | number: "1.2-2"
@@ -423,7 +424,7 @@
               >
                 <span>Op. Gravada (Neto):</span>
                 <span class="font-monospace fw-semibold text-dark"
-                  >S/ {{ totalGravada | number: "1.2-2" }}</span
+                  > {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalGravada | number: "1.2-2" }}</span
                 >
               </div>
               <div
@@ -432,7 +433,7 @@
               >
                 <span>Op. Exonerada:</span>
                 <span class="font-monospace fw-semibold text-dark"
-                  >S/ {{ totalExonerada | number: "1.2-2" }}</span
+                  > {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalExonerada | number: "1.2-2" }}</span
                 >
               </div>
               <div
@@ -441,7 +442,7 @@
               >
                 <span>Op. Inafecta:</span>
                 <span class="font-monospace fw-semibold text-dark"
-                  >S/ {{ totalInafecta | number: "1.2-2" }}</span
+                  > {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalInafecta | number: "1.2-2" }}</span
                 >
               </div>
               <div
@@ -449,7 +450,7 @@
               >
                 <span>I.G.V. Acumulado (18%):</span>
                 <span class="font-monospace fw-semibold text-dark"
-                  >S/ {{ totalIgv | number: "1.2-2" }}</span
+                  > {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalIgv | number: "1.2-2" }}</span
                 >
               </div>
               <div
@@ -457,7 +458,7 @@
               >
                 <span>TOTAL A PAGAR:</span>
                 <span class="font-monospace text-primary"
-                  >S/ {{ totalVenta | number: "1.2-2" }}</span
+                  > {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalVenta | number: "1.2-2" }}</span
                 >
               </div>
             </div>
@@ -689,7 +690,7 @@
           <!-- Ficha Resumen del Comprobante Guardado -->
           <div class="bg-light p-2 rounded-2 border border-light d-flex justify-content-between align-items-center font-monospace" style="font-size: 11.5px;">
             <span class="text-muted fw-semibold">{{ successInvoiceNumber }}</span>
-            <span class="text-dark fw-bold">S/ {{ successInvoiceTotal | number:'1.2-2' }}</span>
+            <span class="text-dark fw-bold">{{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ successInvoiceTotal | number:'1.2-2' }}</span>
           </div>
         </div>
       </div>

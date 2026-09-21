@@ -53,8 +53,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   private readonly API_URL = `${environment.apiUrl}/products`;
   private readonly ATTACHMENT_API_URL = `${environment.apiUrl}/attachments`;
-  public readonly STORAGE_BASE = environment.storageUrl; 
-  
+  public readonly STORAGE_BASE = environment.storageUrl;
 
   products: ProductItem[] = [];
   totalRecords = 0;
@@ -91,8 +90,23 @@ export class ProductListComponent implements OnInit, OnDestroy {
   taxesList: ParameterOption[] = [];
   unitsList: ParameterOption[] = [];
 
-  private loadFormParameters(): void {
+  getCurrencySymbol(currencyCode: string): string {
+    if (!currencyCode) return '';
 
+    const codeStr = String(currencyCode).trim().toUpperCase();
+
+    // Matriz de glifos comerciales. Si mañana cambia la ley, solo alteras este objeto de texto
+    const symbolDictionary: { [key: string]: string } = {
+      PEN: 'S/',
+      USD: '$',
+      EUR: '€',
+    };
+
+    // Retorna el símbolo del diccionario. Si no existe la moneda, muestra su código base por defecto
+    return symbolDictionary[codeStr] || codeStr;
+  }
+
+  private loadFormParameters(): void {
     const url = `${environment.apiUrl}/products/parameters`;
 
     // El interceptor adjuntará de forma transparente las cabeceras de seguridad
@@ -100,7 +114,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
       this.http.get<{ data: ParameterOption[] }>(`${url}?type=CATEGORIA`),
       this.http.get<{ data: ParameterOption[] }>(`${url}?type=MARCA`),
       this.http.get<{ data: ParameterOption[] }>(`${url}?type=MONEDA`),
-      this.http.get<{ data: ParameterOption[] }>(`${url}?type=TIPO_AFECTACION_IGV`),
+      this.http.get<{ data: ParameterOption[] }>(
+        `${url}?type=TIPO_AFECTACION_IGV`,
+      ),
       this.http.get<{ data: ParameterOption[] }>(`${url}?type=UNIDAD_MEDIDA`),
     ]).subscribe({
       next: ([cats, brands, curs, taxes, units]) => {
@@ -287,27 +303,27 @@ export class ProductListComponent implements OnInit, OnDestroy {
     const headers = {
       'x-related-module': 'PRODUCTOS',
       'x-related-record-id': this.selectedProductId.toString(),
-      'x-is-main-photo': (this.productImages.length === 0).toString()
+      'x-is-main-photo': (this.productImages.length === 0).toString(),
     };
 
-    
-
-    this.http.post(`${this.ATTACHMENT_API_URL}/upload`, formData, { headers }).subscribe({
-      next: () => {
-        this.isUploadingFile = false;
-        this.loadProductAttachments(); // Recarga la grilla
-        event.target.value = '';
-      },
-      error: (err) => {
-        this.isUploadingFile = false;
-        alert(err?.error?.message || 'Error en la subida binaria.');
-        this.cdr.detectChanges();
-      }
-    });
+    this.http
+      .post(`${this.ATTACHMENT_API_URL}/upload`, formData, { headers })
+      .subscribe({
+        next: () => {
+          this.isUploadingFile = false;
+          this.loadProductAttachments(); // Recarga la grilla
+          event.target.value = '';
+        },
+        error: (err) => {
+          this.isUploadingFile = false;
+          alert(err?.error?.message || 'Error en la subida binaria.');
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   // F. ⭐ CONMUTAR FOTO PRINCIPAL POR DEFAULT EN CALIENTE
-   setMainPhoto(attachmentId: number): void {
+  setMainPhoto(attachmentId: number): void {
     if (!this.selectedProductId) return;
 
     const url = `${this.ATTACHMENT_API_URL}/${attachmentId}/main`;
@@ -318,7 +334,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
         // 🌟 Refresca de inmediato la galería en pantalla para recalcular las estrellas en vivo
         this.loadProductAttachments();
       },
-      error: (err) => console.error('Error al conmutar la foto por default:', err)
+      error: (err) =>
+        console.error('Error al conmutar la foto por default:', err),
     });
   }
 
@@ -398,16 +415,19 @@ export class ProductListComponent implements OnInit, OnDestroy {
     }
   }
 
-   private handleProductFormError(err: any): void {
+  private handleProductFormError(err: any): void {
     this.isLoading = false;
-    
+
     // Extraemos el mensaje literal enviado por el throw new Error de tu CreateProductUseCase
-    this.formErrorMessage = err?.error?.message || err?.message || 'Error inesperado al procesar el inventario.';
-    
+    this.formErrorMessage =
+      err?.error?.message ||
+      err?.message ||
+      'Error inesperado al procesar el inventario.';
+
     console.error('Radar Inventario - Captura de excepción controlada:', err);
     this.cdr.detectChanges(); // Forzamos a Angular a pintar el cartel de alerta en pantalla
   }
-  
+
   onDelete(id: number): void {
     if (
       confirm(
