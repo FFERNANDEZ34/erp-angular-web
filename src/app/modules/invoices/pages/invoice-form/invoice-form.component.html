@@ -606,6 +606,13 @@
               formControlName="documentNumber"
               placeholder="Ej: 20452368452"
             />
+             <button class="btn btn-primary px-3 text-white fw-bold d-flex align-items-center gap-1 shadow-none" 
+                      type="button"
+                      [disabled]="isSearchingPadron"
+                      (click)="searchDocumentInNationalPadron()">
+                <i class="bx" [ngClass]="isSearchingPadron ? 'bx-loader-alt bx-spin' : 'bx-search-alt'"></i>
+                <span>{{ isSearchingPadron ? '...' : 'Buscar' }}</span>
+              </button>
           </div>
 
           <!-- Razón Social o Nombres -->
@@ -696,5 +703,96 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<div class="modal fade show d-block bg-dark bg-opacity-70 tab-content-fade" *ngIf="showPaymentModal" style="z-index: 10050;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg bg-white rounded-3">
+      
+      <!-- Cabecera Contable -->
+      <div class="modal-header bg-dark text-white py-3 px-4 rounded-top-3 justify-content-between align-items-center d-flex">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bx bx-wallet fs-3 text-warning"></i>
+          <div>
+            <h6 class="modal-title fw-bold font-monospace mb-0" style="font-size: 14px;">PASARELA DE COBRO Y CAJA</h6>
+            <span class="text-light-subtle small font-sans-serif" style="font-size: 11px; opacity: 0.8;">Comprobante Emitido: {{ generatedInvoiceNumber }}</span>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white shadow-none" (click)="onCloseManualWithoutPaying()"></button>
+      </div>
+
+      <!-- Cuerpo del Módulo Financiero -->
+      <div class="modal-body p-4">
+        
+        <!-- Pizarra de Deuda Total -->
+        <div class="bg-light p-3 rounded-3 border mb-3 text-center">
+          <span class="text-secondary small fw-bold text-uppercase font-monospace d-block mb-1">Total a Recaudar</span>
+          <h3 class="text-dark fw-black font-monospace mb-0">
+            {{ invoiceForm.get('currencyCode')?.value === 'PEN' ? 'S/' : '$' }} {{ generatedInvoiceTotal | number:'1.2-2' }}
+          </h3>
+        </div>
+
+        <!-- Selector de Medio de Pago Rápido -->
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-secondary mb-1">Medio de Pago Principal</label>
+          <select class="form-select form-select-sm bg-light text-dark border-light fw-bold shadow-none" 
+                  [(ngModel)]="selectedPaymentMethod" (change)="calculateChange()">
+            <option value="EFECTIVO">💵 EFECTIVO (Billetes / Monedas)</option>
+            <option value="TARJETA_POS">💳 TARJETA CRÉDITO/DÉBITO (POS IziPay/Niubiz)</option>
+            <option value="YAPE_PLIN">📱 YAPE / PLIN (Billetera Digital)</option>
+            <option value="TRANSFERENCIA">🏛️ TRANSFERENCIA BANCARIA (BCP, BBVA, Interbank)</option>
+          </select>
+        </div>
+
+        <!-- SECCIÓN DINÁMICA A: EFECTIVO (Activa cálculo de Vuelto) -->
+        <div class="row g-2 mb-3" *ngIf="selectedPaymentMethod === 'EFECTIVO'">
+          <div class="col-6">
+            <label class="form-label small fw-bold text-secondary mb-1">Efectivo Recibido</label>
+            <input type="number" class="form-control form-control-sm bg-light text-dark border-light fw-bold font-monospace text-end shadow-none"
+                   [(ngModel)]="cashAmountReceived" (input)="calculateChange()" step="0.10">
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-bold text-secondary mb-1">Vuelto a Entregar</label>
+            <div class="form-control form-control-sm bg-danger bg-opacity-10 text-danger border-0 fw-bold font-monospace text-end">
+              S/ {{ cashChangeCalculated | number:'1.2-2' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN DINÁMICA B: BANCOS / DIGITALES (Activa campos de Referencia y Voucher) -->
+        <div class="tab-content-fade" *ngIf="selectedPaymentMethod !== 'EFECTIVO'">
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary mb-1">Número de Operación / Referencia *</label>
+            <input type="text" class="form-control form-control-sm bg-light text-dark border-light fw-bold font-monospace shadow-none"
+                   [(ngModel)]="posTransactionNumber" placeholder="Ej: 002341 (Código de ticket POS)">
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary mb-1">Adjuntar Captura / Voucher Evidencia</label>
+            <input type="file" class="form-control form-control-sm bg-light text-dark border-light shadow-none"
+                   (change)="onFileSelected($event)" accept="image/*,application/pdf">
+            <span class="text-muted d-block mt-1" style="font-size: 10.5px;">Soporta formatos JPG, PNG o PDF de pasarelas bancarias (Máx 5MB).</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Pie de Página: Botonera de Cierre Manual Odoo -->
+      <div class="modal-footer bg-light p-3 border-top border-light d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-sm btn-outline-secondary fw-bold rounded-2 px-3 shadow-none" 
+                (click)="onCloseManualWithoutPaying()">
+          Dejar al Crédito (Cerrar)
+        </button>
+        <button type="button" 
+                class="btn btn-sm btn-success fw-bold rounded-2 px-4 shadow-none d-flex align-items-center gap-1.5"
+                [disabled]="isSavingPayment" 
+                (click)="onConsolidatePayment()">
+          <i class="bx font-monospace" [ngClass]="isSavingPayment ? 'bx-loader-alt bx-spin fs-5' : 'bx-check-shield fs-5'"></i>
+          <span>{{ isSavingPayment ? 'Procesando Abono...' : 'Confirmar y Liquidar Caja' }}</span>
+        </button>
+      </div>
+
+    </div>
   </div>
 </div>

@@ -73,6 +73,22 @@ export class InvoiceFormComponent implements OnInit {
   successToastMessage = '';
   successInvoiceNumber = '';
   successInvoiceTotal = 0;
+  isSearchingPadron = false;
+
+// 🌟 VARIABLES DE TESORERÍA MODAL (ESTÁNDAR ODOO)
+  showPaymentModal = false;
+  generatedInvoiceId: number | null = null;
+  generatedInvoiceNumber = '';
+  generatedInvoiceTotal = 0;
+
+  // Variables dinámicas del formulario de cobro
+  selectedPaymentMethod: 'EFECTIVO' | 'TARJETA_POS' | 'TRANSFERENCIA' | 'YAPE_PLIN' = 'EFECTIVO';
+  cashAmountReceived = 0; // Con cuánto paga (Efectivo)
+  cashChangeCalculated = 0; // Vuelto automático
+  posTransactionNumber = ''; // Nro operación tarjeta/Yape
+  selectedEvidenceFile: File | null = null; // Archivo de voucher adjunto
+  isSavingPayment = false; 
+
 
   getCurrencySymbol(currencyCode: string): string {
     if (!currencyCode) return '';
@@ -89,6 +105,64 @@ export class InvoiceFormComponent implements OnInit {
     // Retorna el símbolo del diccionario. Si no existe la moneda, muestra su código base por defecto
     return symbolDictionary[codeStr] || codeStr;
   }
+
+  searchDocumentInNationalPadron(): void {
+    const docType = this.customerExpressForm.get('documentType')?.value;
+    const docNumber = this.customerExpressForm.get('documentNumber')?.value;
+
+    if (!docType || !docNumber) {
+      this.formErrorMessage = '⚠️ Por favor, seleccione el Tipo de documento e ingrese el número primero.';
+      return;
+    }
+
+    // Validaciones preventivas de longitud de caracteres
+    if (docType === '1' && docNumber.length !== 8) {
+      this.formErrorMessage = '⚠️ El DNI debe contener exactamente 8 números.';
+      return;
+    }
+    if (docType === '6' && docNumber.length !== 11) {
+      this.formErrorMessage = '⚠️ El RUC comercial debe contener exactamente 11 números.';
+      return;
+    }
+
+    this.isSearchingPadron = true;
+    this.formErrorMessage = null;
+    this.cdr.detectChanges();
+
+    // 🚀 DISPARO AL ENDPOINT DE TU API
+    this.http.get(`${environment.apiUrl}/entities/padron/${docType}/${docNumber}`).subscribe({
+      next: (res: any) => {
+        this.isSearchingPadron = false;
+        const result = res?.data || res;
+
+        if (result && result.name) {
+          // 🎯 EL AUTOCOMPLETADO MAGICO: Parcheamos las cajas de Razón Social y Dirección en un milisegundo
+          this.customerExpressForm.patchValue({
+            name: result.name.toUpperCase(),
+            address: result.address ? result.address.toUpperCase() : 'DIRECCIÓN FISCAL NO ESPECIFICADA'
+          });
+          
+          alert(`¡Documento verificado con éxito en la matriz nacional!`);
+        } else {
+          this.formErrorMessage = '⚠️ El documento no devolvió ninguna Razón Social válida.';
+        }
+        
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isSearchingPadron = false;
+        // Si el RUC no existe o la SUNAT está caída, capturamos el mensaje amigable
+        this.formErrorMessage = err?.error?.message || '⚠️ No se pudo conectar con el Padrón Nacional en este instante.';
+        
+        // Ejecutamos el scroll suave que programamos antes para enfocar la alerta
+        if (this.errorBanner) {
+          this.errorBanner.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        this.cdr.detectChanges();
+      }
+    });
+  }
+  
   // B. Inicializa el formulario express de clientes (Llama a esto al final de tu ngOnInit)
   initCustomerExpressForm(): void {
     this.customerExpressForm = this.fb.group({
@@ -837,57 +911,44 @@ export class InvoiceFormComponent implements OnInit {
       return;
     }
 
+    // 🔒 CONGELAMOS EL BOTÓN: Inhabilitamos doble click para evitar duplicar facturas
     this.isLoading = true;
     this.formErrorMessage = null;
 
     this.http.post(this.API_URL, this.invoiceForm.value).subscribe({
       next: (res: any) => {
-        // this.isLoading = false;
-        // alert(res?.message || 'Comprobante emitido con éxito.');
-        // this.router.navigate(['/principal/invoices/invoice-list']); // Volvemos al historial
-
-        this.isLoading = false;
-
         const invoiceResult = res?.data || res;
 
-        // 1. 🚀 CONFIGURAMOS EL RADAR DEL TOAST PREMIUM
-        this.successToastMessage =
-          res?.message || 'Comprobante emitido con éxito.';
-        this.successInvoiceNumber =
-          invoiceResult.fullDocumentNumber || 'N° Generado';
-        this.successInvoiceTotal = Number(invoiceResult.totalVenta || 0);
+        // 1. 🎯 CAPTURAMOS LA IDENTIDAD TRANSACCIONAL DEL COMPROBANTE EMITIDO
+        this.generatedInvoiceId = invoiceResult.id;
+        this.generatedInvoiceNumber = invoiceResult.fullDocumentNumber || 'N° Generado';
+        
+        // Extraemos el total venta calculado por el backend o el de tu acumulador de la UI
+        this.generatedInvoiceTotal = Number(invoiceResult.totalVenta || this.invoiceForm.get('totalVenta')?.value || 0);
 
-        // 2. Encendemos el interruptor visual en la RAM
-        this.showSuccessToast = true;
+        // 2. 🧮 PRE-CONFIGURAMOS LAS MATRICES DE EFECTIVO PARA EL CAJERO
+        // Nace cargando el total exacto de la venta para agilizar el vuelto (vuelto nacerá en 0.00)
+        this.cashAmountReceived = this.generatedInvoiceTotal;
+        this.cashChangeCalculated = 0;
+        this.posTransactionNumber = '';
+        this.selectedEvidenceFile = null;
+        this.selectedPaymentMethod = 'EFECTIVO'; // Nace en efectivo por defecto comercial
+
+        // 3. 🚀 DISPARAMOS EL MODAL FINANCIERO DE COBRO (Estilo Odoo)
+        // La pantalla del POS se queda intacta atrás, bloqueada y congelada
+        this.showPaymentModal = true;
         this.cdr.detectChanges();
-
-        // Si el Toast de éxito se ha pintado, obligamos al navegador a subir suave y elegantemente
-        if (this.successToastElement) {
-          this.successToastElement.nativeElement.scrollIntoView({
-            behavior: 'smooth', // Desplazamiento animado y limpio
-            block: 'start', // Posiciona la parte superior de la pantalla a esta altura
-          });
-        }
-
-        // 3. Limpiamos por completo el carrito de compras del POS para la siguiente venta
-        this.clearInvoiceFormAndCart();
-
-        // 4. ⏳ TEMPORIZADOR AUTOMÁTICO: Después de 4 segundos, el cartel se apaga solo
-        setTimeout(() => {
-          this.showSuccessToast = false;
-          this.cdr.detectChanges();
-        }, 4000);
       },
       error: (err) => {
+        // Si la base de datos rebota la factura (ej: stock insuficiente), liberamos el botón
         this.isLoading = false;
-        this.formErrorMessage =
-          err?.error?.message || 'Error crítico al emitir la venta.';
+        this.formErrorMessage = err?.error?.message || 'Error crítico al emitir la venta.';
         this.cdr.detectChanges();
 
         if (this.errorBanner) {
           this.errorBanner.nativeElement.scrollIntoView({
-            behavior: 'smooth', // Desplazamiento animado y elegante, no un salto brusco
-            block: 'center', // Centra el cartel perfectamente en el monitor del cajero
+            behavior: 'smooth',
+            block: 'center',
           });
         }
       },
@@ -956,5 +1017,87 @@ export class InvoiceFormComponent implements OnInit {
     else if (entero > 1) textoEntero = String(entero);
 
     return `SON ${textoEntero} CON ${strCentavos}/100 ${sufijoMoneda}`;
+  }
+
+  //Todo: Esto es para realizar los pagos
+  // 💵 A. CALCULADOR DE VUELTO EN VIVO
+  calculateChange(): void {
+    if (this.selectedPaymentMethod === 'EFECTIVO') {
+      const received = Number(this.cashAmountReceived || 0);
+      const total = this.generatedInvoiceTotal;
+      this.cashChangeCalculated = received > total ? Number((received - total).toFixed(2)) : 0;
+    } else {
+      this.cashChangeCalculated = 0;
+    }
+    this.cdr.detectChanges();
+  }
+
+  // 📸 B. CAPTURADOR DEL ARCHIVO VOUCHER (INPUT FILE)
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedEvidenceFile = file;
+      console.log('📸 Voucher capturado en RAM listo para subir:', file.name);
+    }
+  }
+
+  // 🏁 C. DESPACHADOR DE TESORERÍA COMPUESTO (MÉTODO MULTIPART/FORM-DATA)
+  onConsolidatePayment(): void {
+  if (!this.generatedInvoiceId) return;
+
+  // 🎯 DESTRABE ATÓMICO: Encendemos el loader propio de la pasarela de cobros
+  this.isSavingPayment = true; 
+  this.cdr.detectChanges();
+
+  const formData = new FormData();
+  formData.append('invoiceHeaderId', String(this.generatedInvoiceId));
+
+  const paymentsPayload = [{
+    paymentMethod: this.selectedPaymentMethod,
+    amountPaid: this.generatedInvoiceTotal, 
+    amountReceived: this.selectedPaymentMethod === 'EFECTIVO' ? this.cashAmountReceived : this.generatedInvoiceTotal,
+    cashChange: this.cashChangeCalculated,
+    transactionNumber: this.posTransactionNumber || null
+  }];
+
+  formData.append('payments', JSON.stringify(paymentsPayload));
+
+  if (this.selectedEvidenceFile) {
+    formData.append('evidenceFile', this.selectedEvidenceFile, this.selectedEvidenceFile.name);
+  }
+
+  this.http.post(`${environment.apiUrl}/payments`, formData).subscribe({
+    next: (res: any) => {
+      this.showPaymentModal = false;
+      this.showSuccessToast = true;
+      this.successToastMessage = 'Cobro y cuadre de caja consolidado con éxito.';
+
+      // 🧹 Apagamos ambos interruptores y limpiamos el POS para la siguiente venta de la cola
+      this.isSavingPayment = false;
+      this.isLoading = false; // Libera también el formulario base de atrás
+      this.clearInvoiceFormAndCart(); 
+      
+      this.cdr.detectChanges();
+      
+      setTimeout(() => {
+        this.showSuccessToast = false;
+        this.cdr.detectChanges();
+      }, 4000);
+    },
+    error: (err) => {
+      // Si el banco o la API rebotan el cobro, liberamos el botón verde para intentar de nuevo
+      this.isSavingPayment = false;
+      alert(err?.error?.message || 'Error en el procesamiento del cuadre de caja.');
+      this.cdr.detectChanges();
+    }
+  });
+}
+
+  // Botón manual de Odoo por si decide dejar la factura al crédito e irse sin cobrar
+  onCloseManualWithoutPaying(): void {
+    this.showPaymentModal = false;
+    this.isLoading = false;
+    this.clearInvoiceFormAndCart(); // Limpia la pantalla para la siguiente venta de la cola
+    this.cdr.detectChanges();
   }
 }

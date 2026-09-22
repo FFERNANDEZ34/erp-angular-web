@@ -1,0 +1,132 @@
+<div class="container-fluid p-4 tab-content-fade">
+  
+  <!-- Cabecera del Panel Logístico -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="text-dark fw-bold mb-1">📦 Registro de Ingresos a Almacén</h4>
+      <p class="text-secondary small mb-0">Abastece el stock de tus sucursales registrando facturas o guías de proveedores de forma atómica.</p>
+    </div>
+    <a routerLink="/principal/inventory/kardex" class="btn btn-sm btn-outline-dark fw-bold rounded-2 px-3 shadow-none">
+      <i class="bx bx-arrow-back me-1"></i> Volver al Monitor
+    </a>
+  </div>
+
+  <!-- 🚨 BANNER DE ERROR ENFOCADO PROGRAMÁTICAMENTE -->
+  <div #errorBannerAnchor class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2 tab-content-fade" *ngIf="formErrorMessage">
+    <i class="bx bx-error-circle fs-4 text-danger mt-0.5"></i>
+    <div>
+      <strong class="text-dark d-block mb-0.5">Control de Inventarios</strong>
+      <span class="text-secondary small d-block">{{ formErrorMessage }}</span>
+    </div>
+  </div>
+
+  <!-- Formulario de Cabecera Contable -->
+  <form [formGroup]="entryForm" (ngSubmit)="onSubmitIngress()">
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+      <div class="card-body p-4">
+        <h6 class="text-dark fw-bold mb-3 border-bottom pb-2 font-monospace" style="font-size: 13px;">1. DATOS DEL DOCUMENTO DE SUSTENTO</h6>
+        <div class="row g-3">
+          
+          <div class="col-md-4">
+            <label class="form-label small fw-bold text-secondary mb-1">Nro Comprobante / Referencia *</label>
+            <input type="text" class="form-control form-control-sm bg-light text-dark border-light fw-bold font-monospace shadow-none" 
+                   formControlName="sourceDocument" placeholder="Ej: F001-0004512 o INV-INICIAL">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label small fw-bold text-secondary mb-1">Motivo del Ingreso *</label>
+            <select class="form-select form-select-sm bg-light text-dark border-light fw-semibold shadow-none" formControlName="reason">
+              <option value="COMPRA">🛒 COMPRA A PROVEEDOR nacional/int.</option>
+              <option value="AJUSTE_INVENTARIO">🔧 AJUSTE DE INVENTARIO por auditoría</option>
+              <option value="DEVOLUCION">🔄 DEVOLUCIÓN DE CLIENTE en buen estado</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla Dinámica de Selección de Ítems (Carrito de Compras) -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+          <h6 class="text-dark fw-bold mb-0 font-monospace" style="font-size: 13px;">2. DETALLE DE ARTÍCULOS A INGRESAR</h6>
+          <button type="button" class="btn btn-sm btn-success px-3 fw-bold shadow-none rounded-2 d-flex align-items-center gap-1" (click)="addDetailRow()">
+            <i class="bx bx-plus-circle fs-5"></i> Añadir Ítem
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle text-nowrap" style="font-size: 13px;">
+            <thead class="table-light font-monospace text-secondary" style="font-size: 11px;">
+              <tr>
+                <th class="ps-3" style="width: 50%;">Selección de Producto *</th>
+                <th class="text-end" style="width: 20%;">Cantidad a Sumar *</th>
+                <th class="text-end" style="width: 20%;">Costo Compra Unitario (Opcional)</th>
+                <th class="text-center pe-3" style="width: 10%;">Acción</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="items">
+              <tr *ngFor="let row of detailsFormArray.controls; let i = index" [formGroupName]="i" class="tab-content-fade">
+                
+                <!-- Combo de productos con tu mismo select limpio -->
+                <td class="ps-3">
+                  <select class="form-select form-select-sm bg-light text-dark border-light fw-semibold shadow-none" formControlName="productId">
+                    <option value="" disabled>Seleccione artículo para reabastecer...</option>
+                    <option *ngFor="let p of productsList" [value]="p.id">📦 {{ p.name }} [{{ p.productCode }}]</option>
+                  </select>
+                </td>
+
+                <!-- Input Cantidad -->
+                <td>
+                  <input type="number" class="form-control form-control-sm bg-light text-dark border-light fw-bold font-monospace text-end shadow-none" 
+                         formControlName="quantity" min="1" step="1">
+                </td>
+
+                <!-- Input Costo -->
+                <td>
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light border-light text-muted fw-bold">S/</span>
+                    <input type="number" class="form-control bg-light border-light text-dark fw-bold font-monospace text-end shadow-none" 
+                           formControlName="purchasePrice" min="0" step="0.01">
+                  </div>
+                </td>
+
+                <!-- Tacho para remover fila -->
+                <td class="text-center pe-3">
+                  <button type="button" class="btn btn-sm btn-link text-danger p-1 shadow-none" (click)="removeDetailRow(i)">
+                    <i class="bx bx-trash fs-4"></i>
+                  </button>
+                </td>
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botonera de Envío Final -->
+    <div class="d-flex align-items-center justify-content-end gap-3">
+      <a routerLink="/inventory/kardex" class="btn btn-sm btn-light fw-bold px-4 border shadow-none rounded-2">Cancelar</a>
+      <button type="submit" class="btn btn-sm btn-dark fw-bold px-5 shadow-none rounded-2 d-flex align-items-center gap-1.5" [disabled]="isSaving">
+        <i class="bx" [ngClass]="isSaving ? 'bx-loader-alt bx-spin' : 'bx-save'"></i>
+        <span>{{ isSaving ? 'Guardando Entrada...' : 'Consolidar Ingreso a MySQL' }}</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- 🌟 BANNER TOAST FLOTANTE DE ÉXITO PREMIUM -->
+<div class="position-fixed top-0 end-0 p-4" style="z-index: 9999;" *ngIf="showSuccessToast">
+  <div class="toast show border-0 bg-white shadow-lg rounded-3 tab-content-fade animate-slide-in" role="alert" style="min-width: 300px;">
+    <div class="toast-header bg-success text-white border-0 py-2 px-3 rounded-top-3">
+      <i class="bx bx-check-circle fs-4 me-2"></i>
+      <strong class="me-auto fw-bold font-monospace small">ALMACÉN MAESTRO</strong>
+      <button type="button" class="btn-close btn-close-white shadow-none small" (click)="showSuccessToast = false"></button>
+    </div>
+    <div class="toast-body p-3 text-secondary small" style="line-height: 1.4;">
+      {{ successToastMessage }}
+    </div>
+  </div>
+</div>

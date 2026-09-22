@@ -1,0 +1,18 @@
+.animate-pulse {
+  animation: pulseAlerta 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseAlerta {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    opacity: .6;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+  }
+}
+
+.border-danger-subtle {
+  border-left: 5px solid #ef4444 !important; /* Estampa una barra roja en el extremo izquierdo de la fila */
+}

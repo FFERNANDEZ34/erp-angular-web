@@ -183,22 +183,21 @@
           <td class="text-center">
             <div class="d-inline-flex gap-1">
               <button
-                class="btn btn-sm border bg-white shadow-none p-1 d-flex align-items-center justify-content-center"
-                style="width: 28px; height: 28px; border-radius: 6px"
+                class="btn btn-outline-primary btn-sm me-2"
                 type="button"
                 (click)="onEdit(prod)"
                 title="Modificar Ficha"
               >
-                <i class="bx bx-pencil text-warning fs-5"></i>
+                ✏️<i class="bx bx-pencil text-warning fs-5"></i>
               </button>
               <button
-                class="btn btn-sm border bg-white text-danger shadow-none p-1 d-flex align-items-center justify-content-center"
-                style="width: 28px; height: 28px; border-radius: 6px"
+                class="btn btn-outline-danger btn-sm"
+                
                 type="button"
                 (click)="onDelete(prod.id)"
                 title="Dar de Baja Lógica"
               >
-                <i class="bx bx-trash-alt fs-5"></i>
+                🗑️<i class="bx bx-trash-alt fs-5"></i>
               </button>
             </div>
           </td>
