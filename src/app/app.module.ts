@@ -6,10 +6,12 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+//import { ManagerDashboardComponent } from './modules/dashboard/pages/manager-dashboard/manager-dashboard.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    //ManagerDashboardComponent
   ],
   imports: [
     BrowserModule,

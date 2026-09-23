@@ -1,0 +1,123 @@
+<div class="container-fluid p-4 tab-content-fade">
+  
+  <!-- Cabecera Ejecutiva -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="text-dark fw-bold mb-1"><i class="ri-dashboard-3-line text-primary me-1"></i> Panel de Control y Analíticas de Gerencia</h4>
+      <p class="text-secondary small mb-0">Toma de decisiones estratégicas basadas en el flujo de caja consolidados del holding.</p>
+    </div>
+  </div>
+
+  <!-- 🎛️ FILTRO JERÁRQUICO COMPUESTO (MÓDULO BI ODOO) -->
+  <div class="card border-0 shadow-sm rounded-3 mb-4 bg-white">
+    <div class="card-body p-3">
+      <div class="row g-2 align-items-center">
+        
+        <!-- Combo Compañías amarrado al interceptor onCompanyChange -->
+        <div class="col-md-4">
+          <label class="form-label small fw-bold text-muted mb-1">Filtrar por Compañía</label>
+          <select class="form-select form-select-sm bg-light text-dark border-light fw-bold shadow-none" 
+                  [(ngModel)]="selectedCompanyId" (change)="onCompanyChange()"> <!-- 🎯 Amarrado al cerebro de cascada -->
+            <option value="ALL">🏢 [CONSOLIDADO GLOBAL] Todas las Compañías</option>
+            <option *ngFor="let c of companiesList" [value]="c.id">🏢 {{ c.name || c.razonSocial }}</option>
+          </select>
+        </div>
+
+        <!-- Combo Locales / Sucursales mutado a filteredBranches -->
+        <div class="col-md-4">
+          <label class="form-label small fw-bold text-muted mb-1">Filtrar por Sucursal / Local</label>
+          <select class="form-select form-select-sm bg-light text-dark border-light fw-bold shadow-none" 
+                  [(ngModel)]="selectedBranchId" (change)="loadExecutiveMetrics()">
+            <option value="ALL">📍 [TODOS LOS LOCALES DE LA EMPRESA] Completo</option>
+            <!-- 🎯 CONEXIÓN DE HIJO: Iteramos únicamente sobre los locales filtrados en RAM -->
+            <option *ngFor="let b of filteredBranches" [value]="b.id">📍 Local N° {{ b.id }} - {{ b.name || 'Sucursal' }}</option>
+          </select>
+        </div>
+
+        <!-- Selector de Año Fiscal -->
+        <div class="col-md-2">
+          <label class="form-label small fw-bold text-muted mb-1">Año Fiscal</label>
+          <select class="form-select form-select-sm bg-light text-dark border-light fw-bold shadow-none" 
+                  [(ngModel)]="selectedYear" (change)="loadExecutiveMetrics()">
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+
+        <div class="col-md-2 mt-4">
+          <button class="btn btn-sm btn-dark w-100 fw-bold shadow-none" [disabled]="isLoading" (click)="loadExecutiveMetrics()">
+            <i class="ri-refresh-line me-1" [ngClass]="{'spin-loader': isLoading}"></i> Actualizar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 TARGETAS KPI SUPERIORES -->
+  <div class="row g-3 mb-4">
+    
+    <!-- Tarjeta A: Facturación Total -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm bg-white rounded-3 border-start border-primary border-4">
+        <div class="card-body p-3.5 d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-secondary small font-monospace fw-bold text-uppercase d-block mb-1">RECAUDACIÓN BRUTA DEL PERIODO</span>
+            <h3 class="text-dark fw-black mb-0 font-monospace">S/ {{ totalRevenuePeriod | number:'1.2-2' }}</h3>
+          </div>
+          <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary"><i class="ri-money-dollar-circle-line fs-2"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjeta B: Pérdida potencial por Quiebre -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm bg-white rounded-3 border-start border-danger border-4">
+        <div class="card-body p-3.5 d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-secondary small font-monospace fw-bold text-uppercase d-block mb-1">PÉRDIDA POTENCIAL (QUIEBRE DE STOCK)</span>
+            <h3 class="text-danger fw-black mb-0 font-monospace">S/ {{ potentialRiskInventoryValue | number:'1.2-2' }}</h3>
+          </div>
+          <div class="bg-opacity-10 p-3 rounded-circle text-danger bg-danger"><i class="ri-error-warning-line fs-2"></i></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 📊 CUADRO DE LIENZOS GRAFICOS RECTANGULARES -->
+  <div class="row g-3">
+    
+    <!-- Lienzo 1: Tendencia Mensual (Líneas) -->
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+        <div class="card-header bg-white border-0 py-3 px-4"><h6 class="text-dark fw-bold mb-0 font-monospace">📈 EVOLUCIÓN HISTÓRICA MENSUAL DE FACTURACIÓN</h6></div>
+        <div class="card-body p-4 pt-0" style="position: relative; height: 320px;">
+          <canvas #trendCanvas></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lienzo 2: Medios de Pago (Donut) -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+        <div class="card-header bg-white border-0 py-3 px-4"><h6 class="text-dark fw-bold mb-0 font-monospace">🍩 PARTICIPACIÓN POR MEDIO DE PAGO</h6></div>
+        <div class="card-body p-4 pt-0" style="position: relative; height: 320px;">
+          <canvas #paymentCanvas></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lienzo 3: Top 10 Productos Estrella (Barras) -->
+    <div class="col-md-12">
+      <div class="card border-0 shadow-sm bg-white rounded-3">
+        <div class="card-header bg-white border-0 py-3 px-4"><h6 class="text-dark fw-bold mb-0 font-monospace">📊 TOP 10 DE ARTÍCULOS ESTRELLA (GENERADORES DE RIQUEZA)</h6></div>
+        <div class="card-body p-4 pt-0" style="position: relative; height: 350px;">
+          <canvas #productsCanvas></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

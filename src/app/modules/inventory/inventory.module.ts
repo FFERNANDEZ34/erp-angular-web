@@ -5,6 +5,7 @@ import { InventoryRoutingModule } from './inventory-routing.module';
 import { ProductListComponent } from './pages/product-list/product-list.component';
 import { KardexMonitorComponent } from './pages/kardex-monitor/kardex-monitor.component';
 import { StockEntryFormComponent } from './pages/stock-entry-form/stock-entry-form.component';
+import { InventoryDashboardComponent } from './pages/inventory-dashboard/inventory-dashboard.component';
 
 
 
@@ -12,7 +13,8 @@ import { StockEntryFormComponent } from './pages/stock-entry-form/stock-entry-fo
   declarations: [
     ProductListComponent,
     KardexMonitorComponent,
-    StockEntryFormComponent
+    StockEntryFormComponent,
+    InventoryDashboardComponent
   ],
   imports: [
     CommonModule,

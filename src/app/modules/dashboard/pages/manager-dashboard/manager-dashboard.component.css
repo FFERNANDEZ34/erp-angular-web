@@ -1,0 +1,10 @@
+/* 🚀 ANIMACIÓN LOADER ROTATIVO */
+.spin-loader {
+  animation: spinnerRotate 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spinnerRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

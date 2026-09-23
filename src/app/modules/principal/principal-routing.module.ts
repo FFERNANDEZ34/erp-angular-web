@@ -39,6 +39,10 @@ const routes: Routes = [
         path: 'invoices', 
         loadChildren: () => import('../invoices/invoices.module').then(m => m.InvoicesModule) 
       },
+       {
+        path: 'dashboard',
+        loadChildren: () => import('../dashboard/dashboard.module').then(m => m.DashboardModule)
+      },
       { path: '', redirectTo: 'entities', pathMatch: 'full' },
     ],
   },

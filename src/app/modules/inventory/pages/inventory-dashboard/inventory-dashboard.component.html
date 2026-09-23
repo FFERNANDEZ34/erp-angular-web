@@ -1,0 +1,122 @@
+<div class="container-fluid p-4 tab-content-fade">
+  
+  <!-- Cabecera -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="text-dark fw-bold mb-1"><i class="ri-sound-module-line text-success me-1"></i> Inteligencia y Optimización de Inventarios</h4>
+      <p class="text-secondary small mb-0">Control analítico del capital invertido, rotación de stocks y alertas preventivas de quiebre.</p>
+    </div>
+  </div>
+
+  <!-- 🎛️ FILTROS EN CASCADA COMPUESTOS -->
+  <div class="card border-0 shadow-sm rounded-3 mb-4 bg-white">
+    <div class="card-body p-3">
+      <div class="row g-2 align-items-center">
+        
+        <div class="col-md-5">
+          <label class="form-label small fw-bold text-muted mb-1">Filtrar por Compañía</label>
+          <select class="form-select form-select-sm bg-light text-dark border-light fw-bold shadow-none" 
+                  [(ngModel)]="selectedCompanyId" (change)="onCompanyChange()">
+            <option value="ALL">🏢 [CONSOLIDADO TOTAL] Todas las Compañías</option>
+            <option *ngFor="let c of companiesList" [value]="c.id">🏢 {{ c.name || c.razonSocial }}</option>
+          </select>
+        </div>
+
+        <div class="col-md-5">
+          <label class="form-label small fw-bold text-muted mb-1">Filtrar por Sucursal / Local</label>
+          <select class="form-select form-select-sm bg-light text-dark border-light fw-bold shadow-none" 
+                  [(ngModel)]="selectedBranchId" (change)="loadInventoryMetrics()">
+            <option value="ALL">📍 [TODOS LOS LOCALES DE LA EMPRESA]</option>
+            <option *ngFor="let b of filteredBranches" [value]="b.id">📍 Local N° {{ b.id }} - {{ b.name || 'Almacén' }}</option>
+          </select>
+        </div>
+
+        <div class="col-md-2 mt-4">
+          <button class="btn btn-sm btn-dark w-100 fw-bold shadow-none" [disabled]="isLoading" (click)="loadInventoryMetrics()">
+            <i class="ri-refresh-line me-1" [ngClass]="{'spin-loader': isLoading}"></i> Actualizar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 TARJETAS KPI LOGÍSTICAS DE IMPACTO -->
+  <div class="row g-3 mb-4">
+    
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-white rounded-3 border-start border-secondary border-4">
+        <div class="card-body p-3 d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-secondary font-monospace fw-bold text-uppercase d-block mb-1" style="font-size: 10px;">SKUS EN CATÁLOGO</span>
+            <h4 class="text-dark fw-black mb-0 font-monospace">{{ totalProductsInCatalog }}</h4>
+          </div>
+          <div class="bg-light text-secondary p-2.5 rounded-circle"><i class="ri-barcode-line fs-3"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-white rounded-3 border-start border-info border-4">
+        <div class="card-body p-3 d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-secondary font-monospace fw-bold text-uppercase d-block mb-1" style="font-size: 10px;">UNIDADES FÍSICAS EN MANO</span>
+            <h4 class="text-info fw-black mb-0 font-monospace">{{ totalPhysicalUnits | number:'1.0-0' }}</h4>
+          </div>
+          <div class="bg-info bg-opacity-10 text-info p-2.5 rounded-circle"><i class="ri-box-3-line fs-3"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-white rounded-3 border-start border-warning border-4">
+        <div class="card-body p-3 d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-secondary font-monospace fw-bold text-uppercase d-block mb-1" style="font-size: 10px;">CAPITAL TOTAL INVERTIDO</span>
+            <h4 class="text-warning fw-black mb-0 font-monospace">S/ {{ totalCapitalInvested | number:'1.2-2' }}</h4>
+          </div>
+          <div class="bg-warning bg-opacity-10 text-warning p-2.5 rounded-circle"><i class="ri-coins-line fs-3"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm bg-white rounded-3 border-start border-danger border-4" [ngClass]="{'bg-danger bg-opacity-10 animate-danger-card': productsInCriticalStock > 0}">
+        <div class="card-body p-3 d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-secondary font-monospace fw-bold text-uppercase d-block mb-1" style="font-size: 10px;">ARTÍCULOS BAJO EL MÍNIMO</span>
+            <h4 class="text-danger fw-black mb-0 font-monospace">{{ productsInCriticalStock }}</h4>
+          </div>
+          <div class="bg-danger bg-opacity-10 text-danger p-2.5 rounded-circle"><i class="ri-alarm-warning-line fs-3"></i></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 📊 REJILLA DE CANVAS GRÁFICOS -->
+  <div class="row g-3">
+    
+    <!-- Gráfico de Tendencia de Movimiento (Líneas comparativas) -->
+    <div class="col-md-7">
+      <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+        <div class="card-header bg-white border-0 py-3 px-4"><h6 class="text-dark fw-bold mb-0 font-monospace">📈 BALANCE DE ENTADAS VS DESPACHOS EN KARDEX</h6></div>
+        <div class="card-body p-4 pt-0" style="position: relative; height: 320px;">
+          <canvas #trendKardexCanvas></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfico de Valorización Monetaria (Barras Amarillas) -->
+    <div class="col-md-5">
+      <div class="card border-0 shadow-sm bg-white rounded-3 h-100">
+        <div class="card-header bg-white border-0 py-3 px-4"><h6 class="text-dark fw-bold mb-0 font-monospace">💰 DINERO INMOVILIZADO POR FAMILIA DE PRODUCTOS</h6></div>
+        <div class="card-body p-4 pt-0" style="position: relative; height: 320px;">
+          <canvas #categoryValuationCanvas></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

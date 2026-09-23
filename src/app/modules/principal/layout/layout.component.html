@@ -11,7 +11,7 @@
       <!-- 🌲 LOOP NIVEL 1: Categorías Macro (Dashboard, Módulos Catálogo) -->
       <div *ngFor="let item of menuTree" class="menu-macro-block">
         
-        <small class="sidebar-tag-title">{{ item.title }}</small>
+        <!-- <small class="sidebar-tag-title">{{ item.title }}</small> -->
         
         <!-- CASO A: Opción principal es un LINK DIRECTO sin hijos (Ej: Dashboard) -->
         <a *ngIf="(!item.children || item.children.length === 0) && item.path" 
