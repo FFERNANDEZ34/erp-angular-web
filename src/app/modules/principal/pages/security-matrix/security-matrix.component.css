@@ -1,0 +1,62 @@
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+.role-card:hover {
+  background-color: #f1f3f5 !important;
+  border-color: #adb5bd !important;
+}
+
+.active-role-card {
+  border-left: 5px solid #0d6efd !important; /* Estampa barra de selección ejecutiva izquierda */
+}
+
+/* Margen de sangrado personalizado para las rutas hijas de los módulos */
+.ms-custom-indent {
+  margin-left: 2rem !important; /* Sangrado elegante de nivel Odoo para las opciones hijas */
+}
+
+/* Sutil cargador rotativo de RemixIcon */
+.spin-loader {
+  animation: spinnerRotate 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spinnerRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Checkbox con mayor impacto visual en los padres */
+.checkbox-master {
+  transform: scale(1.1);
+}
+.scrollable-roles-container {
+  max-height: 500px;       /* Alineado milimétricamente con el alto de la columna derecha */
+  overflow-y: auto;        /* Activa el scroll vertical solo si la data desborda */
+  padding-right: 8px;      /* Espacio de amortiguación para que la barra no pise el texto */
+}
+
+/* 🎨 ESTILIZACIÓN DE LA BARRA DE SCROLL DE LA VIEJA ESCUELA (Webkit Engines) */
+.scrollable-roles-container::-webkit-scrollbar {
+  width: 6px;              /* Grosor ultra-delgado e hiper-elegante */
+}
+
+.scrollable-roles-container::-webkit-scrollbar-track {
+  background: #f8f9fa;     /* Fondo gris claro sutil */
+  border-radius: 10px;
+}
+
+.scrollable-roles-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;     /* Color del control deslizante en gris neutro */
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.scrollable-roles-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;     /* Se oscurece suavemente cuando el usuario pasa el mouse */
+}

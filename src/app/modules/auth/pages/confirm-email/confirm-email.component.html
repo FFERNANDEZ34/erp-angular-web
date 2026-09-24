@@ -1,0 +1,55 @@
+<div class="auth-fullscreen-wrapper d-flex align-items-center justify-content-center bg-light min-vh-100 p-3">
+  <div class="card border-0 shadow-lg rounded-4 bg-white text-center p-4 p-md-5 tab-content-fade" style="max-width: 480px; width: 100%;">
+    
+    <!-- ⏳ ESTADO A: PROCESANDO AUDITORÍA EN LA NUBE -->
+    <div *ngIf="currentState === 'LOADING'" class="tab-content-fade">
+      <div class="mb-4">
+        <i class="ri-loader-3-line spin-loader text-primary text-opacity-80" style="font-size: 64px;"></i>
+      </div>
+      <h5 class="text-dark fw-bold mb-2 font-monospace" style="font-size: 16px;">VERIFICANDO IDENTIDAD</h5>
+      <p class="text-secondary small mb-0 px-3">Conectando de forma segura con los servidores de ciberseguridad en la nube para validar las firmas criptográficas de su cuenta...</p>
+    </div>
+
+    <!-- ✅ ESTADO B: DESTRABE EXITOSO (CUENTA VERIFICADA) -->
+    <div *ngIf="currentState === 'SUCCESS'" class="tab-content-fade">
+      <div class="mb-4 animate-scale-up">
+        <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-block text-success">
+          <i class="ri-checkbox-circle-fill" style="font-size: 56px; line-height: 1;"></i>
+        </div>
+      </div>
+      <h5 class="text-dark fw-bold mb-2 font-monospace text-uppercase" style="font-size: 16px;">¡Correo Verificado con éxito!</h5>
+      <p class="text-secondary small mb-4 px-2">{{ apiResponseMessage }}</p>
+      
+      <!-- Banner informativo de redirección inteligente estilo Stripe -->
+      <div class="bg-light p-3 rounded-3 border border-light-subtle mb-3 small text-muted font-sans-serif">
+        <i class="ri-information-line text-primary me-1"></i>
+        Será redirigido automáticamente a la pantalla de inicio de sesión en <strong class="text-dark font-monospace fw-bold">{{ countdownSeconds }}</strong> segundos.
+      </div>
+
+      <a routerLink="/auth/login" class="btn btn-sm btn-dark w-100 fw-bold py-2 rounded-2 shadow-none font-monospace" style="font-size: 13px;">
+        INGRESAR AL ERP DE INMEDIATO <i class="ri-arrow-right-line ms-1"></i>
+      </a>
+    </div>
+
+    <!-- ❌ ESTADO C: ENLACE CADUCADO O INCORRECTO -->
+    <div *ngIf="currentState === 'ERROR'" class="tab-content-fade">
+      <div class="mb-4">
+        <div class="bg-danger bg-opacity-10 p-3 rounded-circle d-inline-block text-danger">
+          <i class="ri-error-warning-fill" style="font-size: 56px; line-height: 1;"></i>
+        </div>
+      </div>
+      <h5 class="text-dark fw-bold mb-2 font-monospace text-uppercase" style="font-size: 16px; color: #dc3545;">Operación Denegada</h5>
+      <p class="text-secondary small mb-4 px-2">{{ apiResponseMessage }}</p>
+
+      <div class="d-flex flex-column gap-2">
+        <a href="mailto:soporte@tuerp.com" class="btn btn-sm btn-outline-secondary w-100 fw-bold rounded-2 shadow-none py-2 font-monospace" style="font-size: 12.5px;">
+          <i class="ri-customer-service-2-line me-1"></i> Contactar a Soporte Técnico
+        </a>
+        <a routerLink="/auth/login" class="btn btn-sm btn-light w-100 fw-bold border rounded-2 shadow-none py-2 font-monospace" style="font-size: 12.5px;">
+          Volver al Inicio
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>

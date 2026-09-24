@@ -5,13 +5,15 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthRoutingModule } from './auth-routing.module';
 import { LoginComponent } from './pages/login/login.component';
 import { SubscribeComponent } from './pages/subscribe/subscribe.component';
+import { ConfirmEmailComponent } from './pages/confirm-email/confirm-email.component';
 
 @NgModule({
   declarations: [
     // Aquí declararemos los componentes de Login y Subscribe más adelante
   
     LoginComponent,
-    SubscribeComponent
+    SubscribeComponent,
+    ConfirmEmailComponent
   ],
   imports: [
     CommonModule,

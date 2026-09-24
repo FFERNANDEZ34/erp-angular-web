@@ -134,3 +134,39 @@
 
   </div>
 </div>
+
+
+<!-- ========================================================================= -->
+<!-- 🛡️ MODAL DE BIENVENIDA Y VERIFICACIÓN SAAS (HIGH-UX PATTERN) -->
+<!-- ========================================================================= -->
+<div class="custom-modal-backdrop d-flex align-items-center justify-content-center p-3" *ngIf="showSuccessModal">
+  <div class="card border-0 shadow-lg rounded-4 bg-white text-center p-4 p-md-5 animate-scale-up" style="max-width: 460px; width: 100%;">
+    
+    <!-- Icono de Avión de Papel / Correo Despachado Animado -->
+    <div class="mb-4">
+      <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-inline-block text-primary">
+        <i class="ri-mail-send-line" style="font-size: 56px; line-height: 1;"></i>
+      </div>
+    </div>
+
+    <!-- Mensajes de Orientación Logística -->
+    <h5 class="text-dark fw-bold mb-2 font-monospace text-uppercase" style="font-size: 16px; letter-spacing: 0.5px;">
+      ¡Suscripción Registrada!
+    </h5>
+    
+    <p class="text-secondary small mb-1.5 px-1" style="line-height: 1.5;">
+      La infraestructura inicial de su holding multi-tenant ha sido fundada con éxito absoluto en nuestra nube.
+    </p>
+    
+    <p class="text-dark small fw-bold mb-4 px-2">
+      ⚠️ Hemos enviado un enlace de activación a su correo electrónico. Por favor, revise su bandeja de entrada (o carpeta de Spam) y confirme su cuenta para poder ingresar al sistema.
+    </p>
+
+    <!-- Botón máster de salida consciente -->
+    <button class="btn btn-dark w-100 fw-bold py-2.5 rounded-3 shadow-none font-monospace" 
+            style="font-size: 13px;" (click)="closeModalAndGoToLogin()">
+      ENTENDIDO, IR AL LOGIN <i class="ri-arrow-right-line ms-1"></i>
+    </button>
+
+  </div>
+</div>

@@ -101,3 +101,24 @@
 .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .compact-footer { margin-top: 20px; }
+
+.custom-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(33, 37, 41, 0.55); /* Capa gris oscuro translúcido */
+  backdrop-filter: blur(4px);               /* Difumina el fondo de forma premium */
+  z-index: 9999;                             /* Se superpone a cualquier elemento */
+}
+
+/* Animación de entrada suave tipo pop-up */
+.animate-scale-up {
+  animation: modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes modalScaleUp {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
