@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { LayoutComponent } from './layout/layout.component';
 import { authGuard } from '../../core/guards/auth.guard';
 import { SecurityMatrixComponent } from './pages/security-matrix/security-matrix.component';
+import { UserCrudComponent } from './pages/user-crud/user-crud.component';
 
 const routes: Routes = [
   {
@@ -18,33 +19,47 @@ const routes: Routes = [
       },
       {
         path: 'inventory',
-        loadChildren: () => import('../inventory/inventory.module').then(m => m.InventoryModule)
+        loadChildren: () =>
+          import('../inventory/inventory.module').then(
+            (m) => m.InventoryModule,
+          ),
       },
-      { 
-        path: 'finance', 
-        loadChildren: () => import('../finance/finance.module').then(m => m.FinanceModule) 
+      {
+        path: 'finance',
+        loadChildren: () =>
+          import('../finance/finance.module').then((m) => m.FinanceModule),
       },
-      { 
-        path: 'companies', 
-        loadChildren: () => import('../companies/companies.module').then(m => m.CompaniesModule) 
+      {
+        path: 'companies',
+        loadChildren: () =>
+          import('../companies/companies.module').then(
+            (m) => m.CompaniesModule,
+          ),
       },
-       { 
-        path: 'branches', 
-        loadChildren: () => import('../branches/branches.module').then(m => m.BranchesModule) 
+      {
+        path: 'branches',
+        loadChildren: () =>
+          import('../branches/branches.module').then((m) => m.BranchesModule),
       },
-       { 
-        path: 'series', 
-        loadChildren: () => import('../series/series.module').then(m => m.SeriesModule) 
+      {
+        path: 'series',
+        loadChildren: () =>
+          import('../series/series.module').then((m) => m.SeriesModule),
       },
-      { 
-        path: 'invoices', 
-        loadChildren: () => import('../invoices/invoices.module').then(m => m.InvoicesModule) 
+      {
+        path: 'invoices',
+        loadChildren: () =>
+          import('../invoices/invoices.module').then((m) => m.InvoicesModule),
       },
-       {
+      {
         path: 'dashboard',
-        loadChildren: () => import('../dashboard/dashboard.module').then(m => m.DashboardModule)
+        loadChildren: () =>
+          import('../dashboard/dashboard.module').then(
+            (m) => m.DashboardModule,
+          ),
       },
       { path: 'security', component: SecurityMatrixComponent },
+      { path: 'users', component: UserCrudComponent },
       { path: '', redirectTo: 'entities', pathMatch: 'full' },
     ],
   },

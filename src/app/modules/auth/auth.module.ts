@@ -6,6 +6,7 @@ import { AuthRoutingModule } from './auth-routing.module';
 import { LoginComponent } from './pages/login/login.component';
 import { SubscribeComponent } from './pages/subscribe/subscribe.component';
 import { ConfirmEmailComponent } from './pages/confirm-email/confirm-email.component';
+import { ChangePasswordComponent } from './pages/change-password/change-password.component';
 
 @NgModule({
   declarations: [
@@ -13,7 +14,8 @@ import { ConfirmEmailComponent } from './pages/confirm-email/confirm-email.compo
   
     LoginComponent,
     SubscribeComponent,
-    ConfirmEmailComponent
+    ConfirmEmailComponent,
+    ChangePasswordComponent
   ],
   imports: [
     CommonModule,

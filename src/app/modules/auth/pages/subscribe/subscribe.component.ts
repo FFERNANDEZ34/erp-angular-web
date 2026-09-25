@@ -19,7 +19,7 @@ export class SubscribeComponent implements OnInit {
   isLoading = false;
   showSuccessModal = false;
 
-  // 🎛️ Control de Pasos del Asistente
+  // 🎛️ Control de Pasos del Asistente (Wizard)
   currentStep = 1;
 
   ngOnInit(): void {
@@ -28,21 +28,24 @@ export class SubscribeComponent implements OnInit {
 
   private initForm(): void {
     this.subscribeForm = this.fb.group({
-      // Campos Paso 1: Cuenta Maestra
+      // Campos Paso 1: Cuenta Maestra del Dueño del Holding
       contactName: ['', [Validators.required, Validators.minLength(3)]],
       contactEmail: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
 
-      // Campos Paso 2: Primera Empresa
+      // =========================================================================
+      // 🎯 CANDADO REGEX SUNAT: El RUC debe arrancar estrictamente en 10, 15, 17 o 20
+      // y contener exactamente 11 caracteres numéricos puros en total
+      // =========================================================================
       companyName: ['', [Validators.required, Validators.minLength(2)]],
-      companyRuc: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
+      companyRuc: ['', [Validators.required, Validators.pattern(/^(10|15|17|20)\d{9}$/)]],
       employeeCount: [1, [Validators.required, Validators.min(1)]],
     });
   }
 
   // 🔀 Métodos de navegación del Wizard
   nextStep(): void {
-    // Validar únicamente los campos del Paso 1 antes de permitir avanzar
+    // Validar únicamente los campos del Paso 1 antes de permitir avanzar al Paso 2
     const p1Fields = ['contactName', 'contactEmail', 'password'];
     let step1Valid = true;
 
@@ -59,13 +62,15 @@ export class SubscribeComponent implements OnInit {
       this.errorMessage = null;
     } else {
       this.errorMessage =
-        'Por favor, complete correctamente los datos del dueño antes de continuar.';
+        'Por favor, complete correctamente los datos del propietario antes de continuar.';
     }
+    this.cdr.detectChanges();
   }
 
   prevStep(): void {
     this.currentStep = 1;
     this.errorMessage = null;
+    this.cdr.detectChanges();
   }
 
   onSubmit(): void {
@@ -81,32 +86,30 @@ export class SubscribeComponent implements OnInit {
     this.authService.subscribeCompany(this.subscribeForm.value).subscribe({
       next: () => {
         this.isLoading = false;
-        this.showSuccessModal = true;
+        this.showSuccessModal = true; // Despliega el modal flotante difuminado premium de alta UX
         this.cdr.detectChanges();
-        //this.router.navigate(['/auth/login']);
       },
       error: (err: any) => {
         this.isLoading = false;
-
         const apiError = err?.error;
 
-        // 🎯 EL DESTRABE DE ZOD: Si el backend nos devuelve el array de fallos detallado de Zod
+        // 🎯 EL DESTRABE DE MATRICES ZOD: Sincronizado a tu captura de primer índice [0] con éxito
         if (
           apiError?.errors &&
           Array.isArray(apiError.errors) &&
           apiError.errors.length > 0
         ) {
-          // Extraemos de forma dinámica el mensaje real del primer campo que violó la regla (ej: el RUC)
+          // Extraemos de forma dinámica el mensaje real del campo específico (ej: RUC)
           this.errorMessage = apiError.errors[0].message;
         } else {
-          // Fallback tradicional para errores planos, duplicados (409) o cortes de red
+          // Fallback para errores planos duplicados (409) o rebotes del caso de uso
           this.errorMessage =
             apiError?.message ||
             err?.error?.message ||
             'Error al procesar la suscripción. Intente nuevamente.';
         }
 
-        this.cdr.detectChanges(); // 🔥 Forzamos el repintado inmediato del banner rojo en tu monitor
+        this.cdr.detectChanges(); // 🔥 Forzamos el repintado inmediato del banner de alerta en tu monitor
       },
     });
   }
@@ -115,9 +118,10 @@ export class SubscribeComponent implements OnInit {
     const field = this.subscribeForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
+
   closeModalAndGoToLogin(): void {
     this.showSuccessModal = false;
     this.cdr.detectChanges();
-    this.router.navigate(['/auth/login']); // Ahora sí lo mandamos al login de forma elegante
+    this.router.navigate(['/auth/login']); // Redirección fluida al login de forma consciente y educada
   }
 }

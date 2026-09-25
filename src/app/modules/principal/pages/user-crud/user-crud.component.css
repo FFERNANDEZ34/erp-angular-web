@@ -1,0 +1,76 @@
+/* 🚀 GRILLA EJECUTIVA DE CONTROL DE PERSONAL */
+.custom-corporate-table tbody tr:hover {
+  background-color: #f8f9fa !important;
+}
+
+/* 🌊 FONDO OSCURECIDO INTELIGENTE (ADAPTADO AL LAYOUT CENTRAL) */
+.custom-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(33, 37, 41, 0.45); /* Capa gris translúcida */
+  backdrop-filter: blur(4px);               /* Difumina el fondo premium estilo iOS */
+  z-index: 9999;                            /* Se superpone al espacio de trabajo */
+  display: flex;
+  align-items: center;                      /* Centrado vertical perfecto */
+  justify-content: center;                  /* Centrado horizontal perfecto */
+  overflow: hidden;                         /* 🎯 ERRADICA EL SCROLL DE LA PANTALLA COMPLETA */
+}
+
+/* 📐 CONTENEDOR MODAL FLOTANTE AUTODEPENDIENTE */
+.custom-modal-backdrop .card {
+  width: 92%;                               /* Deja un margen defensivo en pantallas chicas */
+  max-width: 640px;                         /* Ancho máximo ideal para no estirarse feo */
+  margin: auto;
+  border: none;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
+}
+
+/* 📜 CONTROL DE SCROLL INTERNO (SOLO SI EL TEXTO SUPERA LA ALTURA MÁXIMA DE LA PANTALLA) */
+.scrollable-matrix {
+  max-height: 70vh !important;              /* Se adapta al 70% del alto real de la pantalla del usuario */
+  overflow-y: auto;                         /* El scroll nace adentro de las asignaciones si se requiere */
+  overflow-x: hidden;
+  padding-right: 8px;
+}
+
+/* Estilización ultra-delgada de la barra de scroll interna */
+.scrollable-matrix::-webkit-scrollbar {
+  width: 5px;
+}
+.scrollable-matrix::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollable-matrix::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+.scrollable-matrix::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Animación de entrada suave tipo pop-up */
+.animate-scale-up {
+  animation: modalScaleUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes modalScaleUp {
+  0% { transform: scale(0.92); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.spin-loader {
+  animation: spinnerRotate 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spinnerRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}

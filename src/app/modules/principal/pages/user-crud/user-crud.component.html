@@ -1,0 +1,507 @@
+<div class="container-fluid p-4 tab-content-fade">
+  <!-- Encabezado Mantenimiento -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h4 class="text-dark fw-bold mb-1">
+        <i class="ri-team-line text-dark me-1"></i> Control y Mantenimiento de
+        Personal
+      </h4>
+      <p class="text-secondary small mb-0">
+        Gestione el catálogo de empleados del holding, audite sus sucursales
+        activas y configure estados de baja lógica.
+      </p>
+    </div>
+    <button
+      class="btn btn-sm btn-dark fw-bold px-3 py-2 rounded-2 shadow-none d-flex align-items-center gap-one-five"
+      [disabled]="isActionLoading"
+      (click)="openCreateModal()"
+    >
+      <i class="ri-user-add-line fs-5"></i>
+      <span>Registrar Colaborador</span>
+    </button>
+  </div>
+
+  <!-- Banners de Estado -->
+  <div
+    class="alert alert-success p-3 border-0 mb-4 rounded-3 d-flex align-items-center gap-2 tab-content-fade"
+    *ngIf="successMessage"
+  >
+    <i class="ri-checkbox-circle-line fs-4 text-success"></i>
+    <div class="small text-secondary fw-bold">{{ successMessage }}</div>
+  </div>
+  <div
+    class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-center gap-2 tab-content-fade"
+    *ngIf="errorMessage"
+  >
+    <i class="ri-error-warning-line fs-4 text-danger"></i>
+    <div class="small text-secondary">{{ errorMessage }}</div>
+  </div>
+
+  <!-- 🎛️ BARRA DE FILTROS EN TIEMPO REAL -->
+  <div class="card border-0 shadow-sm rounded-3 mb-4 bg-white">
+    <div class="card-body p-3">
+      <div
+        class="input-group input-group-sm border border-light-subtle rounded-2 bg-light px-2"
+        style="max-width: 400px"
+      >
+        <span class="input-group-text bg-transparent border-0 text-muted"
+          ><i class="ri-search-2-line fs-5"></i
+        ></span>
+        <input
+          type="text"
+          class="form-control bg-transparent border-0 text-dark shadow-none ps-1 font-sans-serif"
+          placeholder="Buscar por nombre o correo electrónico..."
+          [value]="searchQuery"
+          (input)="onSearchChange($event)"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 GRILLA OFICIAL DE EMPLEADOS -->
+  <div class="card border-0 shadow-sm rounded-3 bg-white overflow-hidden">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0 custom-corporate-table">
+        <thead
+          class="table-dark font-monospace text-uppercase"
+          style="font-size: 11px; letter-spacing: 0.5px"
+        >
+          <tr>
+            <th class="ps-4 py-3" style="width: 70px">ID</th>
+            <th class="py-3">Datos del Colaborador</th>
+            <th class="py-3">Contacto e Identidad</th>
+            <th class="py-3">Asignaciones de Trabajo (Multi-Tenant)</th>
+            <th class="py-3 text-center" style="width: 140px">Verificación</th>
+            <th class="py-3 text-center" style="width: 120px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Spinner de Lectura en Caliente -->
+          <tr *ngIf="isLoading">
+            <td colspan="6" class="text-center py-5 text-muted font-monospace">
+              <i
+                class="ri-loader-3-line spin-loader text-primary fs-2 d-block mb-1"
+              ></i>
+              Sincronizando grilla oficial con Aiven...
+            </td>
+          </tr>
+
+          <!-- Lista vacía fallback -->
+          <tr *ngIf="!isLoading && usersList.length === 0">
+            <td
+              colspan="6"
+              class="text-center py-5 text-muted small font-sans-serif"
+            >
+              <i class="ri-folder-open-line fs-2 text-muted d-block mb-1"></i>
+              No se localizaron colaboradores registrados bajo los criterios
+              indicados.
+            </td>
+          </tr>
+          <ng-container *ngIf="!isLoading">
+            <!-- Render de Filas Dinámicas -->
+            <tr *ngFor="let user of usersList" class="tab-content-fade">
+              <td class="ps-4 font-monospace fw-bold text-muted">
+                #{{ user.id }}
+              </td>
+              <td>
+                <div class="d-flex flex-column">
+                  <strong class="text-dark fw-bold" style="font-size: 13.5px">{{
+                    user.name
+                  }}</strong>
+                  <span
+                    class="text-muted small font-monospace mt-0.5"
+                    style="font-size: 11.5px"
+                    >{{ user.email }}</span
+                  >
+                </div>
+              </td>
+              <td>
+                <div class="d-flex flex-column small text-secondary">
+                  <span
+                    ><i class="ri-phone-line me-1 text-muted"></i
+                    >{{ user.phone || "Sin Celular" }}</span
+                  >
+                  <span class="mt-0.5 text-truncate" style="max-width: 200px"
+                    ><i class="ri-map-pin-line me-1 text-muted"></i
+                    >{{ user.address || "Sin Dirección" }}</span
+                  >
+                </div>
+              </td>
+              <td>
+                <!-- Bucle de Asignaciones Internas -->
+                <div
+                  class="d-flex flex-wrap gap-one-five"
+                  style="max-width: 420px"
+                >
+                  <div
+                    *ngFor="let assign of user.assignments"
+                    class="badge bg-light border text-dark p-2 rounded-2 d-flex flex-column align-items-start gap-0.5 shadow-none text-start font-sans-serif"
+                  >
+                    <span class="fw-bold text-primary" style="font-size: 10px"
+                      ><i class="ri-building-line me-0.5"></i
+                      >{{ assign.companyName }}</span
+                    >
+                    <span class="text-secondary" style="font-size: 9.5px"
+                      ><i class="ri-map-pin-line me-0.5"></i
+                      >{{ assign.branchName }}</span
+                    >
+                    <span
+                      class="text-dark fw-semibold mt-0.5 font-monospace bg-dark bg-opacity-10 px-1 rounded"
+                      style="font-size: 9px"
+                      >{{ assign.roleName | uppercase }}</span
+                    >
+                  </div>
+                </div>
+              </td>
+              <td class="text-center">
+                <span
+                  class="badge rounded-pill p-2 px-2.5 font-monospace text-uppercase"
+                  style="font-size: 10px"
+                  [ngClass]="
+                    user.isEmailConfirmed
+                      ? 'bg-success bg-opacity-10 text-success'
+                      : 'bg-warning bg-opacity-10 text-warning'
+                  "
+                >
+                  <i
+                    [ngClass]="
+                      user.isEmailConfirmed
+                        ? 'ri-checkbox-circle-line'
+                        : 'ri-time-line'
+                    "
+                    class="me-1"
+                  ></i>
+                  {{ user.isEmailConfirmed ? "CONFIRMADO" : "PENDIENTE" }}
+                </span>
+                <span
+                  *ngIf="user.mustChangePassword"
+                  class="badge bg-danger bg-opacity-10 text-danger rounded-pill p-1.5 px-2 font-monospace d-block mt-1 mx-auto"
+                  style="font-size: 9px; width: fit-content"
+                >
+                  CLAVE TEMPORAL
+                </span>
+              </td>
+              <td class="text-center">
+                <div
+                  class="d-flex align-items-center justify-content-center gap-one-five"
+                >
+                  <button
+                    *ngIf="!user.isEmailConfirmed"
+                    class="btn btn-sm btn-light border p-2 rounded-2 text-warning shadow-none"
+                    title="Reenviar enlace de activación"
+                    [disabled]="isActionLoading"
+                    (click)="onResendActivation(user.email)"
+                  >
+                    <i class="ri-mail-send-line fs-5"></i>
+                  </button>
+
+                  <button
+                    class="btn btn-sm btn-light border p-2 rounded-2 text-primary shadow-none"
+                    title="Editar asignaciones"
+                    [disabled]="isActionLoading"
+                    (click)="openEditModal(user)"
+                  >
+                    <i class="ri-edit-line fs-5"></i>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-light border p-2 rounded-2 text-danger shadow-none"
+                    title="Dar de baja"
+                    [disabled]="isActionLoading || user.id === 1"
+                    (click)="onInactivateUser(user.id, user.email)"
+                  >
+                    <i class="ri-user-unfollow-line fs-5"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 🎛️ CONTROLES DE PAGINACIÓN OFICIAL (Mismo Estándar) -->
+    <div
+      class="card-footer bg-white border-top border-light px-4 py-3 d-flex align-items-center justify-content-between font-monospace small"
+      *ngIf="!isLoading && totalPages > 1"
+    >
+      <div class="text-muted">
+        Mostrando personal — Registros totales:
+        <strong class="text-dark">{{ totalItems }}</strong>
+      </div>
+      <div class="d-flex align-items-center gap-one-five">
+        <button
+          class="btn btn-xs btn-light border p-1 px-2.5 rounded shadow-none"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          <i class="ri-arrow-left-s-line"></i> Anterior
+        </button>
+
+        <span class="text-muted"
+          >Página <strong class="text-dark">{{ currentPage }}</strong> de
+          {{ totalPages }}</span
+        >
+
+        <button
+          class="btn btn-xs btn-light border p-1 px-2.5 rounded shadow-none"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)"
+        >
+          Siguiente <i class="ri-arrow-right-s-line"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 🏢 FORMULARIO MODAL COMPUESTO: CREACIÓN Y EDICIÓN DE PERSONAL (SAAS-PATTERN) -->
+<!-- ========================================================================= -->
+<div
+  class="custom-modal-backdrop d-flex align-items-center justify-content-center p-3"
+  *ngIf="showModal"
+>
+  <div
+    class="card border-0 shadow-lg rounded-4 bg-white tab-content-fade"
+    style="max-width: 680px; width: 100%"
+  >
+    <!-- Cabecera Modal -->
+    <div
+      class="card-header bg-dark text-white p-3.5 px-4 d-flex align-items-center justify-content-between rounded-top-4"
+    >
+      <h6 class="mb-0 fw-bold font-monospace">
+        <i
+          [className]="
+            isEditMode
+              ? 'ri-edit-line text-warning'
+              : 'ri-user-add-line text-success'
+          "
+        ></i>
+        {{
+          isEditMode
+            ? "EDITAR PRIVILEGIOS DEL COLABORADOR"
+            : "DAR DE ALTA NUEVO COLABORADOR"
+        }}
+      </h6>
+      <button
+        class="btn-close btn-close-white shadow-none small"
+        (click)="showModal = false"
+        [disabled]="isActionLoading"
+      ></button>
+    </div>
+
+    <!-- Cuerpo del Formulario Reactivo -->
+    <div
+      class="card-body p-4 scrollable-matrix"
+      style="max-height: 520px; overflow-y: auto"
+      [formGroup]="userForm"
+    >
+      <div
+        class="alert alert-danger p-2.5 border-0 mb-3 rounded-2 text-start d-flex align-items-center gap-1.5 tab-content-fade"
+        *ngIf="errorMessage && showModal"
+      >
+        <i class="ri-error-warning-line text-danger fs-5"></i>
+        <span class="small fw-semibold" style="font-size: 12px">{{
+          errorMessage
+        }}</span>
+      </div>
+      <!-- Datos Personales Base -->
+      <h6
+        class="text-secondary fw-bold font-monospace small mb-3 border-bottom pb-1"
+      >
+        1. DATOS DE IDENTIDAD DE LA CUENTA
+      </h6>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label class="form-label small fw-bold text-muted mb-1"
+            >Nombre Completo</label
+          >
+          <input
+            type="text"
+            class="form-control form-control-sm bg-light shadow-none fw-bold"
+            formControlName="name"
+            [class.is-invalid]="
+              userForm.get('name')?.invalid &&
+              (userForm.get('name')?.touched || userForm.touched)
+            "
+            placeholder="Ej: JUAN PEREZ ALVA"
+          />
+          <!-- Texto de ayuda reactivo -->
+          <div class="invalid-feedback font-sans-serif" style="font-size: 11px">
+            El nombre completo es requerido (Mínimo 3 caracteres).
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small fw-bold text-muted mb-1"
+            >Correo Electrónico (Login)</label
+          >
+          <input
+            type="email"
+            class="form-control form-control-sm bg-light shadow-none font-monospace fw-bold"
+            formControlName="email"
+            [class.is-invalid]="
+              userForm.get('email')?.invalid &&
+              (userForm.get('email')?.touched || userForm.touched)
+            "
+            placeholder="juan.perez@holding.com"
+          />
+          <!-- Texto de ayuda reactivo para formato de email -->
+          <div class="invalid-feedback font-sans-serif" style="font-size: 11px">
+            Ingrese un correo electrónico válido (ejemplo&#64;holding.com).
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label small fw-bold text-muted mb-1"
+            >Celular de Contacto</label
+          >
+          <input
+            type="text"
+            class="form-control form-control-sm bg-light shadow-none"
+            formControlName="phone"
+            placeholder="999888777"
+          />
+        </div>
+        <div class="col-md-6" *ngIf="!isEditMode">
+          <label class="form-label small fw-bold text-muted mb-1"
+            >Contraseña Temporal Genérica</label
+          >
+          <input
+            type="text"
+            class="form-control form-control-sm bg-light shadow-none font-monospace text-primary fw-bold"
+            formControlName="password"
+            placeholder="Minimo 6 digitos"
+          />
+        </div>
+        <div class="col-md-12">
+          <label class="form-label small fw-bold text-muted mb-1"
+            >Dirección Residencial</label
+          >
+          <input
+            type="text"
+            class="form-control form-control-sm bg-light shadow-none"
+            formControlName="address"
+            placeholder="Av. Las Camelias 450 - San Isidro"
+          />
+        </div>
+      </div>
+
+      <!-- Matriz Dinámica Multi-Tenant -->
+      <div
+        class="d-flex align-items-center justify-content-between border-bottom pb-1 mb-3"
+      >
+        <h6 class="text-secondary fw-bold font-monospace small mb-0">
+          2. ASIGNACIONES OPERATIVAS EN TIENDAS
+        </h6>
+        <button
+          type="button"
+          class="btn btn-xs btn-outline-primary fw-bold p-1 px-2.5 rounded-2 small"
+          style="font-size: 11px"
+          (click)="addAssignmentRow()"
+        >
+          <i class="ri-add-box-line me-0.5"></i> Añadir Local
+        </button>
+      </div>
+
+      <!-- Bucle del FormArray Dinámico -->
+      <div formArrayName="assignments" class="d-flex flex-column gap-2.5">
+        <div
+          *ngFor="let group of assignmentsFormArray.controls; let i = index"
+          [formGroupName]="i"
+          class="row g-2 align-items-center p-3 rounded-3 bg-light border border-light-subtle shadow-sm tab-content-fade"
+        >
+          <div class="col-md-4">
+            <select
+              class="form-select form-select-sm shadow-none bg-light fw-semibold"
+              formControlName="companyId"
+              [class.is-invalid]="
+                group.get('companyId')?.invalid &&
+                (group.get('companyId')?.touched || userForm.touched)
+              "
+              (change)="group.get('branchId')?.setValue('')"
+            >
+              <option value="" disabled selected>-- Empresa --</option>
+              <option *ngFor="let c of companiesCatalog" [value]="c.id">
+                🏢 {{ c.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Combo 2: Sucursal con Borde de Error -->
+          <div class="col-md-4">
+            <select
+              class="form-select form-select-sm shadow-none bg-light"
+              formControlName="branchId"
+              [class.is-invalid]="
+                group.get('branchId')?.invalid &&
+                (group.get('branchId')?.touched || userForm.touched)
+              "
+            >
+              <option value="" disabled selected>-- Sucursal --</option>
+              <option
+                *ngFor="let b of getBranchesByRowCompany(i)"
+                [value]="b.id"
+              >
+                📍 Local N°{{ b.id }} - {{ b.name }}
+              </option>
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <select
+              class="form-select form-select-sm shadow-none bg-white font-monospace text-uppercase"
+              formControlName="roleInput"
+              style="font-size: 11px"
+            >
+              <option value="" disabled selected>-- Rol / Perfil --</option>
+              <!-- 🚀 ITERACIÓN ENTERPRISE: Leemos las marcas y nombres reales inyectados en MySQL -->
+              <option *ngFor="let r of rolesCatalog" [value]="r.name">
+                {{ r.name | uppercase }}
+              </option>
+            </select>
+          </div>
+
+          <div
+            class="col-md-1 text-end"
+            *ngIf="assignmentsFormArray.length > 1"
+          >
+            <button
+              type="button"
+              class="btn btn-sm btn-link text-danger p-1 border-0"
+              (click)="removeAssignmentRow(i)"
+            >
+              <i class="ri-delete-bin-6-line fs-5"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie del Modal con Acciones de Envío -->
+    <div
+      class="card-footer bg-light p-3 px-4 d-flex align-items-center justify-content-end gap-2 rounded-bottom-4"
+    >
+      <button
+        class="btn btn-sm btn-outline-secondary fw-bold px-3 rounded-2"
+        (click)="showModal = false"
+        [disabled]="isActionLoading"
+      >
+        Cancelar
+      </button>
+      <button
+        class="btn btn-sm btn-dark fw-bold px-4 rounded-2 d-flex align-items-center gap-1"
+        [disabled]="isActionLoading"
+        (click)="onSaveUser()"
+      >
+        <i
+          [className]="
+            isActionLoading ? 'ri-loader-3-line spin-loader' : 'ri-save-3-line'
+          "
+          class="fs-5"
+        ></i>
+        <span>{{
+          isActionLoading ? "Procesando en Aiven..." : "Guardar Colaborador"
+        }}</span>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,6 +1,5 @@
 <div class="login-container">
   <div class="login-card">
-    
     <!-- COLUMNA IZQUIERDA: Propuesta de valor corporativa -->
     <div class="login-branding">
       <div class="branding-content">
@@ -9,12 +8,21 @@
           <span>SmartAdmin</span>
         </div>
         <h1>Soluciones inteligentes para equipos modernos</h1>
-        <p>Optimiza tus flujos de trabajo, gestiona tus locales y toma decisiones basadas en datos — todo desde un solo panel de control unificado.</p>
-        
+        <p>
+          Optimiza tus flujos de trabajo, gestiona tus locales y toma decisiones
+          basadas en datos — todo desde un solo panel de control unificado.
+        </p>
+
         <div class="features-list">
-          <div class="feature-item"><i class="bx bx-trending-up"></i> Análisis en Tiempo Real</div>
-          <div class="feature-item"><i class="bx bx-group"></i> Control Multi-empresa y Multi-local</div>
-          <div class="feature-item"><i class="bx bx-shield-quarter"></i> Seguridad de Nivel Empresarial</div>
+          <div class="feature-item">
+            <i class="bx bx-trending-up"></i> Análisis en Tiempo Real
+          </div>
+          <div class="feature-item">
+            <i class="bx bx-group"></i> Control Multi-empresa y Multi-local
+          </div>
+          <div class="feature-item">
+            <i class="bx bx-shield-quarter"></i> Seguridad de Nivel Empresarial
+          </div>
         </div>
       </div>
       <div class="branding-footer">
@@ -35,14 +43,24 @@
           <i class="bx bx-error-circle"></i> {{ errorMessage }}
         </div>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-          
+        <form
+          [formGroup]="loginForm"
+          (ngSubmit)="onSubmit()"
+          *ngIf="!showResendForm"
+          class="tab-content-fade"
+        >
           <!-- Campo: Email -->
           <div class="form-group" [class.has-error]="isFieldInvalid('email')">
             <label for="email">Correo Electrónico</label>
             <div class="input-wrapper">
               <i class="bx bx-envelope input-icon"></i>
-              <input type="email" id="email" formControlName="email" placeholder="ejemplo@holding.com" autocomplete="email">
+              <input
+                type="email"
+                id="email"
+                formControlName="email"
+                placeholder="ejemplo@holding.com"
+                autocomplete="email"
+              />
             </div>
             <span class="error-text" *ngIf="isFieldInvalid('email')">
               Por favor, ingresa un correo electrónico válido.
@@ -50,41 +68,147 @@
           </div>
 
           <!-- Campo: Password -->
-          <div class="form-group" [class.has-error]="isFieldInvalid('password')">
+          <div
+            class="form-group"
+            [class.has-error]="isFieldInvalid('password')"
+          >
             <label for="password">Contraseña</label>
             <div class="input-wrapper">
               <i class="bx bx-lock-alt input-icon"></i>
-              <input type="password" id="password" formControlName="password" placeholder="••••••••">
+              <input
+                type="password"
+                id="password"
+                formControlName="password"
+                placeholder="••••••••"
+              />
             </div>
             <span class="error-text" *ngIf="isFieldInvalid('password')">
               La contraseña es obligatoria (Mínimo 6 caracteres).
             </span>
           </div>
 
-          <!-- Opciones extras -->
-          <div class="form-actions-helper">
-            <label class="checkbox-label">
-              <input type="checkbox" formControlName="rememberMe">
-              <span>Recordarme</span>
-            </label>
-            <a routerLink="/auth/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</a>
+          <!-- Opciones extras (Alineación Ejecutiva) -->
+          <div class="form-actions-helper d-flex flex-column gap-2 mb-3">
+            <div
+              class="d-flex align-items-center justify-content-between w-100"
+            >
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="rememberMe" />
+                <span>Recordarme</span>
+              </label>
+              <a routerLink="/auth/forgot-password" class="forgot-link"
+                >¿Olvidaste tu contraseña?</a
+              >
+            </div>
+
+            <!-- 🎯 GATILLO DISCRETO DE RESCATE -->
+            <div class="text-start mt-1">
+              <a
+                href="javascript:void(0)"
+                class="text-primary small fw-semibold font-sans-serif text-decoration-none"
+                (click)="toggleResendPanel(true)"
+              >
+                ¿No recibió su enlace de activación? Reenviar aquí
+              </a>
+            </div>
           </div>
 
           <!-- Botón de Envío -->
           <button type="submit" class="btn-submit" [disabled]="isLoading">
             <span *ngIf="!isLoading">Iniciar Sesión</span>
             <span *ngIf="isLoading" class="spinner-text">
-              <i class="bx bx-loader-alt spinner-icon"></i> Autenticando...
+              <i class="bx bx-loader-alt spinner-icon spin-loader"></i>
+              Autenticando...
             </span>
           </button>
         </form>
 
+        <!-- ========================================================================= -->
+        <!-- 🛡️ FRENTE B: PIZARRA MUTANTE DE REENVÍO AUTÓNOMO SANEADO -->
+        <!-- ========================================================================= -->
+        <div *ngIf="showResendForm" class="tab-content-fade text-start p-1">
+          <h5
+            class="text-dark fw-bold font-monospace text-uppercase mb-1"
+            style="font-size: 15px; letter-spacing: 0.5px"
+          >
+            Solicitar Reenvío de Activación
+          </h5>
+          <p class="text-secondary small mb-4" style="line-height: 1.4">
+            Ingrese el correo corporativo con el que fue registrado para
+            despachar un token fresh a su bandeja de entrada.
+          </p>
+
+          <!-- 🎯 NUEVO BANNER PROFESIONAL ENTERPRISE -->
+          <div
+            class="alert alert-success p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2 tab-content-fade"
+            *ngIf="successMessage"
+          >
+            <i class="ri-checkbox-circle-line fs-4 text-success mt-0.5"></i>
+            <div class="d-flex flex-column">
+              <strong class="text-dark small fw-bold font-monospace"
+                >TOKEN DESPACHADO</strong
+              >
+              <span
+                class="text-secondary mt-0.5"
+                style="font-size: 12px; line-height: 1.4"
+              >
+                {{ successMessage }}
+              </span>
+            </div>
+          </div>
+
+          <!-- El input y los botones se ocultan automáticamente si ya se envió el correo con éxito -->
+          <ng-container *ngIf="!successMessage">
+            <!-- Campo: Email de Rescate -->
+            <div class="form-group mb-4">
+              <label for="resendEmail">Correo Electrónico Registrado</label>
+              <div class="input-wrapper">
+                <i class="bx bx-envelope input-icon"></i>
+                <input
+                  type="email"
+                  id="resendEmail"
+                  [(ngModel)]="resendEmailInput"
+                  placeholder="ejemplo@holding.com"
+                  class="form-control"
+                />
+              </div>
+            </div>
+
+            <!-- Botones de Acción de Envío y Retorno -->
+            <div class="d-flex flex-column gap-2.5">
+              <button
+                type="button"
+                class="btn-submit w-100 fw-bold"
+                [disabled]="isLoading"
+                (click)="onResendPublic()"
+              >
+                <span *ngIf="!isLoading">DESPACHAR NUEVO TOKEN</span>
+                <span *ngIf="isLoading" class="spinner-text">
+                  <i class="bx bx-loader-alt spinner-icon spin-loader"></i>
+                  Procesando enlace...
+                </span>
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-sm btn-light border w-100 fw-bold py-2 rounded-2 font-monospace text-muted shadow-none mt-1"
+                [disabled]="isLoading"
+                (click)="toggleResendPanel(false)"
+                style="font-size: 12.5px"
+              >
+                <i class="ri-arrow-left-line me-1"></i> VOLVER AL LOGIN
+              </button>
+            </div>
+          </ng-container>
+        </div>
+
         <div class="form-footer">
           <p>¿Aún no tienes una cuenta corporativa?</p>
-          <a routerLink="/auth/subscribe" class="link-register">Suscribir mi Holding / Empresa</a>
+          <a routerLink="/auth/subscribe" class="link-register"
+            >Suscribir mi Holding / Empresa</a
+          >
         </div>
       </div>
     </div>
-
   </div>
 </div>
