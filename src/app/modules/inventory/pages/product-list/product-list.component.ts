@@ -11,6 +11,7 @@ import { Subject, Subscription, combineLatest } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { AuthService } from '../../../../core/services/auth.service';
 import { environment } from '../../../../../environments/environment'; // 👈 1. IMPORTAR
+import { JsonPipe } from '@angular/common';
 
 export interface ProductItem {
   id: number;
@@ -178,11 +179,13 @@ export class ProductListComponent implements OnInit, OnDestroy {
       description: [''],
       sku: [''],
       barCode: [''],
-      categoryId: [10, [Validators.required]],
-      brandId: [11, [Validators.required]],
-      currencyParamId: [4, [Validators.required]],
-      taxTypeParamId: [4, [Validators.required]],
-      unitMeasureParamId: [8, [Validators.required]],
+      // 🎯 EL DESTRABE EN LA RAM: Mutamos '' a null para forzar el estado INVALID nativo
+      categoryId: ['', [Validators.required]],
+      brandId: ['', [Validators.required]],
+      currencyParamId: ['', [Validators.required]],
+      taxTypeParamId: ['', [Validators.required]],
+
+      unitMeasureParamId: [8, [Validators.required]], // Nace con 8 por defecto (Sigue intacto)
       purchasePrice: [0, [Validators.required, Validators.min(0.01)]],
       salesPrice: [0, [Validators.required, Validators.min(0.01)]],
       minimumStock: [0, [Validators.required, Validators.min(0)]],
@@ -256,17 +259,31 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.selectedProductId = null;
     this.formErrorMessage = null;
     this.productForm.reset({
-      categoryId: 10,
-      brandId: 11,
-      currencyParamId: 4,
-      taxTypeParamId: 4,
-      unitMeasureParamId: 8,
+      productCode: '',
+      name: '',
+      description: '',
+      sku: '',
+      barCode: '',
+      
+      // Nacen vacíos para obligar a que falle Validators.required y encienda el rojo
+      categoryId: '',
+      brandId: '',
+      currencyParamId: '',
+      taxTypeParamId: '',
+      
+      // El de unidad de medida puedes dejarlo en 8 si deseas que 'Unidades' sea el default de la SUNAT,
+      // o ponerlo en '' si también quieres obligar a que lo seleccionen a mano.
+      unitMeasureParamId: '', 
+      
       purchasePrice: 0,
       salesPrice: 0,
       minimumStock: 0,
       isPackage: false,
-      allowSearch: true,
+      allowSearch: true
     });
+
+    this.productForm.updateValueAndValidity();
+    
     this.activeTab = 'datos';
     this.showModal = true;
     this.cdr.detectChanges();
@@ -275,13 +292,47 @@ export class ProductListComponent implements OnInit, OnDestroy {
   loadProductAttachments(): void {
     if (!this.selectedProductId) return;
 
-    // private readonly API_URL = `${environment.apiUrl}/products`;
-
     const url = `${this.ATTACHMENT_API_URL}?module=PRODUCTOS&recordId=${this.selectedProductId}`;
+
     this.http.get<{ data: any[] }>(url).subscribe({
       next: (res) => {
+        // 1. Poblamos tu array real de la galería
         this.productImages = res?.data || [];
-        this.cdr.detectChanges();
+
+        // 2. 🎯 EL DESTRABE VISUAL EN TU MONITOR:
+        // Buscamos dentro de la galería cloud si alguna foto es la estrella principal
+        const mainPhotoRow = this.productImages.find(
+          (img) => img.isMainPhoto === true || img.isMainPhoto === 1,
+        );
+
+        if (mainPhotoRow) {
+          console.log(
+            '📸 Portada localizada en Cloudflare R2:',
+            mainPhotoRow.fileUrl,
+          );
+
+          // Sincronizamos tu FormGroup reactivo de la vista
+          if (this.productForm) {
+            // Buscamos cuál es el nombre de tu control de foto (imageUrl, fileUrl o mainPhoto)
+            const targetControl =
+              this.productForm.get('imageUrl') ||
+              this.productForm.get('fileUrl') ||
+              this.productForm.get('mainPhoto');
+            if (targetControl) {
+              targetControl.setValue(mainPhotoRow.fileUrl);
+            }
+          }
+        } else {
+          // Fallback: Si no hay estrella principal, limpiamos el control para que pinte el logo vacío
+          if (this.productForm) {
+            const targetControl =
+              this.productForm.get('imageUrl') ||
+              this.productForm.get('fileUrl');
+            if (targetControl) targetControl.setValue('');
+          }
+        }
+
+        this.cdr.detectChanges(); // 🔥 Repintado inmediato en tu monitor de Angular
       },
       error: (err) =>
         console.error('Error al recuperar galería de adjuntos:', err),
@@ -351,14 +402,18 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  closeModal(): void {
+   closeModal(): void {
     this.showModal = false;
+    this.formErrorMessage = null;
+    this.productImages = []; // Limpiamos el carrete cloud de R2 para el siguiente artículo
+    this.productForm.reset(); // Sanea la RAM del formulario
     this.cdr.detectChanges();
   }
 
   onFormSubmit(): void {
     if (this.productForm.invalid) {
       this.productForm.markAllAsTouched();
+      this.cdr.detectChanges();
       return;
     }
 
@@ -391,6 +446,9 @@ export class ProductListComponent implements OnInit, OnDestroy {
     };
 
     console.log('🛰️ Despachando payload saneado al catálogo maestro:', payload);
+
+//console.log(JSON.stringify(this.productForm));
+console.log(JSON.stringify(payload));
 
     if (this.isEditing && this.selectedProductId) {
       this.http
@@ -447,8 +505,16 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  
   isFieldInvalid(fieldName: string): boolean {
+    if (!this.productForm) return false;
     const field = this.productForm.get(fieldName);
-    return !!(field && field.invalid && (field.dirty || field.touched));
+    
+    // 🛡️ Si el campo es inválido matemáticamente Y (fue tocado individualmente O se presionó Grabar)
+    return !!(
+      field && 
+      field.invalid && 
+      (field.dirty || field.touched || this.productForm.touched)
+    );
   }
 }

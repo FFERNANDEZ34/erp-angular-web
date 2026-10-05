@@ -217,3 +217,27 @@ body.dark-theme-mode .gallery-actions-bar {
   background-color: #1e293b !important;
   border-color: #334155 !important;
 }
+
+.has-error-input input,
+.has-error-input select { /* 🎯 EL DESTRABE: Habilitamos selectores */
+  border-color: #ef4444 !important; /* Rojo fosforito OWASP/Bootstrap */
+  background-color: #fef2f2 !important; /* Fondo rosa pálido de alerta */
+}
+
+.has-error-input label {
+  color: #dc2626 !important; /* Texto de la etiqueta en rojo ejecutivo */
+}
+
+/* Animación de entrada suave para los textos de error pequeños */
+.extra-small-err, .invalid-feedback {
+  color: #dc2626 !important;
+  font-size: 11px;
+  margin-top: 4px;
+  display: block;
+  animation: fadeInError 0.2s ease-in-out;
+}
+
+@keyframes fadeInError {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}

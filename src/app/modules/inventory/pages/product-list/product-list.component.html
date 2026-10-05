@@ -175,10 +175,12 @@
             }}</span>
           </td>
           <td class="text-end font-monospace text-secondary">
-            {{ getCurrencySymbol($any(prod.Currency)?.code) }} {{ prod.purchasePrice | number: "1.2-2" }}
+            {{ getCurrencySymbol($any(prod.Currency)?.code) }}
+            {{ prod.purchasePrice | number: "1.2-2" }}
           </td>
           <td class="text-end font-monospace text-primary fw-bold">
-            {{ getCurrencySymbol($any(prod.Currency)?.code) }} {{ prod.salesPrice | number: "1.2-2" }}
+            {{ getCurrencySymbol($any(prod.Currency)?.code) }}
+            {{ prod.salesPrice | number: "1.2-2" }}
           </td>
           <td class="text-center">
             <div class="d-inline-flex gap-1">
@@ -192,7 +194,6 @@
               </button>
               <button
                 class="btn btn-outline-danger btn-sm"
-                
                 type="button"
                 (click)="onDelete(prod.id)"
                 title="Dar de Baja Lógica"
@@ -324,11 +325,23 @@
       <form [formGroup]="productForm" (ngSubmit)="onFormSubmit()">
         <div class="modal-body p-4 text-start">
           <!-- Banner de Captura de Errores del Backend -->
-          <div class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2 tab-content-fade" *ngIf="formErrorMessage">
-            <i class="bx bx-error-circle fs-4 mt-0.5" style="color: #ef4444;"></i>
+          <div
+            class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2 tab-content-fade"
+            *ngIf="formErrorMessage"
+          >
+            <i
+              class="bx bx-error-circle fs-4 mt-0.5"
+              style="color: #ef4444"
+            ></i>
             <div>
-              <strong class="text-dark d-block mb-0.5">Control de Unicidad de Inventarios</strong>
-              <span class="text-secondary small d-block" style="line-height: 1.4;">{{ formErrorMessage }}</span>
+              <strong class="text-dark d-block mb-0.5"
+                >Control de Unicidad de Inventarios</strong
+              >
+              <span
+                class="text-secondary small d-block"
+                style="line-height: 1.4"
+                >{{ formErrorMessage }}</span
+              >
             </div>
           </div>
 
@@ -432,40 +445,31 @@
                 >
               </div>
 
-              <div
-                class="col-md-4"
-                [class.has-error-input]="isFieldInvalid('categoryId')"
-              >
-                <label class="form-label small fw-bold text-secondary mb-1"
-                  >Categoría del Producto</label
-                >
-                <select
-                  class="form-select bg-light text-dark border-light fw-semibold"
-                  formControlName="categoryId"
-                >
-                  <option value="" disabled>Seleccione...</option>
-                  <option *ngFor="let cat of categoriesList" [value]="cat.id">
-                    📁 {{ cat.name }}
-                  </option>
+              <div class="col-md-4" [class.has-error-input]="isFieldInvalid('categoryId')">
+                <label class="form-label small fw-bold text-secondary mb-1">Categoría del Producto</label>
+                <select class="form-select bg-light text-dark border-light fw-semibold"
+                        formControlName="categoryId"
+                        [class.is-invalid]="isFieldInvalid('categoryId')">
+                  <option value="" disabled selected>Seleccione Categoría...</option>
+                  <option *ngFor="let cat of categoriesList" [value]="cat.id">📁 {{ cat.name }}</option>
                 </select>
+                <!-- 🎯 CORRECCIÓN: Envolvemos el error en un *ngIf para que no se vea desde el inicio -->
+                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('categoryId')">
+                  La categoría es obligatoria para la organización del catálogo POS.
+                </small>
               </div>
 
-              <div
-                class="col-md-4"
-                [class.has-error-input]="isFieldInvalid('brandId')"
-              >
-                <label class="form-label small fw-bold text-secondary mb-1"
-                  >Marca / Fabricante</label
-                >
-                <select
-                  class="form-select bg-light text-dark border-light fw-semibold"
-                  formControlName="brandId"
-                >
-                  <option value="" disabled>Seleccione...</option>
-                  <option *ngFor="let brand of brandsList" [value]="brand.id">
-                    🏷️ {{ brand.name }}
-                  </option>
+               <div class="col-md-4" [class.has-error-input]="isFieldInvalid('brandId')">
+                <label class="form-label small fw-bold text-secondary mb-1">Marca / Fabricante</label>
+                <select class="form-select bg-light text-dark border-light fw-semibold"
+                        formControlName="brandId"
+                        [class.is-invalid]="isFieldInvalid('brandId')">
+                  <option value="" disabled selected>Seleccione Marca...</option>
+                  <option *ngFor="let brand of brandsList" [value]="brand.id">🏷️ {{ brand.name }}</option>
                 </select>
+                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('brandId')">
+                  Debe seleccionar una marca (o elegir 'Genérico').
+                </small>
               </div>
             </div>
 
@@ -487,41 +491,32 @@
           <!-- ========================================================================= -->
           <div *ngIf="activeTab === 'precios'" class="tab-content-fade">
             <div class="row g-3 mb-3">
-              <div
-                class="col-md-6"
-                [class.has-error-input]="isFieldInvalid('currencyParamId')"
-              >
-                <label class="form-label small fw-bold text-secondary mb-1"
-                  >Moneda Comercial (PEN, USD, EUR)</label
-                >
-                <select
-                  class="form-select bg-light text-dark border-light fw-semibold"
-                  formControlName="currencyParamId"
-                >
-                  <option value="" disabled>Seleccione...</option>
-                  <option *ngFor="let curr of currenciesList" [value]="curr.id">
-                    💰 {{ curr.code }} - {{ curr.name }}
-                  </option>
-                </select>
-              </div>
-
-              <div
-                class="col-md-6"
-                [class.has-error-input]="isFieldInvalid('taxTypeParamId')"
-              >
-                <label class="form-label small fw-bold text-secondary mb-1"
-                  >Tipo de Afectación (Impuesto IGV)</label
-                >
-                <select
-                  class="form-select bg-light text-dark border-light fw-semibold"
-                  formControlName="taxTypeParamId"
-                >
-                  <option value="" disabled>Seleccione...</option>
-                  <option *ngFor="let tax of taxesList" [value]="tax.id">
-                    ⚖️ {{ tax.name }}
-                  </option>
-                </select>
-              </div>
+               <div class="col-md-6" [class.has-error-input]="isFieldInvalid('currencyParamId')">
+                                <label class="form-label small fw-bold text-secondary mb-1">Moneda Comercial (PEN, USD, EUR)</label>
+                                <select class="form-select bg-light text-dark border-light fw-semibold"
+                                        formControlName="currencyParamId"
+                                        [class.is-invalid]="isFieldInvalid('currencyParamId')">
+                                    <option value="" disabled selected>Seleccione Moneda...</option>
+                                    <option *ngFor="let curr of currenciesList" [value]="curr.id">💰 {{ curr.code }} - {{ curr.name }}</option>
+                                </select>
+                                <!-- 🎯 CORRECCIÓN: Envolvemos en *ngIf amarrado a tu CSS de alerta -->
+                                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('currencyParamId')">
+                                    La selección de la moneda comercial es obligatoria para la consistencia contable.
+                                </small>
+                            </div>
+             <div class="col-md-6" [class.has-error-input]="isFieldInvalid('taxTypeParamId')">
+                                <label class="form-label small fw-bold text-secondary mb-1">Tipo de Afectación (Impuesto IGV)</label>
+                                <select class="form-select bg-light text-dark border-light fw-semibold"
+                                        formControlName="taxTypeParamId"
+                                        [class.is-invalid]="isFieldInvalid('taxTypeParamId')">
+                                    <option value="" disabled selected>Seleccione Impuesto IGV...</option>
+                                    <option *ngFor="let tax of taxesList" [value]="tax.id">⚖️ {{ tax.name }}</option>
+                                </select>
+                                <!-- 🎯 CORRECCIÓN: Envolvemos en *ngIf amarrado a tu CSS de alerta -->
+                                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('taxTypeParamId')">
+                                    El tipo de afectación tributaria es requerido por normativas de la SUNAT.
+                                </small>
+                            </div>
             </div>
 
             <div class="row g-3 mb-2">
@@ -612,23 +607,19 @@
             </div>
 
             <div class="row g-3 mb-3">
-              <div
-                class="col-md-6"
-                [class.has-error-input]="isFieldInvalid('unitMeasureParamId')"
-              >
-                <label class="form-label small fw-bold text-secondary mb-1"
-                  >Unidad de Medida (Unidad, Servicio)</label
-                >
-                <select
-                  class="form-select bg-light text-dark border-light fw-semibold"
-                  formControlName="unitMeasureParamId"
-                >
-                  <option value="" disabled>Seleccione...</option>
-                  <option *ngFor="let unit of unitsList" [value]="unit.id">
-                    📦 {{ unit.name }}
-                  </option>
-                </select>
-              </div>
+              <div class="col-md-6" [class.has-error-input]="isFieldInvalid('unitMeasureParamId')">
+                                <label class="form-label small fw-bold text-secondary mb-1">Unidad de Medida Comercial</label>
+                                <select class="form-select bg-light text-dark border-light fw-semibold"
+                                        formControlName="unitMeasureParamId"
+                                        [class.is-invalid]="isFieldInvalid('unitMeasureParamId')">
+                                    <option value="" disabled selected>Seleccione Unidad...</option>
+                                    <option *ngFor="let unit of unitsList" [value]="unit.id">⚖️ {{ unit.code }} - {{ unit.name }}</option>
+                                </select>
+                                <!-- 🎯 CORRECCIÓN: Envolvemos en *ngIf amarrado a tu CSS de alerta -->
+                                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('unitMeasureParamId')">
+                                    La unidad de medida es obligatoria para la validez del XML UBL 2.1.
+                                </small>
+                            </div>
 
               <div
                 class="col-md-6"
@@ -674,17 +665,17 @@
           </div>
 
           <!-- ========================================================================= -->
-          <!-- 🖼️ CONTENIDO DE PESTAÑA 4: IMÁGENES Y ADJUNTOS EN CALIENTE (POLIMÓRFICO) -->
+          <!-- 🖼️ SOLAPA 4: GALERÍA DE IMÁGENES Y ADJUNTOS EN LA NUBE REPOTENCIADA (REMIXICON) -->
           <!-- ========================================================================= -->
           <div *ngIf="activeTab === 'adjuntos'" class="tab-content-fade">
             <!-- 🚫 ESTADO CONTROLADO: Modo Creación bloquea subida por falta de ID Primary Key -->
             <div
               *ngIf="!isEditing"
               class="p-4 text-center bg-light border rounded-3 mb-3 text-secondary"
-              style="font-size: 13.5px"
+              style="font-size: 13px"
             >
               <i
-                class="bx bx-lock-alt text-warning d-block mb-2"
+                class="ri-lock-2-line text-warning d-block mb-2"
                 style="font-size: 34px"
               ></i>
               <strong class="text-dark d-block mb-1"
@@ -713,7 +704,7 @@
                 </div>
                 <div>
                   <label
-                    class="btn btn-sm btn-primary fw-bold text-white px-3 py-2 border-0 m-0 d-flex align-items-center gap-1"
+                    class="btn btn-sm btn-primary fw-bold text-white px-3 py-2 border-0 m-0 d-flex align-items-center gap-1.5"
                     style="
                       background-color: #2563eb;
                       cursor: pointer;
@@ -722,11 +713,10 @@
                     [class.disabled]="isUploadingFile"
                   >
                     <i
-                      class="bx"
-                      [ngClass]="
+                      [className]="
                         isUploadingFile
-                          ? 'bx-loader-alt bx-spin'
-                          : 'bx-cloud-upload fs-5'
+                          ? 'ri-loader-3-line spin-loader'
+                          : 'ri-upload-cloud-2-line fs-5'
                       "
                     ></i>
                     {{ isUploadingFile ? "Subiendo..." : "Cargar Archivo" }}
@@ -747,7 +737,7 @@
                 class="text-center py-4 border border-dashed rounded-3 mb-2 text-secondary bg-light"
               >
                 <i
-                  class="bx bx-images text-muted opacity-25 d-block mb-1.5"
+                  class="ri-images-line text-muted opacity-25 d-block mb-1.5"
                   style="font-size: 38px"
                 ></i>
                 <span class="small d-block fw-semibold"
@@ -759,42 +749,26 @@
                 </p>
               </div>
 
-              <!-- 🚀 CUADRÍCULA DE GALERÍA ACTIVA (MYSQL + COBERTURA DARK) -->
-              <div class="gallery-grid" *ngIf="productImages.length > 0">
+              <!-- 🚀 CUADRÍCULA DE GALERÍA ACTIVA REPOTENCIADA (CLOUDFLARE R2 + REMIXICON) -->
+              <div
+                class="gallery-grid d-flex flex-wrap gap-3"
+                *ngIf="productImages.length > 0"
+              >
                 <div
-                  class="gallery-card shadow-sm border"
+                  class="gallery-card shadow-sm border position-relative bg-white rounded-3 overflow-hidden"
                   *ngFor="let img of productImages"
+                  [style.border-color]="img.isMainPhoto ? '#eab308' : '#e2e8f0'"
+                  style="width: 140px; transition: all 0.2s"
                 >
-                  <!-- Contenedor Imagen -->
-                  <div class="gallery-img-wrapper p-1">
-                    <img
-                      *ngIf="img.fileExtension !== 'pdf'"
-                      [src]="STORAGE_BASE + img.fileUrl"
-                      class="gallery-img"
-                      alt="Vista previa"
-                    />
-                    <!-- Icono representativo si es un documento técnico PDF -->
-                    <div
-                      *ngIf="img.fileExtension === 'pdf'"
-                      class="text-center text-danger"
-                    >
-                      <i class="bx bxs-file-pdf" style="font-size: 48px"></i>
-                      <small
-                        class="text-muted d-block font-monospace px-1 text-truncate"
-                        style="max-width: 110px; font-size: 10px"
-                        >{{ img.fileName }}</small
-                      >
-                    </div>
-                  </div>
-
-                  <!-- Barra de Acciones de Estrella (Foto Principal por Default) -->
+                  <!-- 🎯 BOTÓN INTERACTIVO FLOTANTE DE PORTADA PRINCIPAL -->
                   <div
-                    class="gallery-actions-bar d-flex justify-content-between align-items-center"
+                    class="position-absolute top-0 start-0 p-1"
+                    style="z-index: 10"
                   >
-                    <!-- 🌟 CORRECCIÓN: Cambiamos br por img para que Angular lea la metadata real de MySQL -->
                     <button
                       type="button"
-                      class="btn btn-sm border-0 p-1 bg-transparent shadow-none d-flex align-items-center"
+                      class="btn p-1 bg-white bg-opacity-90 rounded-circle shadow-sm border-0 d-flex align-items-center justify-content-center"
+                      style="width: 24px; height: 24px"
                       (click)="setMainPhoto(img.id)"
                       [title]="
                         img.isMainPhoto
@@ -803,18 +777,64 @@
                       "
                     >
                       <i
-                        class="bx fs-5"
-                        [ngClass]="
+                        [className]="
                           img.isMainPhoto
-                            ? 'bxs-star btn-star-active'
-                            : 'bx-star btn-star-inactive'
+                            ? 'ri-star-fill text-warning'
+                            : 'ri-star-line text-muted'
                         "
+                        style="font-size: 14px"
                       ></i>
                     </button>
+                  </div>
 
+                  <!-- Contenedor Imagen / Documento -->
+                  <div
+                    class="gallery-img-wrapper bg-light d-flex align-items-center justify-content-center"
+                    style="height: 110px; overflow: hidden"
+                  >
+                    <!-- Si es imagen, pintamos la previsualización directa desde Cloudflare R2 -->
+                    <img
+                      *ngIf="img.fileExtension !== 'pdf'"
+                      [src]="img.fileUrl"
+                      class="w-100 h-100"
+                      style="object-fit: cover"
+                      alt="Vista previa"
+                    />
+
+                    <!-- Icono representativo si es un documento técnico PDF con RemixIcon -->
+                    <div
+                      *ngIf="img.fileExtension === 'pdf'"
+                      class="text-center"
+                    >
+                      <i
+                        class="ri-file-pdf-2-fill text-danger"
+                        style="font-size: 42px; color: #dc2626 !important"
+                      ></i>
+                      <span
+                        class="d-block text-muted font-monospace mt-1 text-truncate px-2"
+                        style="font-size: 9px; max-width: 130px"
+                        [title]="img.fileName"
+                      >
+                        {{ img.fileName }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Barra de Detalles Inferior -->
+                  <div
+                    class="gallery-actions-bar p-2 bg-white border-top d-flex justify-content-between align-items-center"
+                    style="font-size: 11px"
+                  >
                     <span
-                      class="badge text-uppercase font-monospace text-secondary bg-light-subtle small px-1.5 py-0.5"
-                      style="font-size: 9px; border-radius: 3px"
+                      class="text-dark font-monospace text-truncate d-block fw-semibold"
+                      style="max-width: 85px"
+                      [title]="img.fileName"
+                    >
+                      {{ img.fileName }}
+                    </span>
+                    <span
+                      class="badge text-uppercase font-monospace text-secondary bg-light border px-1"
+                      style="font-size: 8.5px; border-radius: 3px"
                     >
                       .{{ img.fileExtension }}
                     </span>

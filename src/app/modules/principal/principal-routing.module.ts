@@ -4,6 +4,7 @@ import { LayoutComponent } from './layout/layout.component';
 import { authGuard } from '../../core/guards/auth.guard';
 import { SecurityMatrixComponent } from './pages/security-matrix/security-matrix.component';
 import { UserCrudComponent } from './pages/user-crud/user-crud.component';
+import { RoleCrudComponent } from './pages/role-crud/role-crud.component';
 
 const routes: Routes = [
   {
@@ -60,6 +61,7 @@ const routes: Routes = [
       },
       { path: 'security', component: SecurityMatrixComponent },
       { path: 'users', component: UserCrudComponent },
+      { path: 'roles', component: RoleCrudComponent },
       { path: '', redirectTo: 'entities', pathMatch: 'full' },
     ],
   },

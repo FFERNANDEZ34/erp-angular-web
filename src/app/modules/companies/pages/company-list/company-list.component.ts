@@ -172,6 +172,31 @@ export class CompanyListComponent implements OnInit, OnDestroy {
     });
   }
 
+  setMainPhoto(attachmentId: number): void {
+    if (!this.selectedCompanyId || !attachmentId) return;
+
+    this.isUploadingFile = true; // Bloqueamos preventivamente las acciones de la UI
+    this.cdr.detectChanges();
+
+    console.log(`📡 [COMPANÍAS MULTIMEDIA] Marcando adjunto #${attachmentId} como logo oficial.`);
+
+    // Construimos la petición apuntando a tu endpoint centralizado /api/attachments/:id/main
+    this.http.patch<any>(`${this.ATTACHMENT_API_URL}/${attachmentId}/main`, {
+      relatedRecordId: this.selectedCompanyId
+    }).subscribe({
+      next: (res) => {
+        this.isUploadingFile = false;
+        console.log('✅ Logotipo oficial actualizado con éxito en la nube.');
+        this.loadCompanyAttachments(); // 🔄 Recargamos el carrete para que pinte la estrella dorada en vivo
+      },
+      error: (err) => {
+        this.isUploadingFile = false;
+        alert(err?.error?.message || 'Error al cambiar el logotipo oficial de la empresa.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+  
   onFilterChange(): void { this.searchSubject.next(); }
   onPageSizeChange(newSize: number): void { this.pageSize = Number(newSize); this.currentPage = 1; this.loadEntities(); }
   changePage(page: number): void { if (page >= 1 && page <= this.totalPages) { this.currentPage = page; this.loadEntities(); } }
