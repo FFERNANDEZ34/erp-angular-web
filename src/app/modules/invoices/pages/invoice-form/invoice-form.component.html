@@ -1,42 +1,42 @@
+
 <div class="page-header-title mb-4">
   <h1 class="h4 fw-bold text-dark mb-1">
-    Módulo de Emisión Electrónica Directa (POS)
+    <i class="ri-terminal-window-line text-primary me-1"></i> Módulo de Emisión Electrónica Directa (POS)
   </h1>
   <p class="text-muted small m-0">
-    Gatille comprobantes oficiales SUNAT o documentos comerciales de control
-    interno con cálculo contable en vivo
+    Gatille comprobantes oficiales SUNAT o documentos comerciales de control interno con cálculo contable en vivo
   </p>
 </div>
 
 <!-- Formulario Reactivo Maestro de Ventas -->
 <form [formGroup]="invoiceForm" (ngSubmit)="onSubmitInvoice()">
+  
   <!-- Banner de Captura de Errores Críticos del Backend -->
-  <div  #errorBannerAnchor
-    class="alert alert-danger p-2 small border-0 mb-3 rounded-3"
-    *ngIf="formErrorMessage"
-  >
-    <strong>Error en la Operación:</strong> {{ formErrorMessage }}
+  <div #errorBannerAnchor
+       class="alert alert-danger p-3 small border-0 mb-3 rounded-3 d-flex align-items-start gap-2 tab-content-fade"
+       *ngIf="formErrorMessage">
+    <i class="ri-error-warning-fill fs-5 text-danger mt-0.5"></i>
+    <div>
+      <strong class="text-dark d-block mb-0.5">Error en la Operación:</strong>
+      <span class="text-secondary d-block" style="line-height: 1.4">{{ formErrorMessage }}</span>
+    </div>
   </div>
 
   <div class="row g-3">
     <!-- 🗂️ COLUMNA IZQUIERDA: CONFIGURACIÓN FISCAL Y CLIENTE RECEPTOR -->
     <div class="col-lg-12">
       <div class="card border shadow-sm rounded-3 bg-white p-4 mb-3">
-        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">
-          <i class="bx bx-file text-primary me-1"></i> 1. Tipo de Comprobante y
-          Origen Financiero
+        <!-- Sección 1: Tipo de Comprobante y Origen Financiero -->
+        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3 d-flex align-items-center gap-1.5">
+          <i class="ri-file-text-line text-primary fs-5"></i> 1. Tipo de Comprobante y Origen Financiero
         </h6>
 
         <div class="row g-3 mb-4">
           <!-- Campo A: Tipo de Documento -->
           <div class="col-md-3">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Tipo de Registro</label
-            >
-            <select
-              class="form-select form-select-sm bg-light text-dark border-light fw-bold"
-              formControlName="documentType"
-            >
+            <label class="form-label small fw-bold text-secondary mb-1">Tipo de Registro</label>
+            <select class="form-select form-select-sm bg-light text-dark border-light fw-bold"
+                    formControlName="documentType">
               <!-- 🌟 Iteración Dinámica -->
               <option *ngFor="let doc of documentTypesList" [value]="doc.code">
                 📄 {{ doc.name }}
@@ -45,39 +45,24 @@
           </div>
 
           <!-- Campo B: Selección del Talonario / Serie -->
-          <div
-            class="col-md-3"
-            [class.has-error-input]="isFieldInvalid('seriesId')"
-          >
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Prefijo / Serie Asignada</label
-            >
-            <select
-              class="form-select form-select-sm bg-light text-dark border-light fw-bold font-monospace"
-              formControlName="seriesId"
-            >
+          <div class="col-md-3" [class.has-error-input]="isFieldInvalid('seriesId')">
+            <label class="form-label small fw-bold text-secondary mb-1">Prefijo / Serie Asignada</label>
+            <select class="form-select form-select-sm bg-light text-dark border-light fw-bold font-monospace"
+                    formControlName="seriesId">
               <option value="" disabled>Seleccione serie...</option>
               <option *ngFor="let s of filteredSeries" [value]="s.id">
                 {{ s.series }} (Próximo: {{ s.currentNumber + 1 }})
               </option>
             </select>
-            <small
-              class="text-danger extra-small-err"
-              *ngIf="isFieldInvalid('seriesId')"
-              >Talonario obligatorio.</small
-            >
+            <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('seriesId')">Talonario obligatorio.</small>
           </div>
 
           <!-- Campo C: Divisa / Moneda -->
           <div class="col-md-3">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Moneda Comercial</label
-            >
-            <select
-              class="form-select form-select-sm bg-light text-dark border-light fw-semibold"
-              formControlName="currencyCode"
-              (change)="onCurrencyChange($any($event.target).value)"
-            >
+            <label class="form-label small fw-bold text-secondary mb-1">Moneda Comercial</label>
+            <select class="form-select form-select-sm bg-light text-dark border-light fw-semibold"
+                    formControlName="currencyCode"
+                    (change)="onCurrencyChange($any($event.target).value)">
               <!-- 🌟 Iteración Dinámica -->
               <option *ngFor="let curr of currenciesList" [value]="curr.code">
                 💰 {{ curr.name }} ({{ curr.code }})
@@ -87,97 +72,62 @@
 
           <!-- Campo D: Tipo de Cambio Diario -->
           <div class="col-md-3">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Factor Tipo Cambio</label
-            >
-            <input
-              type="number"
-              step="0.0001"
-              class="form-control form-control-sm bg-light text-dark border-light fw-semibold font-monospace"
-              formControlName="exchangeRate"
-            />
+            <label class="form-label small fw-bold text-secondary mb-1">Factor Tipo Cambio</label>
+            <input type="number"
+                   step="0.0001"
+                   class="form-control form-control-sm bg-light text-dark border-light fw-semibold font-monospace"
+                   formControlName="exchangeRate" />
           </div>
         </div>
-
-        <!-- ========================================================================= -->
-        <!-- 👤 BLOQUE ACTUALIZADO: BUSCADOR PREDICTIVO Y MODAL EXPRESS DE CLIENTE     -->
-        <!-- ========================================================================= -->
-        <h6
-          class="fw-bold text-dark border-bottom pb-2 mb-3 mt-2 d-flex align-items-center justify-content-between"
-        >
-          <span
-            ><i class="bx bx-group text-primary me-1"></i> 2. Información del
-            Cliente / Adquiriente</span
-          >
+        <!-- Sección 2: Información del Cliente / Adquiriente (Saneado con RemixIcon) -->
+        <h6 class="fw-bold text-dark border-bottom pb-2 mb-3 mt-2 d-flex align-items-center justify-content-between">
+          <span class="d-flex align-items-center gap-1.5">
+            <i class="ri-user-shared-line text-primary fs-5"></i> 2. Información del Cliente / Adquiriente
+          </span>
         </h6>
 
         <div class="row g-3">
           <!-- Campo Predictivo Intermedio: Filtrar en caliente -->
           <div class="col-md-4">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Filtrar por Nombre o RUC/DNI</label
-            >
+            <label class="form-label small fw-bold text-secondary mb-1">Filtrar por Nombre o RUC/DNI</label>
             <div class="input-group input-group-sm">
               <!-- 🚀 El motor de filtrado: Captura las pulsaciones del cajero al vuelo -->
-              <input
-                type="text"
-                class="form-control bg-white text-dark shadow-none border"
-                [(ngModel)]="searchCustomerTerm"
-                [ngModelOptions]="{ standalone: true }"
-                (input)="onSearchCustomer()"
-                placeholder="Escriba para filtrar..."
-              />
+              <input type="text"
+                     class="form-control bg-white text-dark shadow-none border"
+                     [(ngModel)]="searchCustomerTerm"
+                     [ngModelOptions]="{ standalone: true }"
+                     (input)="onSearchCustomer()"
+                     placeholder="Escriba para filtrar..." />
 
-              <!-- Gatillo Express: Abre la ventana modal pequeña para registrar al vuelo -->
-              <!-- <button
-                class="btn input-group-append-btn border-0 fw-bold d-flex align-items-center px-2.5"
-                type="button"
-                (click)="showCustomerModal = true"
-                title="Registrar Cliente al Vuelo"
-              >
-                <i class="bx bx-user-plus fs-5"></i>
-              </button> -->
-              <button
-                class="btn input-group-append-btn border-0 fw-bold d-flex align-items-center px-2.5"
-                type="button"
-                (click)="openCustomerExpressModal()"
-                title="Registrar Cliente al Vuelo"
-              >
-                <i class="bx bx-user-plus fs-5"></i>
+              <!-- Gatillo Express con RemixIcon: Abre la ventana modal pequeña para registrar al vuelo -->
+              <button class="btn input-group-append-btn border-0 fw-bold d-flex align-items-center px-2.5"
+                      type="button"
+                      (click)="openCustomerExpressModal()"
+                      title="Registrar Cliente al Vuelo">
+                <i class="ri-user-add-line fs-5"></i>
               </button>
             </div>
           </div>
 
           <!-- Selector Final del Cliente ya Filtrado -->
           <div class="col-md-8">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Seleccionar Cliente Confirmado</label
-            >
-            <select
-              class="form-select form-select-sm bg-light text-dark border-light fw-bold"
-              formControlName="customerId"
-            >
-              <option value="" disabled>
-                Seleccione de la lista filtrada...
-              </option>
-              <!-- 🌟 CORRECCIÓN: Renderizamos usando 'c.name' y 'c.documentNumber' validados en Postman -->
+            <label class="form-label small fw-bold text-secondary mb-1">Seleccionar Cliente Confirmado</label>
+            <select class="form-select form-select-sm bg-light text-dark border-light fw-bold"
+                    formControlName="customerId">
+              <option value="" disabled>Seleccione de la lista filtrada...</option>
+              <!-- 🌟 CORRECCIÓN: Renderizamos usando 'c.name' y 'c.documentNumber' validados -->
               <option *ngFor="let c of filteredCustomers" [value]="c.id">
                 👤 {{ c.name }} | Doc: {{ c.documentNumber }}
               </option>
             </select>
           </div>
         </div>
-
         <!-- Campos de Identidad Desglosados Fijos de Abajo -->
         <div class="row g-3 mt-1">
           <div class="col-md-3">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Tipo de Doc. Identidad</label
-            >
-            <select
-              class="form-select form-select-sm bg-light text-dark border-light fw-semibold"
-              formControlName="customerIdentityType"
-            >
+            <label class="form-label small fw-bold text-secondary mb-1">Tipo de Doc. Identidad</label>
+            
+            <select class="form-select form-select-sm bg-light text-dark border-light fw-bold shadow-none" formControlName="customerIdentityType">
               <option value="" disabled>Seleccione...</option>
               <option *ngFor="let type of identityTypesList" [value]="type.code">
                 {{ type.name }}
@@ -185,39 +135,27 @@
             </select>
           </div>
           <div class="col-md-4">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Número de Documento</label
-            >
-            <input
-              type="text"
-              class="form-control form-control-sm bg-light text-dark border-light fw-bold"
-              formControlName="customerIdentityNumber"
-              placeholder="nro de Documento..."
-            />
+            <label class="form-label small fw-bold text-secondary mb-1">Número de Documento</label>
+            <input type="text"
+       class="form-control form-control-sm bg-light text-dark border-light small"
+       formControlName="customerIdentityNumber"
+        />
           </div>
           <div class="col-md-5">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Dirección de Despacho / Fiscal</label
-            >
-            <input
-              type="text"
-              class="form-control form-control-sm bg-light text-dark border-light small"
-              formControlName="customerAddress"
-              readonly
-            />
+            <label class="form-label small fw-bold text-secondary mb-1">Dirección de Despacho / Fiscal</label>
+            <input type="text"
+                   class="form-control form-control-sm bg-light text-dark border-light small"
+                   formControlName="customerAddress"
+                   readonly />
           </div>
         </div>
         <div class="row g-3 mt-1 mb-2">
           <div class="col-md-12">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Razón Social / Nombre Comercial Completo</label
-            >
-            <input
-              type="text"
-              class="form-control form-control-sm bg-light text-dark border-light fw-bold text-primary"
-              formControlName="customerName"
-              readonly
-            />
+            <label class="form-label small fw-bold text-secondary mb-1">Razón Social / Nombre Comercial Completo</label>
+            <input type="text"
+                   class="form-control form-control-sm bg-light text-dark border-light fw-bold text-primary"
+                   formControlName="customerName"
+                   readonly />
           </div>
         </div>
         <!-- ========================================================================= -->
@@ -227,57 +165,40 @@
     </div>
   </div>
   <!-- ========================================================================= -->
-  <!-- 🛒 PARTE 2: DETALLE MATRICIAL DE COMPRAS (CARRITO DE ARTÍCULOS)         -->
+  <!-- 🛒 PARTE 2: DETALLE MATRICIAL DE COMPRAS (CARRITO DE ARTÍCULOS - SANEADO) -->
   <!-- ========================================================================= -->
   <div class="row g-3 mt-1">
     <div class="col-lg-12">
       <div class="card border shadow-sm rounded-3 bg-white p-4">
-        <div
-          class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3"
-        >
-          <h6 class="fw-bold text-dark m-0">
-            <i class="bx bx-shopping-bag text-primary me-1"></i> 3. Detalle de
-            Ítems / Productos en Carrito
+        
+        <!-- Cabecera de la grilla transaccional -->
+        <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
+          <h6 class="fw-bold text-dark m-0 d-flex align-items-center gap-1.5">
+            <i class="ri-shopping-bag-3-line text-primary fs-5"></i> 3. Detalle de Ítems / Productos en Carrito
           </h6>
-          <!-- Botón operativo para añadir registros en blanco al array reactivo -->
-          <button
-            type="button"
-            class="btn btn-sm btn-success fw-bold d-flex align-items-center gap-1 border-0"
-            style="border-radius: 6px; padding: 4px 12px"
-            (click)="addDetailRow()"
-          >
-            <i class="bx bx-plus-circle fs-6"></i> Agregar Artículo
+          <!-- Botón operativo para añadir registros en blanco con RemixIcon -->
+          <button type="button"
+                  class="btn btn-sm btn-success fw-bold d-flex align-items-center gap-1.5 border-0 shadow-sm"
+                  style="border-radius: 6px; padding: 6px 14px; font-size: 12.5px;"
+                  (click)="addDetailRow()">
+            <i class="ri-add-circle-line fs-6"></i> Agregar Artículo
           </button>
         </div>
 
-        <!-- 📂 Carrete Informativo de Carrito Vacío -->
-        <div
-          *ngIf="detailsFormArray.length === 0"
-          class="text-center py-5 border border-dashed rounded-3 bg-light text-secondary mb-3"
-        >
-          <i
-            class="bx bx-cart text-muted opacity-25 d-block mb-1.5"
-            style="font-size: 42px"
-          ></i>
-          <span class="small d-block fw-semibold"
-            >El carrito de ventas se encuentra vacío</span
-          >
+        <!-- 📂 Carrete Informativo de Carrito Vacío Re-potenciado con RemixIcon -->
+        <div *ngIf="detailsFormArray.length === 0"
+             class="text-center py-5 border border-dashed rounded-3 bg-light text-secondary mb-3 tab-content-fade">
+          <i class="ri-shopping-cart-line text-muted opacity-25 d-block mb-1.5" style="font-size: 42px"></i>
+          <span class="small d-block fw-semibold">El carrito de ventas se encuentra vacío</span>
           <p class="text-muted extra-small-err m-0">
-            Presione el botón "Agregar Artículo" para aperturar una fila
-            contable.
+            Presione el botón "Agregar Artículo" para aperturar una fila contable.
           </p>
         </div>
-
         <!-- 🚀 GRILLA DEL DETALLE MATRICIAL (FormArray) -->
-        <div
-          class="table-responsive text-start"
-          *ngIf="detailsFormArray.length > 0"
-        >
-          <table
-            class="table table-hover align-middle m-0"
-            style="min-width: 1000px; font-size: 13px"
-            formArrayName="details"
-          >
+        <div class="table-responsive text-start" *ngIf="detailsFormArray.length > 0">
+          <table class="table table-hover align-middle m-0"
+                 style="min-width: 1000px; font-size: 13px"
+                 formArrayName="details">
             <thead class="table-light text-secondary border-bottom">
               <tr>
                 <th style="width: 50px" class="text-center">#</th>
@@ -291,27 +212,20 @@
               </tr>
             </thead>
             <tbody class="border-0">
-              <tr
-                *ngFor="let row of detailsFormArray.controls; let i = index"
-                [formGroupName]="i"
-                style="transition: background 0.1s"
-              >
+              <tr *ngFor="let row of detailsFormArray.controls; let i = index"
+                  [formGroupName]="i"
+                  style="transition: background 0.1s">
+                
                 <!-- Índice correlativo -->
-                <td
-                  class="text-center text-secondary font-monospace fw-semibold"
-                >
+                <td class="text-center text-secondary font-monospace fw-semibold">
                   #{{ i + 1 }}
                 </td>
 
                 <!-- Selector dinámico de catálogo por fila -->
                 <td>
-                  <select
-                    class="form-select form-select-sm bg-light text-dark border-light fw-semibold"
-                    formControlName="productId"
-                    (change)="
-                      onProductSelectChange(i, $any($event.target).value)
-                    "
-                  >
+                  <select class="form-select form-select-sm bg-light text-dark border-light fw-semibold"
+                          formControlName="productId"
+                          (change)="onProductSelectChange(i, $any($event.target).value)">
                     <option value="" disabled>Seleccione artículo...</option>
                     <option *ngFor="let p of productsList" [value]="p.id">
                       📦 {{ p.name }}
@@ -321,53 +235,41 @@
 
                 <!-- Código físico inmutable en caliente -->
                 <td>
-                  <input
-                    type="text"
-                    class="form-control form-control-sm bg-light text-secondary border-light font-monospace small"
-                    formControlName="productCode"
-                    readonly
-                  />
+                  <input type="text"
+                         class="form-control form-control-sm bg-light text-secondary border-light font-monospace small"
+                         formControlName="productCode"
+                         readonly />
                 </td>
 
                 <!-- Tipo de Afectación Tributaria (Catálogo 07 SUNAT) -->
                 <td>
-                  <select
-                    class="form-select form-select-sm bg-light text-dark border-light fw-medium"
-                    formControlName="taxTypeCode"
-                  >
-                    <!-- 🌟 Iteración Dinámica basada en Catálogo 07 SUNAT -->
+                  <select class="form-select form-select-sm bg-light text-dark border-light fw-medium"
+                          formControlName="taxTypeCode">
                     <option *ngFor="let tax of taxTypesList" [value]="tax.code">
                       {{ tax.name }}
                     </option>
                   </select>
                 </td>
-
                 <!-- Cantidad Operativa -->
                 <td class="text-center">
-                  <input
-                    type="number"
-                    step="1"
-                    class="form-control form-control-sm bg-light text-dark border-light font-monospace text-center fw-bold"
-                    formControlName="quantity"
-                    style="max-width: 85px"
-                  />
+                  <input type="number"
+                         step="1"
+                         class="form-control form-control-sm bg-light text-dark border-light font-monospace text-center fw-bold"
+                         formControlName="quantity"
+                         style="max-width: 85px" />
                 </td>
 
-                <!-- Precio Unitario Bruto (Paga el cliente en caja) -->
+                <!-- Precio Unitario Bruto (Paga el cliente en caja con Símbolo Dinámico) -->
                 <td>
                   <div class="input-group input-group-sm">
-                    <span
-                      class="input-group-text bg-light border-light-subtle text-secondary font-monospace"
-                      style="font-size: 11px"
-                      > {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }}
-                      </span
-                    >
-                    <input
-                      type="number"
-                      step="0.01"
-                      class="form-control form-control-sm bg-light text-dark border-light font-monospace text-end fw-semibold"
-                      formControlName="unitPrice"
-                    />
+                    <span class="input-group-text bg-light border-light-subtle text-secondary font-monospace"
+                          style="font-size: 11px">
+                      {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }}
+                    </span>
+                    <input type="number"
+                           step="0.01"
+                           class="form-control form-control-sm bg-light text-dark border-light font-monospace text-end fw-semibold"
+                           formControlName="unitPrice" />
                   </div>
                 </td>
 
@@ -376,290 +278,192 @@
                   {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }}
                   {{
                     (+row.get("quantity")?.value || 0) *
-                      (+row.get("unitPrice")?.value || 0) | number: "1.2-2"
+                    (+row.get("unitPrice")?.value || 0) | number: "1.2-2"
                   }}
                 </td>
 
-                <!-- Botón eliminar fila -->
+                <!-- Botón eliminar fila Saneado con RemixIcon -->
                 <td class="text-center">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-link text-danger p-0 shadow-none border-0"
-                    (click)="removeDetailRow(i)"
-                  >
-                    <i class="bx bx-trash fs-5"></i>
+                  <button type="button"
+                          class="btn btn-sm btn-link text-danger p-0 shadow-none border-0 d-inline-flex align-items-center justify-content-center"
+                          (click)="removeDetailRow(i)">
+                    <i class="ri-delete-bin-line fs-5"></i>
                   </button>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-
         <!-- ========================================================================= -->
         <!-- 📊 PANEL DE RESUMEN CONTABLE GLOBAL Y TOTALES FINALES                    -->
         <!-- ========================================================================= -->
         <div class="row mt-4 pt-3 border-top g-3 align-items-start">
           <!-- Glosa oficial en letras requerida por SUNAT -->
           <div class="col-md-7 text-start">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Leyenda Legal del Importe Total (Automático)</label
-            >
-            <textarea
-              class="form-control bg-light text-secondary border-light font-monospace small text-uppercase"
-              rows="3"
-              formControlName="totalLetras"
-              readonly
-              placeholder="Glosa de la moneda en letras..."
-            ></textarea>
+            <label class="form-label small fw-bold text-secondary mb-1">Leyenda Legal del Importe Total (Automático)</label>
+            <textarea class="form-control bg-light text-secondary border-light font-monospace small text-uppercase"
+                      rows="3"
+                      formControlName="totalLetras"
+                      readonly
+                      placeholder="Glosa de la moneda en letras..."></textarea>
           </div>
 
           <!-- Cuadro resumido de matrices contables -->
           <div class="col-md-5">
-            <div
-              class="p-3 bg-light rounded-3 border"
-              style="font-size: 13.5px"
-            >
-              <div
-                class="d-flex justify-content-between align-items-center mb-2 text-secondary"
-              >
+            <div class="p-3 bg-light rounded-3 border" style="font-size: 13.5px">
+              <div class="d-flex justify-content-between align-items-center mb-2 text-secondary">
                 <span>Op. Gravada (Neto):</span>
-                <span class="font-monospace fw-semibold text-dark"
-                  > {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalGravada | number: "1.2-2" }}</span
-                >
+                <span class="font-monospace fw-semibold text-dark">
+                  {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalGravada | number: "1.2-2" }}
+                </span>
               </div>
-              <div
-                class="d-flex justify-content-between align-items-center mb-2 text-secondary"
-                *ngIf="totalExonerada > 0"
-              >
+              <div class="d-flex justify-content-between align-items-center mb-2 text-secondary" *ngIf="totalExonerada > 0">
                 <span>Op. Exonerada:</span>
-                <span class="font-monospace fw-semibold text-dark"
-                  > {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalExonerada | number: "1.2-2" }}</span
-                >
+                <span class="font-monospace fw-semibold text-dark">
+                  {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalExonerada | number: "1.2-2" }}
+                </span>
               </div>
-              <div
-                class="d-flex justify-content-between align-items-center mb-2 text-secondary"
-                *ngIf="totalInafecta > 0"
-              >
+              <div class="d-flex justify-content-between align-items-center mb-2 text-secondary" *ngIf="totalInafecta > 0">
                 <span>Op. Inafecta:</span>
-                <span class="font-monospace fw-semibold text-dark"
-                  > {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalInafecta | number: "1.2-2" }}</span
-                >
+                <span class="font-monospace fw-semibold text-dark">
+                  {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalInafecta | number: "1.2-2" }}
+                </span>
               </div>
-              <div
-                class="d-flex justify-content-between align-items-center mb-2 text-secondary border-bottom pb-2"
-              >
+              <div class="d-flex justify-content-between align-items-center mb-2 text-secondary border-bottom pb-2">
                 <span>I.G.V. Acumulado (18%):</span>
-                <span class="font-monospace fw-semibold text-dark"
-                  > {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalIgv | number: "1.2-2" }}</span
-                >
+                <span class="font-monospace fw-semibold text-dark">
+                  {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalIgv | number: "1.2-2" }}
+                </span>
               </div>
-              <div
-                class="d-flex justify-content-between align-items-center pt-1 fs-5 fw-bold text-dark"
-              >
+              <div class="d-flex justify-content-between align-items-center pt-1 fs-5 fw-bold text-dark">
                 <span>TOTAL A PAGAR:</span>
-                <span class="font-monospace text-primary"
-                  > {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalVenta | number: "1.2-2" }}</span
-                >
+                <span class="font-monospace text-primary">
+                  {{ getCurrencySymbol(invoiceForm.get('currencyCode')?.value) }} {{ totalVenta | number: "1.2-2" }}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Pie de página de gatillos operativos finales -->
+        <!-- Pie de página de gatillos operativos finales Saneado con RemixIcon -->
         <div class="d-flex justify-content-end gap-2 border-top pt-3 mt-4">
-          <button
-            type="button"
-            class="btn btn-light btn-sm px-4 border text-secondary shadow-none"
-            style="border-radius: 6px; height: 34px"
-            (click)="cancelForm()"
-          >
+          <button type="button"
+                  class="btn btn-light btn-sm px-4 border text-secondary shadow-none"
+                  style="border-radius: 6px; height: 34px"
+                  (click)="cancelForm()">
             Cancelar Operación
           </button>
-          <button
-            type="submit"
-            class="btn btn-primary btn-sm px-5 text-white fw-bold d-flex align-items-center gap-1.5 border-0 shadow-sm"
-            style="background-color: #2563eb; border-radius: 6px; height: 34px"
-            [disabled]="isLoading || detailsFormArray.length === 0"
-          >
-            <i
-              class="bx"
-              [ngClass]="
-                isLoading ? 'bx-loader-alt bx-spin' : 'bx-badge-check fs-5'
-              "
-            ></i>
-            {{
-              isLoading
-                ? "Emitiendo en MySQL..."
-                : "Firmar y Emitir Comprobante"
-            }}
+          <button type="submit"
+                  class="btn btn-primary btn-sm px-5 text-white fw-bold d-flex align-items-center gap-2 border-0 shadow-sm"
+                  style="background-color: #2563eb; border-radius: 6px; height: 34px"
+                  [disabled]="isLoading || detailsFormArray.length === 0">
+            <i [className]="isLoading ? 'ri-loader-3-line spin-loader' : 'ri-shield-check-line fs-5'"></i>
+            {{ isLoading ? "Emitiendo en MySQL..." : "Firmar y Emitir Comprobante" }}
           </button>
         </div>
       </div>
     </div>
   </div>
 </form>
-
 <!-- ========================================================================= -->
 <!-- 🚪 POPUP INTERNO MODAL: ALTA EXPRESS DE CLIENTES DESDE PUNTO DE VENTA     -->
 <!-- ========================================================================= -->
-<div
-  class="modal fade"
-  [class.show]="showCustomerModal"
-  [style.display]="showCustomerModal ? 'block' : 'none'"
-  tabindex="-1"
-  role="dialog"
-  aria-hidden="true"
->
+<div class="modal fade"
+     [class.show]="showCustomerModal"
+     [style.display]="showCustomerModal ? 'block' : 'none'"
+     tabindex="-1"
+     role="dialog"
+     aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
-    <div
-      class="modal-content border-0 shadow-lg modal-premium-radius bg-white text-dark"
-    >
-      <div
-        class="modal-header border-bottom border-light px-4 py-3 bg-light rounded-top d-flex align-items-center justify-content-between"
-      >
-        <h5 class="modal-title fw-bold text-dark fs-6 m-0">
-          👤 Alta Rápida de Cliente Express
+    <div class="modal-content border-0 shadow-lg modal-premium-radius bg-white text-dark">
+      
+      <!-- Cabecera del Modal -->
+      <div class="modal-header border-bottom border-light px-4 py-3 bg-light rounded-top d-flex align-items-center justify-content-between">
+        <h5 class="modal-title fw-bold text-dark fs-6 m-0 d-flex align-items-center gap-1.5">
+          <i class="ri-user-add-line text-primary fs-5"></i> Alta Rápida de Cliente Express
         </h5>
-
-        <button
-          type="button"
-          class="btn-close shadow-none border-0 bg-transparent text-secondary fs-4"
-          (click)="
-            showCustomerModal = false;
-            customerExpressForm.reset({ documentType: '1' })
-          "
-          aria-label="Close"
-        ></button>
+        <button type="button"
+                class="btn-close shadow-none border-0 bg-transparent text-secondary fs-4"
+                (click)="showCustomerModal = false; customerExpressForm.reset({ documentType: '1' })"
+                aria-label="Close">×</button>
       </div>
 
-      <form
-        [formGroup]="customerExpressForm"
-        (ngSubmit)="onSubmitExpressCustomer()"
-        *ngIf="customerExpressForm"
-      >
+      <form [formGroup]="customerExpressForm" (ngSubmit)="onSubmitExpressCustomer()" *ngIf="customerExpressForm">
         <div class="modal-body p-4 text-start">
-          <div
-            class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2 tab-content-fade"
-            *ngIf="formErrorMessage"
-          >
-            <i
-              class="bx bx-error-circle fs-4 mt-0.5"
-              style="color: #ef4444"
-            ></i>
+          
+          <!-- Banner de Errores Internos del Modal Express -->
+          <div class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2 tab-content-fade"
+               *ngIf="formErrorMessage">
+            <i class="ri-error-warning-fill fs-4 text-danger mt-0.5"></i>
             <div>
-              <strong class="text-dark d-block mb-0.5"
-                >Control de Catálogo Multi-Tenant</strong
-              >
-              <span
-                class="text-secondary small d-block"
-                style="line-height: 1.4"
-                >{{ formErrorMessage }}</span
-              >
+              <strong class="text-dark d-block mb-0.5">Control de Catálogo Multi-Tenant</strong>
+              <span class="text-secondary small d-block" style="line-height: 1.4">{{ formErrorMessage }}</span>
             </div>
           </div>
+
+          <!-- Tipo de Documento -->
           <div class="mb-3">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Tipo de Documento de Identidad</label
-            >
-            <!-- Usaremos una variable local o dejamos que el TypeScript infiera por la longitud del número ingresado -->
-            <select class="form-select bg-light text-dark border-light fw-bold shadow-none" 
-                    formControlName="documentType">
+            <label class="form-label small fw-bold text-secondary mb-1">Tipo de Documento de Identidad</label>
+            <select class="form-select bg-light text-dark border-light fw-bold shadow-none" formControlName="documentType">
               <option value="" disabled selected>Seleccione tipo...</option>
-              <!-- 🌟 REUTILIZACIÓN: Muestra exactamente las mismas opciones de MySQL en el popup -->
               <option *ngFor="let type of identityTypesList" [value]="type.code">
-                {{ type.name }}
-              </option>
+              {{ type.name }}</option>
             </select>
           </div>
-          <!-- RUC o DNI -->
-          <div class="mb-3">
-            <small
-              class="text-danger d-block mt-1 fw-semibold"
-              *ngIf="
-                customerExpressForm.get('documentNumber')?.invalid &&
-                (customerExpressForm.get('documentNumber')?.dirty ||
-                  customerExpressForm.get('documentNumber')?.touched)
-              "
-            >
-              <!-- Directiva RUC Express -->
-              <span
-                *ngIf="customerExpressForm.get('documentType')?.value === '6'"
-              >
-                ⚠️ El RUC comercial debe tener 11 dígitos y empezar con 10, 15,
-                17 o 20.
-              </span>
 
-              <!-- Directiva DNI Express -->
-              <span
-                *ngIf="customerExpressForm.get('documentType')?.value === '1'"
-              >
+          <!-- RUC o DNI con Validadores Condicionales -->
+          <div class="mb-3">
+            <small class="text-danger d-block mt-1 fw-semibold"
+                   *ngIf="customerExpressForm.get('documentNumber')?.invalid && (customerExpressForm.get('documentNumber')?.dirty || customerExpressForm.get('documentNumber')?.touched)">
+              <span *ngIf="customerExpressForm.get('documentType')?.value === '6'">
+                ⚠️ El RUC comercial debe tener 11 dígitos y empezar con 10, 15, 17 o 20.
+              </span>
+              <span *ngIf="customerExpressForm.get('documentType')?.value === '1'">
                 ⚠️ El DNI debe contener exactamente 8 caracteres numéricos.
               </span>
             </small>
 
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Número de Documento (RUC o DNI)</label
-            >
-            <input
-              type="text"
-              class="form-control bg-light text-dark border-light fw-bold"
-              formControlName="documentNumber"
-              placeholder="Ej: 20452368452"
-            />
-             <button class="btn btn-primary px-3 text-white fw-bold d-flex align-items-center gap-1 shadow-none" 
-                      type="button"
-                      [disabled]="isSearchingPadron"
-                      (click)="searchDocumentInNationalPadron()">
-                <i class="bx" [ngClass]="isSearchingPadron ? 'bx-loader-alt bx-spin' : 'bx-search-alt'"></i>
+            <label class="form-label small fw-bold text-secondary mb-1">Número de Documento (RUC o DNI)</label>
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control bg-light text-dark border-light fw-bold" formControlName="documentNumber" placeholder="Ej: 20452368452" />
+              <!-- Botón de consulta al Padrón Nacional Rápido -->
+              <button class="btn btn-primary px-3 text-white fw-bold d-flex align-items-center gap-1.5 shadow-none border-0" 
+                      type="button" [disabled]="isSearchingPadron" (click)="searchDocumentInNationalPadron()">
+                <i [className]="isSearchingPadron ? 'ri-loader-3-line spin-loader' : 'ri-search-eye-line fs-5'"></i>
                 <span>{{ isSearchingPadron ? '...' : 'Buscar' }}</span>
               </button>
+            </div>
           </div>
-
-          <!-- Razón Social o Nombres -->
+            <!-- Razón Social o Nombres -->
           <div class="mb-3">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Razón Social / Nombre Completo</label
-            >
-            <input
-              type="text"
-              class="form-control bg-light text-dark border-light fw-bold"
-              formControlName="name"
-              placeholder="Ej: Distribuidora Comercial S.A.C."
-            />
+            <label class="form-label small fw-bold text-secondary mb-1">Razón Social / Nombre Completo</label>
+            <input type="text"
+                   class="form-control bg-light text-dark border-light fw-bold"
+                   formControlName="name"
+                   placeholder="Ej: Distribuidora Comercial S.A.C." />
           </div>
 
           <!-- Dirección Fiscal -->
           <div class="mb-3">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Dirección Fiscal / Residencia</label
-            >
-            <input
-              type="text"
-              class="form-control bg-light text-dark border-light small"
-              formControlName="address"
-              placeholder="Ej: Av. Las Flores 450, Lima"
-            />
+            <label class="form-label small fw-bold text-secondary mb-1">Dirección Fiscal / Residencia</label>
+            <input type="text"
+                   class="form-control bg-light text-dark border-light small"
+                   formControlName="address"
+                   placeholder="Ej: Av. Las Flores 450, Lima" />
           </div>
         </div>
 
-        <div
-          class="modal-footer border-top border-light px-4 py-3 bg-light rounded-bottom d-flex justify-content-end gap-2"
-        >
-          <button
-            type="button"
-            class="btn btn-light btn-sm px-3 border text-secondary shadow-none"
-            (click)="
-              showCustomerModal = false;
-              customerExpressForm.reset({ documentType: '1' })
-            "
-          >
+        <!-- Pie del Modal Express -->
+        <div class="modal-footer border-top border-light px-4 py-3 bg-light rounded-bottom d-flex justify-content-end gap-2">
+          <button type="button"
+                  class="btn btn-light btn-sm px-3 border text-secondary shadow-none"
+                  (click)="showCustomerModal = false; customerExpressForm.reset({ documentType: '1' })">
             Cancelar
           </button>
-          <button
-            type="submit"
-            class="btn btn-success btn-sm px-4 text-white fw-bold"
-            [disabled]="isSavingCustomer"
-          >
+          <button type="submit"
+                  class="btn btn-success btn-sm px-4 text-white fw-bold d-flex align-items-center gap-1"
+                  [disabled]="isSavingCustomer">
+            <i class="ri-user-shared-line"></i>
             {{ isSavingCustomer ? "Guardando..." : "Inyectar al POS" }}
           </button>
         </div>
@@ -670,25 +474,24 @@
 
 <div class="modal-backdrop fade show" *ngIf="showCustomerModal"></div>
 
-
-<!-- 🌟 BANNER FLOTANTE DE ÉXITO EMISIÓN COMPROBANTES (TOAST PREMIUM) -->
+<!-- 🌟 BANNER FLOTANTE DE ÉXITO EMISIÓN COMPROBANTES (TOAST PREMIUM - SANEADO) -->
 <div #successToastAnchor class="position-fixed top-0 end-0 p-4" style="z-index: 9999;" *ngIf="showSuccessToast">
   <div class="toast show border-0 bg-white shadow-lg rounded-3 tab-content-fade animate-slide-in" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 320px;">
     
-    <!-- Cabecera del Mensaje -->
+    <!-- Cabecera del Mensaje con RemixIcon -->
     <div class="toast-header bg-success text-white border-0 py-2.5 px-3 rounded-top-3 d-flex align-items-center justify-content-between">
       <div class="d-flex align-items-center gap-2">
-        <i class="bx bx-check-shield fs-4 text-white"></i>
+        <i class="ri-shield-check-line fs-4 text-white"></i>
         <strong class="me-auto fw-bold font-monospace small" style="letter-spacing: 0.5px;">SISTEMA TRANSACCIONAL</strong>
       </div>
       <button type="button" class="btn-close btn-close-white shadow-none small" (click)="showSuccessToast = false" aria-label="Close"></button>
     </div>
     
     <!-- Cuerpo Detallado del Éxito Comercial -->
-    <div  class="toast-body p-3">
+    <div class="toast-body p-3">
       <div class="d-flex align-items-start gap-2.5">
         <div class="bg-success bg-opacity-10 p-2 rounded-circle text-success mt-0.5">
-          <i class="bx bx-receipt fs-3"></i>
+          <i class="ri-article-line fs-3"></i>
         </div>
         <div class="flex-fill">
           <h6 class="text-dark fw-bold mb-0.5" style="font-size: 14px;">¡Emisión Completada!</h6>
@@ -706,6 +509,9 @@
   </div>
 </div>
 
+<!-- ========================================================================= -->
+<!-- 🚪 PASARELA DE COBRO Y CAJA DE FACTURACIÓN (SANEADO CON REMIXICON)         -->
+
 <div class="modal fade show d-block bg-dark bg-opacity-70 tab-content-fade" *ngIf="showPaymentModal" style="z-index: 10050;">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg bg-white rounded-3">
@@ -713,7 +519,7 @@
       <!-- Cabecera Contable -->
       <div class="modal-header bg-dark text-white py-3 px-4 rounded-top-3 justify-content-between align-items-center d-flex">
         <div class="d-flex align-items-center gap-2">
-          <i class="bx bx-wallet fs-3 text-warning"></i>
+          <i class="ri-wallet-3-line fs-3 text-warning"></i>
           <div>
             <h6 class="modal-title fw-bold font-monospace mb-0" style="font-size: 14px;">PASARELA DE COBRO Y CAJA</h6>
             <span class="text-light-subtle small font-sans-serif" style="font-size: 11px; opacity: 0.8;">Comprobante Emitido: {{ generatedInvoiceNumber }}</span>
@@ -788,7 +594,7 @@
                 class="btn btn-sm btn-success fw-bold rounded-2 px-4 shadow-none d-flex align-items-center gap-1.5"
                 [disabled]="isSavingPayment" 
                 (click)="onConsolidatePayment()">
-          <i class="bx font-monospace" [ngClass]="isSavingPayment ? 'bx-loader-alt bx-spin fs-5' : 'bx-check-shield fs-5'"></i>
+          <i [className]="isSavingPayment ? 'ri-loader-3-line spin-loader' : 'ri-shield-check-line fs-5'"></i>
           <span>{{ isSavingPayment ? 'Procesando Abono...' : 'Confirmar y Liquidar Caja' }}</span>
         </button>
       </div>

@@ -1,14 +1,19 @@
+<!-- ========================================================================= -->
+<!-- 📊 HISTORIAL DE VENTAS: CABECERA Y FILTROS INTEGRADOS EN REMIXICON       -->
+<!-- ========================================================================= -->
 <div class="page-header-title mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
   <div>
-    <h1 class="h4 fw-bold text-dark mb-1">Registro y Control de Ventas</h1>
+    <h1 class="h4 fw-bold text-dark mb-1">
+      <i class="ri-file-list-3-line text-primary me-1"></i> Registro y Control de Ventas
+    </h1>
     <p class="text-muted small m-0">Audite el historial de comprobantes oficiales SUNAT y documentos de control interno emitidos por su holding</p>
   </div>
   <div>
-    <!-- 🚀 Botón Maestro de Redirección hacia tu Formulario Complejo POS -->
-    <button class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-1.5 border-0 shadow-sm" 
+    <!-- 🚀 Botón Maestro: Redirección hacia tu Formulario Complejo POS con RemixIcon -->
+    <button class="btn btn-primary fw-bold d-flex align-items-center justify-content-center gap-2 border-0 shadow-sm" 
             style="background-color: #2563eb; border-radius: 6px; padding: 0 16px; height: 36px; font-size: 13.5px;" 
             type="button" (click)="navigateToCreate()">
-      <i class="bx bx-cart-add fs-5"></i> Emitir Nuevo Comprobante (POS)
+      <i class="ri-shopping-cart-2-line fs-5"></i> Emitir Nuevo Comprobante (POS)
     </button>
   </div>
 </div>
@@ -45,8 +50,7 @@
 
     </div>
   </div>
-
-  <!-- REJILLA DE DATOS / RESPONSIVE TABLE -->
+   <!-- REJILLA DE DATOS / RESPONSIVE TABLE CON REMIXICON -->
   <div class="table-responsive text-start">
     <table class="table table-hover align-middle m-0" style="min-width: 1050px; font-size: 13px;">
       <thead class="table-light text-secondary border-bottom">
@@ -63,26 +67,26 @@
       </thead>
       <tbody class="border-0">
         
-        <!-- ⏳ ANIMACIÓN DE ESPERA DE RED -->
+        <!-- ⏳ ANIMACIÓN DE ESPERA DE RED REPOTENCIADA -->
         <tr *ngIf="isLoading">
           <td colspan="8" class="text-center py-5 text-muted">
-            <i class="bx bx-loader-alt bx-spin text-primary fs-3 d-block mb-2"></i>
+            <i class="ri-loader-3-line spin-loader text-primary fs-3 d-block mb-2"></i>
             <span class="fw-semibold">Abriendo libros contables en MySQL...</span>
           </td>
         </tr>
 
-        <!-- 📂 PANEL DE CATÁLOGO VACÍO -->
+        <!-- 📂 PANEL DE CATÁLOGO VACÍO CON REMIXICON -->
         <tr *ngIf="!isLoading && invoices.length === 0">
           <td colspan="8" class="text-center py-5 bg-white">
             <div class="py-4">
-              <i class="bx bx-receipt text-muted opacity-25 d-block mb-2" style="font-size: 48px;"></i>
+              <i class="ri-bill-line text-muted opacity-25 d-block mb-2" style="font-size: 48px;"></i>
               <h6 class="text-dark fw-bold m-0">No se registran transacciones de venta</h6>
               <p class="text-muted small m-0">Presione el botón superior para realizar su primera facturación en el sistema.</p>
             </div>
           </td>
         </tr>
 
-        <!-- 🚀 ITERACIÓN RECURSIVA EN VIVO DESDE MYSQL -->
+        <!-- 🚀 ITERACIÓN RECURSIVA EN VIVO DESDE MYSQL (SANEADO CON REMIXICON) -->
         <tr *ngFor="let inv of invoices" style="transition: background 0.15s;">
           <td class="px-4 text-secondary font-monospace">#{{ inv.id }}</td>
           <td>
@@ -123,20 +127,19 @@
             </div>
           </td>
           <td class="text-center">
-            <!-- Botón Único de Anulación Contable Segura -->
+            <!-- Botón Único de Anulación Contable Segura con RemixIcon -->
             <button class="btn btn-sm border bg-white text-danger shadow-none p-1 d-flex align-items-center justify-content-center" 
                     style="width: 28px; height: 28px; border-radius: 6px;" type="button" 
                     [disabled]="inv.paymentStatus === 'ANULADO' || inv.sunatStatus === 'ACEPTADO'"
                     (click)="onCancelInvoice(inv.id, inv.fullDocumentNumber)" title="Anular Comprobante Interno o Pendiente">
-              <i class="bx bx-block fs-5"></i>
+              <i class="ri-close-circle-line fs-5"></i>
             </button>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
-
-  <!-- 📑 PIE DE PAGINACIÓN ADAPTATIVA Y FILAS DINÁMICAS -->
+  <!-- 📑 PIE DE PAGINACIÓN ADAPTATIVA Y FILAS DINÁMICAS CON REMIXICON -->
   <div class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3" *ngIf="totalRecords > 0">
     <div class="d-flex align-items-center gap-3 text-secondary" style="font-size: 12px;">
       <div>
@@ -157,17 +160,18 @@
       </div>
     </div>
 
+    <!-- Controles de Navegación con Glifos Premium de RemixIcon -->
     <div class="d-flex align-items-center gap-2">
       <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2" 
-              [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" style="width: 32px; height: 32px;">
-        <i class="bx bx-chevron-left fs-4"></i>
+              [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" style="width: 32px; height: 32px; border-radius: 6px;">
+        <i class="ri-arrow-left-s-line fs-4"></i>
       </button>
       <div class="text-secondary fw-semibold mx-1" style="font-size: 12px; user-select: none;">
         Página <span class="text-dark fw-bold">{{ currentPage }}</span> de {{ totalPages }}
       </div>
       <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2" 
-              [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)" style="width: 32px; height: 32px;">
-        <i class="bx bx-chevron-right fs-4"></i>
+              [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)" style="width: 32px; height: 32px; border-radius: 6px;">
+        <i class="ri-arrow-right-s-line fs-4"></i>
       </button>
     </div>
   </div>

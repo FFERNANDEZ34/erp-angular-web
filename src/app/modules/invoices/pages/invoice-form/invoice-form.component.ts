@@ -982,6 +982,11 @@ export class InvoiceFormComponent implements OnInit {
         // 3. 🚀 DISPARAMOS EL MODAL FINANCIERO DE COBRO (Estilo Odoo)
         // La pantalla del POS se queda intacta atrás, bloqueada y congelada
         this.showPaymentModal = true;
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: 'smooth' // Desplazamiento fluido y elegante estilo premium
+        });
         this.cdr.detectChanges();
       },
       error: (err) => {
