@@ -107,41 +107,44 @@ export class ProductListComponent implements OnInit, OnDestroy {
     return symbolDictionary[codeStr] || codeStr;
   }
 
-  private loadFormParameters(): void {
-    const url = `${environment.apiUrl}/products/parameters`;
+   private loadFormParameters(): void {
+    // 🔌 Declaramos los dos destinos de red según la procedencia de los datos
+    const parametersUrl = `${environment.apiUrl}/products/parameters`;
+    const productsBaseUrl = `${environment.apiUrl}/products`;
 
-    // El interceptor adjuntará de forma transparente las cabeceras de seguridad
+    console.log('📡 [COMBINE_LATEST SaaS] Sincronizando catálogos mixtos (Globales + Multi-Company)...');
+
+    // Despachamos el pool de peticiones en paralelo a la velocidad del rayo
     combineLatest([
-      this.http.get<{ data: ParameterOption[] }>(`${url}?type=CATEGORIA`),
-      this.http.get<{ data: ParameterOption[] }>(`${url}?type=MARCA`),
-      this.http.get<{ data: ParameterOption[] }>(`${url}?type=MONEDA`),
-      this.http.get<{ data: ParameterOption[] }>(
-        `${url}?type=TIPO_AFECTACION_IGV`,
-      ),
-      this.http.get<{ data: ParameterOption[] }>(`${url}?type=UNIDAD_MEDIDA`),
+      // 🎯 NUEVAS TABLAS: Categorías y Marcas independientes aisladas por tu companyId
+      this.http.get<{ data: ParameterOption[] }>(`${productsBaseUrl}/categories`),
+      this.http.get<{ data: ParameterOption[] }>(`${productsBaseUrl}/brands`),
+      
+      // 🔌 TABLA AUXILIAR: Catálogos regulatorios universales de la SUNAT
+      this.http.get<{ data: ParameterOption[] }>(`${parametersUrl}?type=MONEDA`),
+      this.http.get<{ data: ParameterOption[] }>(`${parametersUrl}?type=TIPO_AFECTACION_IGV`),
+      this.http.get<{ data: ParameterOption[] }>(`${parametersUrl}?type=UNIDAD_MEDIDA`),
     ]).subscribe({
       next: ([cats, brands, curs, taxes, units]) => {
+        // 1. Poblamos de forma líquida las colecciones reactivas de tu monitor
         this.categoriesList = cats.data || [];
         this.brandsList = brands.data || [];
         this.currenciesList = curs.data || [];
         this.taxesList = taxes.data || [];
         this.unitsList = units.data || [];
 
-        // Seteamos dinámicamente los primeros elementos válidos por defecto en el FormGroup si las listas no vienen vacías
-        if (this.currenciesList.length > 0)
-          this.productForm
-            .get('currencyParamId')
-            ?.setValue(this.currenciesList[0].id);
-        if (this.taxesList.length > 0)
-          this.productForm
-            .get('taxTypeParamId')
-            ?.setValue(this.taxesList[0].id);
-        if (this.unitsList.length > 0)
-          this.productForm
-            .get('unitMeasureParamId')
-            ?.setValue(this.unitsList[0].id);
+        // 2. Seteamos dinámicamente los elementos válidos por defecto (Tu lógica intacta)
+        if (this.currenciesList.length > 0) {
+          this.productForm.get('currencyParamId')?.setValue(this.currenciesList[0].id);
+        }
+        if (this.taxesList.length > 0) {
+          this.productForm.get('taxTypeParamId')?.setValue(this.taxesList[0].id);
+        }
+        if (this.unitsList.length > 0) {
+          this.productForm.get('unitMeasureParamId')?.setValue(this.unitsList[0].id);
+        }
 
-        this.cdr.detectChanges();
+        this.cdr.detectChanges(); // 🔥 Forzamos el repintado en caliente en tu monitor de Angular
       },
       error: (err) =>
         console.error('Error al alimentar los catálogos del inventario:', err),
@@ -283,7 +286,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
     });
 
     this.productForm.updateValueAndValidity();
-    
+
     this.activeTab = 'datos';
     this.showModal = true;
     this.cdr.detectChanges();

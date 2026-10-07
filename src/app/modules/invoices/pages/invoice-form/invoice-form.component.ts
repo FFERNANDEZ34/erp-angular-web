@@ -636,17 +636,24 @@ export class InvoiceFormComponent implements OnInit {
   }
 
   getExchangeRatesMatrix(): { [key: string]: number } {
-    const dollarRate = Number(
-      this.invoiceForm.get('exchangeRate')?.value || 3.75,
-    );
-    const euroRate = Number(
-      this.invoiceForm.get('exchangeRateEuro')?.value || 4.15,
-    );
+    // Jalamos los valores activos en el formulario del POS en este milisegundo
+    const currentInvoiceCurrency = this.invoiceForm.get('currencyCode')?.value || 'PEN';
+    
+    let dollarRate = Number(this.invoiceForm.get('exchangeRate')?.value || 30);
+    let euroRate = Number(this.invoiceForm.get('exchangeRateEuro')?.value || 40);
+
+    // 🛡️ COMPUERTA DEFENSIVA CONTABLE:
+    // Si el comprobante está en SOLES (PEN), forzamos a que el dollarRate lea la tasa real 
+    // de tu base de datos en caso de que el input se ponga gris o marque 1.0 por error visual.
+    if (currentInvoiceCurrency === 'PEN') {
+      dollarRate = this.databaseDollarSaleRate || 30;
+      euroRate = this.databaseEuroSaleRate || 40;
+    }
 
     return {
-      PEN: 1.0,
-      USD: dollarRate,
-      EUR: euroRate, // Puedes amarrarlo a otro input o dejar este fallback comercial estándar
+      PEN: 1.0,       // 🇵🇪 Moneda base inmutable de paridad internacional
+      USD: dollarRate, // 💵 Cotización real: 3.53
+      EUR: euroRate,   // 💶 Cotización real: 4.23
     };
   }
 
@@ -704,36 +711,75 @@ export class InvoiceFormComponent implements OnInit {
     );
 
     // 1. Combo de Moneda Principal
+    // this.invoiceForm
+    //   .get('currencyCode')
+    //   ?.valueChanges.subscribe((monedaCode) => {
+    //     const codeStr = String(monedaCode).trim().toUpperCase();
+
+    //     console.log(
+    //       `📡 Combo Moneda mutó en caliente a: [${codeStr}] -> Autoparchando tasas de MySQL...`,
+    //     );
+
+    //     if (codeStr === 'PEN') {
+    //       this.invoiceForm.patchValue(
+    //         {
+    //           exchangeRate: 1.0,
+    //           exchangeRateEuro: this.databaseEuroSaleRate,
+    //         },
+    //         { emitEvent: false },
+    //       );
+    //     } else if (codeStr === 'USD') {
+    //       this.invoiceForm.patchValue(
+    //         {
+    //           exchangeRate: this.databaseDollarSaleRate,
+    //           exchangeRateEuro: this.databaseEuroSaleRate,
+    //         },
+    //         { emitEvent: false },
+    //       );
+    //     } else if (codeStr === 'EUR') {
+    //       this.invoiceForm.patchValue(
+    //         {
+    //           exchangeRate: this.databaseEuroSaleRate, // 🎯 FORZAMOS 4.60 EN EL CAMPO DEL DÓLAR COMO PIVOTE CONTRA SCRIPTS EXTERNOS
+    //           exchangeRateEuro: this.databaseEuroSaleRate,
+    //         },
+    //         { emitEvent: false },
+    //       );
+    //     }
+
+    //     this.updateAllCartPricesByExchangeRate();
+    //   });
+
     this.invoiceForm
       .get('currencyCode')
       ?.valueChanges.subscribe((monedaCode) => {
         const codeStr = String(monedaCode).trim().toUpperCase();
 
-        console.log(
-          `📡 Combo Moneda mutó en caliente a: [${codeStr}] -> Autoparchando tasas de MySQL...`,
-        );
+        console.log(`📡 Combo Moneda mutó en caliente a: [${codeStr}] -> Autoparchando tasas de MySQL...`);
 
         if (codeStr === 'PEN') {
+          // 🎯 EL DESTRABE CONTABLE: Al emitir en Soles, NO destruimos la tasa del Dólar.
+          // Mantenemos los valores de venta reales de la base de datos (Ej: 3.53) 
+          // para que el convertidor pueda calcular los productos que nacieron en USD o EUR.
           this.invoiceForm.patchValue(
             {
-              exchangeRate: 1.0,
-              exchangeRateEuro: this.databaseEuroSaleRate,
+              exchangeRate: this.databaseDollarSaleRate || 30, // 🔥 Mantiene el T.C. real del Dólar
+              exchangeRateEuro: this.databaseEuroSaleRate || 40, // 🔥 Mantiene el T.C. real del Euro
             },
-            { emitEvent: false },
+            { emitEvent: false }
           );
         } else if (codeStr === 'USD') {
           this.invoiceForm.patchValue(
             {
-              exchangeRate: this.databaseDollarSaleRate,
-              exchangeRateEuro: this.databaseEuroSaleRate,
+              exchangeRate: this.databaseDollarSaleRate || 30,
+              exchangeRateEuro: this.databaseEuroSaleRate || 40,
             },
             { emitEvent: false },
           );
         } else if (codeStr === 'EUR') {
           this.invoiceForm.patchValue(
             {
-              exchangeRate: this.databaseEuroSaleRate, // 🎯 FORZAMOS 4.60 EN EL CAMPO DEL DÓLAR COMO PIVOTE CONTRA SCRIPTS EXTERNOS
-              exchangeRateEuro: this.databaseEuroSaleRate,
+              exchangeRate: this.databaseEuroSaleRate || 40, // Mantiene factor pivote para scripts
+              exchangeRateEuro: this.databaseEuroSaleRate || 50,
             },
             { emitEvent: false },
           );
@@ -741,7 +787,6 @@ export class InvoiceFormComponent implements OnInit {
 
         this.updateAllCartPricesByExchangeRate();
       });
-
     // 2. Input de Tipo de Cambio Dólar (Equipado con Cortafuegos preventivo)
     this.invoiceForm.get('exchangeRate')?.valueChanges.subscribe((tcDolar) => {
       const currentCurrency = this.invoiceForm.get('currencyCode')?.value;
