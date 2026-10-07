@@ -1,292 +1,246 @@
+<!-- ========================================================================= -->
+<!-- 👥 MAESTRO DE ENTIDADES (CLIENTES/PROVEEDORES): REMIXICON PREMIUM (1 DE 2) -->
+<!-- ========================================================================= -->
 <div class="page-header-title mb-4">
-  <h1 class="h4 fw-bold text-dark mb-1">Catálogo Maestro de Entidades</h1>
-  <p class="text-muted small m-0">
-    Gestione la base de datos unificada de clientes y proveedores compartida de
-    su Holding
-  </p>
+    <h1 class="h4 fw-bold text-dark mb-1">
+        <i class="ri-user-shared-2-line text-primary me-1"></i> Catálogo Maestro de Entidades
+    </h1>
+    <p class="text-muted small m-0">
+        Gestione la base de datos unificada de clientes y proveedores compartida de su Holding
+    </p>
 </div>
 
 <div class="table-container-wrapper shadow-sm border rounded-3 bg-white">
-  <!-- 🔍 BARRA DE FILTROS AVANZADOS INTEGRADOS (HORIZONTAL) -->
-  <div
-    class="table-advanced-filters-toolbar p-3 bg-light rounded-top border-bottom"
-  >
-    <div class="row g-2 align-items-center">
-      <!-- Filtro 1: Tipo de Documento -->
-      <div class="col-md-2">
-        <select
-          class="form-select form-select-sm shadow-none border bg-white text-dark fw-semibold"
-          [(ngModel)]="filterDocumentType"
-          (change)="onFilterChange()"
-        >
-          <option value="">📁 Todos los Documentos</option>
-          <option *ngFor="let doc of identityTypesList" [value]="doc.code">
-            {{ doc.name }}
-          </option>
-        </select>
-      </div>
+    <!-- 🔍 BARRA DE FILTROS AVANZADOS INTEGRADOS (HORIZONTAL) -->
+    <div class="table-advanced-filters-toolbar p-3 bg-light rounded-top border-bottom">
+        <div class="row g-2 align-items-center">
 
-      <!-- Filtro 2: Número de Documento -->
-      <div class="col-md-2">
-        <input
-          type="text"
-          class="form-control form-control-sm shadow-none border bg-white text-dark"
-          [(ngModel)]="filterDocumentNumber"
-          (input)="onFilterChange()"
-          placeholder="Nro Documento..."
-        />
-      </div>
+            <!-- Filtro 1: Tipo de Documento -->
+            <div class="col-md-2">
+                <select class="form-select form-select-sm shadow-none border bg-white text-dark fw-semibold"
+                        [(ngModel)]="filterDocumentType"
+                        (change)="onFilterChange()">
+                    <option value="">📁 Todos los Documentos</option>
+<option *ngFor="let doc of identityTypesList" [value]="doc.code">
+                    {{ doc.name }}
+                    </option>
+                </select>
+            </div>
 
-      <!-- Filtro 3: Razón Social / Nombres -->
-      <div class="col-md-4">
-        <input
-          type="text"
-          class="form-control form-control-sm shadow-none border bg-white text-dark"
-          [(ngModel)]="filterName"
-          (input)="onFilterChange()"
-          placeholder="Buscar Razón Social o Nombres Completos..."
-        />
-      </div>
+            <!-- Filtro 2: Número de Documento -->
+            <div class="col-md-2">
+                <input type="text"
+                       class="form-control form-control-sm shadow-none border bg-white text-dark"
+                       [(ngModel)]="filterDocumentNumber"
+                       (input)="onFilterChange()"
+                       placeholder="Nro Documento..." />
+            </div>
 
-      <!-- Filtro 4: Correo de Contacto -->
-      <div class="col-md-2">
-        <input
-          type="text"
-          class="form-control form-control-sm shadow-none border bg-white text-dark"
-          [(ngModel)]="filterEmail"
-          (input)="onFilterChange()"
-          placeholder="Buscar por Correo..."
-        />
-      </div>
+            <!-- Filtro 3: Razón Social / Nombres -->
+            <div class="col-md-4">
+                <input type="text"
+                       class="form-control form-control-sm shadow-none border bg-white text-dark"
+                       [(ngModel)]="filterName"
+                       (input)="onFilterChange()"
+                       placeholder="Buscar Razón Social o Nombres Completos..." />
+            </div>
 
-      <!-- Acción: Botón Nuevo Registro -->
-      <div class="col-md-2 text-end">
-        <button
-          class="btn btn-primary btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1 border-0"
-          style="background-color: #2563eb; border-radius: 6px"
-          type="button"
-          (click)="openCreateModal()"
-        >
-          <i class="bx bx-plus-circle fs-5"></i> Nuevo Registro
-        </button>
-      </div>
+            <!-- Filtro 4: Correo de Contacto -->
+            <div class="col-md-2">
+                <input type="text"
+                       class="form-control form-control-sm shadow-none border bg-white text-dark"
+                       [(ngModel)]="filterEmail"
+                       (input)="onFilterChange()"
+                       placeholder="Buscar por Correo..." />
+            </div>
+
+            <!-- Acción: Botón Nuevo Registro Saneado con RemixIcon -->
+            <div class="col-md-2 text-end">
+                <button class="btn btn-primary btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1.5 border-0 shadow-sm"
+                        style="background-color: #2563eb; border-radius: 6px; height: 32px; font-size: 13px;"
+                        type="button"
+                        (click)="openCreateModal()">
+                    <i class="ri-user-add-line fs-5"></i> Nuevo Registro
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- CONTENEDOR DE LA TABLA DINÁMICA -->
-  <div class="table-responsive text-start">
-    <table
-      class="table table-hover align-middle m-0"
-      style="min-width: 900px; font-size: 13px"
-    >
-      <thead class="table-light text-secondary border-bottom">
-        <tr>
-          <th
-            (click)="changeOrder('id')"
-            class="py-3 px-4 cursor-pointer"
-            style="width: 90px; user-select: none"
-          >
-            ID
-            <i
-              class="bx"
-              [ngClass]="
+    <!-- CONTENEDOR DE LA TABLA DINÁMICA CON REMIXICON -->
+    <div class="table-responsive text-start">
+        <table class="table table-hover align-middle m-0"
+               style="min-width: 900px; font-size: 13px">
+            <thead class="table-light text-secondary border-bottom">
+                <tr>
+                    <th (click)="changeOrder('id')"
+                        class="py-3 px-4 cursor-pointer"
+                        style="width: 90px; user-select: none">
+                        ID
+                        <i [className]="
                 sortField === 'id'
                   ? sortOrder === 'asc'
-                    ? 'bx-chevron-up text-primary'
-                    : 'bx-chevron-down text-primary'
-                  : 'bx-minus opacity-25'
-              "
-            ></i>
-          </th>
-          <th
-            (click)="changeOrder('name')"
-            class="py-3 cursor-pointer"
-            style="user-select: none"
-          >
-            Entidad Comercial / Razón Social
-            <i
-              class="bx"
-              [ngClass]="
+                    ? 'ri-arrow-up-s-line text-primary fw-bold'
+                    : 'ri-arrow-down-s-line text-primary fw-bold'
+                  : 'ri-subtract-line opacity-25'
+              "></i>
+                    </th>
+                    <th (click)="changeOrder('name')"
+                        class="py-3 cursor-pointer"
+                        style="user-select: none">
+                        Entidad Comercial / Razón Social
+                        <i [className]="
                 sortField === 'name'
                   ? sortOrder === 'asc'
-                    ? 'bx-chevron-up text-primary'
-                    : 'bx-chevron-down text-primary'
-                  : 'bx-sort-alt opacity-25'
-              "
-            ></i>
-          </th>
-          <th style="width: 140px">Estructura</th>
-          <th style="width: 130px">Documento</th>
-          <th style="width: 160px">Identificación</th>
-          <th>Canal de Contacto</th>
-          <th class="text-center" style="width: 110px">Operaciones</th>
-        </tr>
-      </thead>
-      <tbody class="border-0">
-        <!-- ⏳ EFECTO VISUAL: EN ESPERA DE DATOS -->
-        <tr *ngIf="isLoading">
-          <td colspan="7" class="text-center py-5 text-muted">
-            <i
-              class="bx bx-loader-alt bx-spin text-primary fs-3 d-block mb-2"
-            ></i>
-            <span class="fw-semibold"
-              >Consultando catálogo maestro en MySQL...</span
-            >
-          </td>
-        </tr>
+                    ? 'ri-arrow-up-s-line text-primary fw-bold'
+                    : 'ri-arrow-down-s-line text-primary fw-bold'
+                  : 'ri-arrow-up-down-line opacity-25'
+              "></i>
+                    </th>
+                    <th style="width: 140px">Estructura</th>
+                    <th style="width: 130px">Documento</th>
+                    <th style="width: 160px">Identificación</th>
+                    <th>Canal de Contacto</th>
+                    <th class="text-center" style="width: 110px">Operaciones</th>
+                </tr>
+            </thead>
+            <tbody class="border-0">
+                <!-- ⏳ EFECTO VISUAL: EN ESPERA DE DATOS REPOTENCIADO -->
+                <tr *ngIf="isLoading">
+                    <td colspan="7" class="text-center py-5 text-muted">
+                        <i class="ri-loader-3-line spin-loader text-primary fs-3 d-block mb-2"></i>
+                        <span class="fw-semibold">Consultando catálogo maestro en MySQL...</span>
+                    </td>
+                </tr>
+                <!-- 📂 ESTADO VACÍO CON REMIXICON -->
+                <tr *ngIf="!isLoading && entities.length === 0">
+                    <td colspan="7" class="text-center py-5 bg-white tab-content-fade">
+                        <div class="py-4">
+                            <i class="ri-database-2-line text-muted opacity-25 d-block mb-2"
+                               style="font-size: 48px"></i>
+                            <h6 class="text-dark fw-bold m-0">
+                                No se encontraron entidades comerciales
+                            </h6>
+                            <p class="text-muted small m-0">
+                                Intente modificando los filtros de búsqueda avanzados o cambie de local.
+                            </p>
+                        </div>
+                    </td>
+                </tr>
 
-        <!-- 📂 ESTADO VACÍO -->
-        <tr *ngIf="!isLoading && entities.length === 0">
-          <td colspan="7" class="text-center py-5 bg-white">
-            <div class="py-4">
-              <i
-                class="bx bx-data text-muted opacity-25 d-block mb-2"
-                style="font-size: 48px"
-              ></i>
-              <h6 class="text-dark fw-bold m-0">
-                No se encontraron entidades comerciales
-              </h6>
-              <p class="text-muted small m-0">
-                Intente modificando los filtros de búsqueda avanzados o cambie
-                de local.
-              </p>
-            </div>
-          </td>
-        </tr>
-
-        <!-- 🚀 REGISTROS REALES EN VIVO -->
-        <tr *ngFor="let entity of entities">
-          <td class="px-4 text-secondary fw-semibold">#{{ entity.id }}</td>
-          <td>
-            <div class="d-flex align-items-center gap-2">
-              <span class="text-dark fw-bold">{{ entity.name }}</span>
-            </div>
-          </td>
-          <td>
-            <span>
-              {{ entity.entityType }}
-            </span>
-          </td>
-          <td>
-            <span class="text-muted text-uppercase fw-semibold">{{
+                <!-- 🚀 REGISTROS REALES EN VIVO (SANEADO CON REMIXICON) -->
+<tr *ngFor="let entity of entities">
+            <td class="px-4 text-secondary font-monospace">#{{ entity.id }}</td>
+            <td>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-dark fw-bold">{{ entity.name }}</span>
+                </div>
+            </td>
+            <td>
+                <span class="badge bg-light text-secondary border border-light-subtle px-2 py-0.5 text-uppercase fw-semibold" style="font-size: 11px;">
+                    {{ entity.entityType }}
+                </span>
+            </td>
+            <td>
+                <span class="text-muted text-uppercase fw-semibold font-monospace" style="font-size: 11.5px;">
+                    {{
               entity.DocumentParameter?.name ||
                 (entity.documentType === "6" ? "RUC" : "DNI")
-            }}</span>
-          </td>
-          <td>
-            <span class="text-dark font-monospace fw-semibold">{{
-              entity.documentNumber
-            }}</span>
-          </td>
-          <td>
-            <!-- ✅ ENLACE DE CONTACTO LIMPIO SIN DIVS HUÉRFANOS -->
-            <span>
-              <i class="bx bx-envelope text-muted me-1"></i>{{ entity.email }}
-            </span>
+                    }}
+                </span>
+            </td>
+            <td>
+                <span class="text-dark font-monospace fw-bold" style="letter-spacing: 0.3px;">
+                    {{ entity.documentNumber }}
+                </span>
+            </td>
+            <td>
+                <!-- ✅ ENLACE DE CONTACTO LIMPIO CON REMIXICON -->
+<span>
+                <i class="ri-mail-line text-muted me-1.5 fs-6"></i>{{ entity.email }}
+                </span>
+                <ng-template #sinCorreo>
+                    <span class="text-muted opacity-50 small d-inline-flex align-items-center">
+                        <i class="ri-mail-forbid-line me-1.5 fs-6"></i>Sin correo
+                    </span>
+                </ng-template>
+            </td>
+            <td class="text-center">
+                <div class="d-inline-flex gap-1.5">
+                    <!-- Botón Modificar Registro -->
+<button class="btn btn-sm btn-outline-secondary p-1 d-flex align-items-center justify-content-center shadow-none"
+style="width: 28px; height: 28px; border-radius: 6px;"        
+(click)="onEdit(entity)">
+                    <i class="ri-pencil-line text-warning fs-5"></i>
+                    </button>
+                    <!-- Botón Dar de Baja Lógica -->
+                    <button class="btn btn-sm btn-outline-secondary p-1 d-flex align-items-center justify-content-center shadow-none"
+                            style="width: 28px; height: 28px; border-radius: 6px;"
+                            type="button"
+                            title="Dar de Baja Lógica">
+                        <i class="ri-delete-bin-line text-danger fs-5"></i>
+                    </button>
+                </div>
+            </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 
-            <ng-template #sinCorreo>
-              <span class="text-muted opacity-50 small">Sin correo</span>
-            </ng-template>
-          </td>
-          <td class="text-center">
-            <div class="d-inline-flex gap-1">
-              <button
-                class="btn btn-outline-primary btn-sm me-2"
-                (click)="onEdit(entity)"
-              >
-                ✏️<i class="bx bx-pencil fs-6"></i>
-              </button>
-              <button class="btn btn-outline-danger btn-sm">
-                🗑️<i class="bx bx-trash-alt fs-6"></i>
-              </button>
+    <!-- 📑 PIE DE PAGINACIÓN PREMIUM CON SELECTOR DINÁMICO DE FILAS -->
+    <div class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3"
+         *ngIf="totalRecords > 0">
+        <!-- Lado Izquierdo: Contador + Selector de Tamaño (10, 20, 30, 50) -->
+        <div class="d-flex align-items-center gap-3 text-secondary" style="font-size: 12px">
+            <div>
+                Mostrando
+                <span class="fw-bold text-dark">
+                    {{ (currentPage - 1) * pageSize + 1 }}
+                </span>
+                al
+                <span class="fw-bold text-dark">
+                    {{ currentPage * pageSize > totalRecords ? totalRecords : currentPage * pageSize }}
+                </span>
+                de
+                <span class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-2.5 py-1">{{ totalRecords }} registros</span>
             </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
 
-  <!-- 📑 PIE DE PAGINACIÓN PREMIUM CON SELECTOR DINÁMICO DE FILAS -->
-  <div
-    class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3"
-    *ngIf="totalRecords > 0"
-  >
-    <!-- Lado Izquierdo: Contador + Selector de Tamaño (10, 20, 30, 50) -->
-    <div
-      class="d-flex align-items-center gap-3 text-secondary"
-      style="font-size: 12px"
-    >
-      <div>
-        Mostrando
-        <span class="fw-bold text-dark">{{
-          (currentPage - 1) * pageSize + 1
-        }}</span>
-        al
-        <span class="fw-bold text-dark">{{
-          currentPage * pageSize > totalRecords
-            ? totalRecords
-            : currentPage * pageSize
-        }}</span>
-        de
-        <span
-          class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-2 py-1"
-          >{{ totalRecords }} registros</span
-        >
-      </div>
+            <div class="d-flex align-items-center gap-2 border-start ps-3">
+                <span>Filas por página:</span>
+                <select class="form-select form-select-sm shadow-none border bg-white text-dark py-0.5"
+                        style="width: 65px; font-size: 12px; font-weight: 600; height: 24px; border-radius: 4px;"
+                        [ngModel]="pageSize"
+                        (change)="onPageSizeChange(+$any($event.target).value)">
+                    <option [value]="10">10</option>
+                    <option [value]="20">20</option>
+                    <option [value]="30">30</option>
+                    <option [value]="50">50</option>
+                </select>
+            </div>
+        </div>
 
-      <div class="d-flex align-items-center gap-2 border-start ps-3">
-        <span>Filas por página:</span>
-        <select
-          class="form-select form-select-sm shadow-none border bg-white text-dark py-0.5"
-          style="
-            width: 65px;
-            font-size: 12px;
-            font-weight: 600;
-            height: 24px;
-            border-radius: 4px;
-          "
-          [ngModel]="pageSize"
-          (change)="onPageSizeChange(+$any($event.target).value)"
-        >
-          <option [value]="10">10</option>
-          <option [value]="20">20</option>
-          <option [value]="30">30</option>
-          <option [value]="50">50</option>
-        </select>
-      </div>
+        <!-- Lado Derecho: Controles Navigacionales con RemixIcon -->
+        <div class="d-flex align-items-center gap-2">
+            <!-- Botón Izquierdo (Retroceder) -->
+            <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
+                    [disabled]="currentPage === 1"
+                    (click)="changePage(currentPage - 1)"
+                    style="width: 32px; height: 32px; border-radius: 6px;">
+                <i class="ri-arrow-left-s-line fs-4" style="line-height: 1"></i>
+            </button>
+
+            <div class="text-secondary fw-semibold mx-1" style="font-size: 12px; user-select: none">
+                Página <span class="text-dark fw-bold">{{ currentPage }}</span> de {{ totalPages }}
+            </div>
+
+            <!-- Botón Derecho (Avanzar) -->
+            <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
+                    [disabled]="currentPage === totalPages"
+                    (click)="changePage(currentPage + 1)"
+                    style="width: 32px; height: 32px; border-radius: 6px;">
+                <i class="ri-arrow-right-s-line fs-4" style="line-height: 1"></i>
+            </button>
+        </div>
     </div>
-
-    <!-- Lado Derecho: Controles Navigacionales -->
-    <div class="d-flex align-items-center gap-2">
-      <!-- Botón Izquierdo (Retroceder) -->
-      <button
-        class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
-        [disabled]="currentPage === 1"
-        (click)="changePage(currentPage - 1)"
-        style="width: 32px; height: 32px"
-      >
-        <i class="bx bx-chevron-left fs-4" style="line-height: 1"></i>
-      </button>
-
-      <div
-        class="text-secondary fw-semibold mx-1"
-        style="font-size: 12px; user-select: none"
-      >
-        Página <span class="text-dark fw-bold">{{ currentPage }}</span> de
-        {{ totalPages }}
-      </div>
-
-      <!-- Botón Derecho (Avanzar) -->
-      <button
-        class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
-        [disabled]="currentPage === totalPages"
-        (click)="changePage(currentPage + 1)"
-        style="width: 32px; height: 32px"
-      >
-        <i class="bx bx-chevron-right fs-4" style="line-height: 1"></i>
-      </button>
-    </div>
-  </div>
 </div>
 
 <!-- ========================================================================= -->

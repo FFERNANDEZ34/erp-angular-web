@@ -1,874 +1,622 @@
+<!-- ========================================================================= -->
+<!-- 📦 CATÁLOGO DE PRODUCTOS E INVENTARIO: CONFIGURACIÓN PREMIUM (1 DE 2)     -->
+<!-- ========================================================================= -->
 <div class="page-header-title mb-4">
-  <h1 class="h4 fw-bold text-dark mb-1">Catálogo de Productos e Inventario</h1>
-  <p class="text-muted small m-0">
-    Gestione el catálogo maestro de artículos, servicios y precios exclusivos de
-    su Empresa
-  </p>
+    <h1 class="h4 fw-bold text-dark mb-1">
+        <i class="ri-archive-line text-primary me-1"></i> Catálogo de Productos e Inventario
+    </h1>
+    <p class="text-muted small m-0">
+        Gestione el catálogo maestro de artículos, servicios y precios exclusivos de su Empresa
+    </p>
 </div>
 
 <div class="table-container-wrapper shadow-sm border rounded-3 bg-white">
-  <!-- 🔍 BARRA DE FILTROS AVANZADOS EN LINEA HORIZONTAL -->
-  <div
-    class="table-advanced-filters-toolbar p-3 bg-light rounded-top border-bottom"
-  >
-    <div class="row g-2 align-items-center">
-      <!-- Filtro 1: Código de Producto Interno -->
-      <div class="col-md-2">
-        <input
-          type="text"
-          class="form-control form-control-sm shadow-none border bg-white text-dark"
-          [(ngModel)]="filterProductCode"
-          (input)="onFilterChange()"
-          placeholder="Código producto..."
-        />
-      </div>
+    <!-- 🔍 BARRA DE FILTROS AVANZADOS EN LÍNEA HORIZONTAL -->
+    <div class="table-advanced-filters-toolbar p-3 bg-light rounded-top border-bottom">
+        <div class="row g-2 align-items-center">
 
-      <!-- Filtro 2: Nombre del Artículo / Descripción -->
-      <div class="col-md-6">
-        <input
-          type="text"
-          class="form-control form-control-sm shadow-none border bg-white text-dark"
-          [(ngModel)]="filterName"
-          (input)="onFilterChange()"
-          placeholder="Buscar por descripción o nombre de artículo..."
-        />
-      </div>
+            <!-- Filtro 1: Código de Producto Interno -->
+            <div class="col-md-2">
+                <input type="text"
+                       class="form-control form-control-sm shadow-none border bg-white text-dark"
+                       [(ngModel)]="filterProductCode"
+                       (input)="onFilterChange()"
+                       placeholder="Código producto..." />
+            </div>
 
-      <!-- Acción Central: Lanzar Modal de Registro -->
-      <div class="col-md-4 text-end">
-        <button
-          class="btn btn-primary btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1 border-0"
-          style="background-color: #2563eb; border-radius: 6px; height: 32px"
-          type="button"
-          (click)="openCreateModal()"
-        >
-          <i class="bx bx-plus-circle fs-5"></i> Registrar Nuevo Artículo
-        </button>
-      </div>
+            <!-- Filtro 2: Nombre del Artículo / Descripción -->
+            <div class="col-md-6">
+                <input type="text"
+                       class="form-control form-control-sm shadow-none border bg-white text-dark"
+                       [(ngModel)]="filterName"
+                       (input)="onFilterChange()"
+                       placeholder="Buscar por descripción o nombre de artículo..." />
+            </div>
+
+            <!-- Acción Central: Lanzar Modal de Registro Saneado -->
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1.5 border-0 shadow-sm"
+                        style="background-color: #2563eb; border-radius: 6px; height: 32px; font-size: 13px;"
+                        type="button"
+                        (click)="openCreateModal()">
+                    <i class="ri-add-circle-line fs-5"></i> Registrar Nuevo Artículo
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- REJILLA DE DATOS / RESPONSIVE TABLE -->
-  <div class="table-responsive text-start">
-    <table
-      class="table table-hover align-middle m-0"
-      style="min-width: 1000px; font-size: 13px"
-    >
-      <thead class="table-light text-secondary border-bottom">
-        <tr>
-          <th
-            (click)="changeOrder('id')"
-            class="py-3 px-4 cursor-pointer"
-            style="width: 80px; user-select: none"
-          >
-            ID
-            <i
-              class="bx"
-              [ngClass]="
+    <!-- REJILLA DE DATOS / RESPONSIVE TABLE CON REMIXICON -->
+    <div class="table-responsive text-start">
+        <table class="table table-hover align-middle m-0"
+               style="min-width: 1000px; font-size: 13px">
+            <thead class="table-light text-secondary border-bottom">
+                <tr>
+                    <th (click)="changeOrder('id')"
+                        class="py-3 px-4 cursor-pointer"
+                        style="width: 80px; user-select: none">
+                        ID
+                        <i [className]="
                 sortField === 'id'
                   ? sortOrder === 'asc'
-                    ? 'bx-chevron-up text-primary'
-                    : 'bx-chevron-down text-primary'
-                  : 'bx-minus opacity-25'
-              "
-            ></i>
-          </th>
-          <th
-            (click)="changeOrder('productCode')"
-            class="py-3 cursor-pointer"
-            style="width: 140px; user-select: none"
-          >
-            Código
-            <i
-              class="bx"
-              [ngClass]="
+                    ? 'ri-arrow-up-s-line text-primary fw-bold'
+                    : 'ri-arrow-down-s-line text-primary fw-bold'
+                  : 'ri-subtract-line opacity-25'
+              "></i>
+                    </th>
+                    <th (click)="changeOrder('productCode')"
+                        class="py-3 cursor-pointer"
+                        style="width: 140px; user-select: none">
+                        Código
+                        <i [className]="
                 sortField === 'productCode'
                   ? sortOrder === 'asc'
-                    ? 'bx-chevron-up text-primary'
-                    : 'bx-chevron-down text-primary'
-                  : 'bx-sort-alt opacity-25'
-              "
-            ></i>
-          </th>
-          <th
-            (click)="changeOrder('name')"
-            class="py-3 cursor-pointer"
-            style="user-select: none"
-          >
-            Descripción del Producto
-            <i
-              class="bx"
-              [ngClass]="
+                    ? 'ri-arrow-up-s-line text-primary fw-bold'
+                    : 'ri-arrow-down-s-line text-primary fw-bold'
+                  : 'ri-arrow-up-down-line opacity-25'
+              "></i>
+                    </th>
+                    <th (click)="changeOrder('name')"
+                        class="py-3 cursor-pointer"
+                        style="user-select: none">
+                        Descripción del Producto
+                        <i [className]="
                 sortField === 'name'
                   ? sortOrder === 'asc'
-                    ? 'bx-chevron-up text-primary'
-                    : 'bx-chevron-down text-primary'
-                  : 'bx-sort-alt opacity-25'
-              "
-            ></i>
-          </th>
-          <th style="width: 140px">Categoría</th>
-          <th style="width: 120px">Marca</th>
-          <th style="width: 120px" class="text-end">P. Compra</th>
-          <th style="width: 120px" class="text-end">P. Venta</th>
-          <th class="text-center" style="width: 110px">Operaciones</th>
-        </tr>
-      </thead>
-      <tbody class="border-0">
-        <!-- ⏳ ANIMACIÓN DE ESPERA DE RED -->
-        <tr *ngIf="isLoading">
-          <td colspan="8" class="text-center py-5 text-muted">
-            <i
-              class="bx bx-loader-alt bx-spin text-primary fs-3 d-block mb-2"
-            ></i>
-            <span class="fw-semibold"
-              >Sincronizando existencias de almacén con MySQL...</span
-            >
-          </td>
-        </tr>
+                    ? 'ri-arrow-up-s-line text-primary fw-bold'
+                    : 'ri-arrow-down-s-line text-primary fw-bold'
+                  : 'ri-arrow-up-down-line opacity-25'
+              "></i>
+                    </th>
+                    <th style="width: 140px">Categoría</th>
+                    <th style="width: 120px">Marca</th>
+                    <th style="width: 120px" class="text-end">P. Compra</th>
+                    <th style="width: 120px" class="text-end">P. Venta</th>
+                    <th class="text-center" style="width: 110px">Operaciones</th>
+                </tr>
+            </thead>
+            <tbody class="border-0">
+                <!-- ⏳ ANIMACIÓN DE ESPERA DE RED REPOTENCIADA -->
+                <tr *ngIf="isLoading">
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        <i class="ri-loader-3-line spin-loader text-primary fs-3 d-block mb-2"></i>
+                        <span class="fw-semibold">Sincronizando existencias de almacén con MySQL...</span>
+                    </td>
+                </tr>
+                <!-- 📂 PANEL DE CATÁLOGO VACÍO CON REMIXICON -->
+                <tr *ngIf="!isLoading && products.length === 0">
+                    <td colspan="8" class="text-center py-5 bg-white">
+                        <div class="py-4">
+                            <i class="ri-box-3-line text-muted opacity-25 d-block mb-2"
+                               style="font-size: 48px"></i>
+                            <h6 class="text-dark fw-bold m-0">
+                                No se encontraron productos en esta compañía
+                            </h6>
+                            <p class="text-muted small m-0">
+                                El inventario se encuentra vacío para este local comercial seleccionado.
+                            </p>
+                        </div>
+                    </td>
+                </tr>
 
-        <!-- 📂 PANEL DE CATÁLOGO VACÍO -->
-        <tr *ngIf="!isLoading && products.length === 0">
-          <td colspan="8" class="text-center py-5 bg-white">
-            <div class="py-4">
-              <i
-                class="bx bx-package text-muted opacity-25 d-block mb-2"
-                style="font-size: 48px"
-              ></i>
-              <h6 class="text-dark fw-bold m-0">
-                No se encontraron productos en esta compañía
-              </h6>
-              <p class="text-muted small m-0">
-                El inventario se encuentra vacío para este local comercial
-                seleccionado.
-              </p>
-            </div>
-          </td>
-        </tr>
-
-        <!-- 🚀 ITERACIÓN RECURSIVA EN VIVO DESDE MYSQL (CON INCLUDES) -->
-        <tr *ngFor="let prod of products" style="transition: background 0.15s">
-          <td class="px-4 text-secondary font-monospace">#{{ prod.id }}</td>
-          <td>
-            <span
-              class="badge bg-light text-dark border border-secondary-subtle font-monospace px-2 py-1"
-              >{{ prod.productCode }}</span
-            >
-          </td>
-          <td>
-            <div class="fw-bold text-dark mb-0.5">{{ prod.name }}</div>
-            <small
-              class="text-muted d-block text-truncate"
-              style="max-width: 300px"
-              *ngIf="prod.description"
-              >{{ prod.description }}</small
-            >
-          </td>
-          <td>
-            <span class="text-dark fw-medium">{{
-              prod.Category?.name || "General"
-            }}</span>
-          </td>
-          <td>
-            <span class="text-secondary small">{{
-              prod.Brand?.name || "Genérico"
-            }}</span>
-          </td>
-          <td class="text-end font-monospace text-secondary">
-            {{ getCurrencySymbol($any(prod.Currency)?.code) }}
-            {{ prod.purchasePrice | number: "1.2-2" }}
-          </td>
-          <td class="text-end font-monospace text-primary fw-bold">
-            {{ getCurrencySymbol($any(prod.Currency)?.code) }}
-            {{ prod.salesPrice | number: "1.2-2" }}
-          </td>
-          <td class="text-center">
-            <div class="d-inline-flex gap-1">
-              <button
-                class="btn btn-outline-primary btn-sm me-2"
-                type="button"
-                (click)="onEdit(prod)"
-                title="Modificar Ficha"
-              >
-                ✏️<i class="bx bx-pencil text-warning fs-5"></i>
-              </button>
-              <button
-                class="btn btn-outline-danger btn-sm"
-                type="button"
-                (click)="onDelete(prod.id)"
-                title="Dar de Baja Lógica"
-              >
-                🗑️<i class="bx bx-trash-alt fs-5"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- 📑 PIE DE PAGINACIÓN ADAPTATIVA Y FILAS DINÁMICAS -->
-  <div
-    class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3"
-    *ngIf="totalRecords > 0"
-  >
-    <div
-      class="d-flex align-items-center gap-3 text-secondary"
-      style="font-size: 12px"
-    >
-      <div>
-        Mostrando
-        <span class="fw-bold text-dark">{{
-          (currentPage - 1) * pageSize + 1
-        }}</span>
-        al
-        <span class="fw-bold text-dark">{{
-          currentPage * pageSize > totalRecords
-            ? totalRecords
-            : currentPage * pageSize
-        }}</span>
-        de
-        <span
-          class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-2.5 py-1"
-          >{{ totalRecords }} artículos</span
-        >
-      </div>
-
-      <div class="d-flex align-items-center gap-2 border-start ps-3">
-        <span>Filas por página:</span>
-        <select
-          class="form-select form-select-sm shadow-none border bg-white text-dark py-0.5"
-          style="
-            width: 65px;
-            font-size: 12px;
-            font-weight: 600;
-            height: 24px;
-            border-radius: 4px;
-          "
-          [ngModel]="pageSize"
-          (change)="onPageSizeChange(+$any($event.target).value)"
-        >
-          <option [value]="10">10</option>
-          <option [value]="20">20</option>
-          <option [value]="30">30</option>
-          <option [value]="50">50</option>
-        </select>
-      </div>
+                <!-- 🚀 ITERACIÓN RECURSIVA EN VIVO DESDE MYSQL (SANEADO CON REMIXICON) -->
+                <tr *ngFor="let prod of products" style="transition: background 0.15s">
+                    <td class="px-4 text-secondary font-monospace">#{{ prod.id }}</td>
+                    <td>
+                        <span class="badge bg-light text-dark border border-secondary-subtle font-monospace px-2 py-1">{{ prod.productCode }}</span>
+                    </td>
+                    <td>
+                        <div class="fw-bold text-dark mb-0.5">{{ prod.name }}</div>
+                        <small class="text-muted d-block text-truncate"
+                               style="max-width: 300px"
+                               *ngIf="prod.description" [title]="prod.description">{{ prod.description }}</small>
+                    </td>
+                    <td>
+                        <span class="text-dark fw-medium">
+                            {{ prod.Category?.name || "General" }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="text-secondary small">
+                            {{ prod.Brand?.name || "Genérico" }}
+                        </span>
+                    </td>
+                    <td class="text-end font-monospace text-secondary">
+                        {{ getCurrencySymbol($any(prod.Currency)?.code) }}
+                        {{ prod.purchasePrice | number: "1.2-2" }}
+                    </td>
+                    <td class="text-end font-monospace text-primary fw-bold">
+                        {{ getCurrencySymbol($any(prod.Currency)?.code) }}
+                        {{ prod.salesPrice | number: "1.2-2" }}
+                    </td>
+                    <td class="text-center">
+                        <div class="d-inline-flex gap-1.5">
+                            <!-- Botón Modificar Ficha -->
+                            <button class="btn btn-sm btn-outline-secondary p-1 d-flex align-items-center justify-content-center shadow-none"
+                                    style="width: 28px; height: 28px; border-radius: 6px;"
+                                    type="button"
+                                    (click)="onEdit(prod)"
+                                    title="Modificar Ficha">
+                                <i class="ri-pencil-line text-warning fs-5"></i>
+                            </button>
+                            <!-- Botón Dar de Baja Lógica -->
+                            <button class="btn btn-sm btn-outline-secondary p-1 d-flex align-items-center justify-content-center shadow-none"
+                                    style="width: 28px; height: 28px; border-radius: 6px;"
+                                    type="button"
+                                    (click)="onDelete(prod.id)"
+                                    title="Dar de Baja Lógica">
+                                <i class="ri-delete-bin-line text-danger fs-5"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
-    <div class="d-flex align-items-center gap-2">
-      <button
-        class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
-        [disabled]="currentPage === 1"
-        (click)="changePage(currentPage - 1)"
-        style="width: 32px; height: 32px"
-      >
-        <i class="bx bx-chevron-left fs-4"></i>
-      </button>
+    <!-- 📑 PIE DE PAGINACIÓN ADAPTATIVA Y FILAS DINÁMICAS CON REMIXICON -->
+    <div class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3"
+         *ngIf="totalRecords > 0">
+        <div class="d-flex align-items-center gap-3 text-secondary"
+             style="font-size: 12px">
+            <div>
+                Mostrando
+                <span class="fw-bold text-dark">
+                    {{ (currentPage - 1) * pageSize + 1 }}
+                </span>
+                al
+                <span class="fw-bold text-dark">
+                    {{ currentPage * pageSize > totalRecords ? totalRecords : currentPage * pageSize }}
+                </span>
+                de
+                <span class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-2.5 py-1">{{ totalRecords }} artículos</span>
+            </div>
 
-      <div
-        class="text-secondary fw-semibold mx-1"
-        style="font-size: 12px; user-select: none"
-      >
-        Página <span class="text-dark fw-bold">{{ currentPage }}</span> de
-        {{ totalPages }}
-      </div>
+            <div class="d-flex align-items-center gap-2 border-start ps-3">
+                <span>Filas por página:</span>
+                <select class="form-select form-select-sm shadow-none border bg-white text-dark py-0.5"
+                        style="width: 65px; font-size: 12px; font-weight: 600; height: 24px; border-radius: 4px;"
+                        [ngModel]="pageSize"
+                        (change)="onPageSizeChange(+$any($event.target).value)">
+                    <option [value]="10">10</option>
+                    <option [value]="20">20</option>
+                    <option [value]="30">30</option>
+                    <option [value]="50">50</option>
+                </select>
+            </div>
+        </div>
 
-      <button
-        class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
-        [disabled]="currentPage === totalPages"
-        (click)="changePage(currentPage + 1)"
-        style="width: 32px; height: 32px"
-      >
-        <i class="bx bx-chevron-right fs-4"></i>
-      </button>
+        <!-- Controles de Navegación del Catálogo -->
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
+                    [disabled]="currentPage === 1"
+                    (click)="changePage(currentPage - 1)"
+                    style="width: 32px; height: 32px; border-radius: 6px;">
+                <i class="ri-arrow-left-s-line fs-4"></i>
+            </button>
+
+            <div class="text-secondary fw-semibold mx-1"
+                 style="font-size: 12px; user-select: none">
+                Página <span class="text-dark fw-bold">{{ currentPage }}</span> de {{ totalPages }}
+            </div>
+
+            <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
+                    [disabled]="currentPage === totalPages"
+                    (click)="changePage(currentPage + 1)"
+                    style="width: 32px; height: 32px; border-radius: 6px;">
+                <i class="ri-arrow-right-s-line fs-4"></i>
+            </button>
+        </div>
     </div>
-  </div>
 </div>
 
 <!-- ========================================================================= -->
-<!-- 🚪 VENTANA MODAL EMERGENTE: FORMULARIO REACTIVO DE PRODUCTOS (4 TABS)     -->
+<!-- 🚪 VENTANA MODAL EMERGENTE: FORMULARIO MAESTRO DE PRODUCTOS (BLOQUE 1 DE 5) -->
 <!-- ========================================================================= -->
-<div
-  class="modal fade"
-  [class.show]="showModal"
-  [style.display]="showModal ? 'block' : 'none'"
-  tabindex="-1"
-  role="dialog"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-    <div
-      class="modal-content border-0 shadow-lg modal-premium-radius bg-white text-dark"
-    >
-      <!-- 📌 Encabezado del Modal -->
-      <div
-        class="modal-header border-bottom border-light px-4 py-3 bg-light rounded-top d-flex align-items-center justify-content-between"
-      >
-        <h5 class="modal-title fw-bold text-dark fs-6 m-0">
-          {{
-            isEditing
-              ? "📝 Modificar Ficha de Inventario"
-              : "📦 Registrar Nuevo Artículo / Servicio"
-          }}
-        </h5>
-        <button
-          type="button"
-          class="btn-close shadow-none border-0 bg-transparent text-secondary fs-4"
-          (click)="closeModal()"
-        >
-          ×
-        </button>
-      </div>
+<div class="modal fade"
+     [class.show]="showModal"
+     [style.display]="showModal ? 'block' : 'none'"
+     tabindex="-1"
+     role="dialog"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg modal-premium-radius bg-white text-dark">
 
-      <!-- 🚀 Formulario Reactivo Unificado -->
-      <form [formGroup]="productForm" (ngSubmit)="onFormSubmit()">
-        <div class="modal-body p-4 text-start">
-          <!-- Banner de Captura de Errores del Backend -->
-          <div
-            class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2 tab-content-fade"
-            *ngIf="formErrorMessage"
-          >
-            <i
-              class="bx bx-error-circle fs-4 mt-0.5"
-              style="color: #ef4444"
-            ></i>
-            <div>
-              <strong class="text-dark d-block mb-0.5"
-                >Control de Unicidad de Inventarios</strong
-              >
-              <span
-                class="text-secondary small d-block"
-                style="line-height: 1.4"
-                >{{ formErrorMessage }}</span
-              >
-            </div>
-          </div>
-
-          <!-- 🌟 CAMPO ESTÁTICO SUPERIOR: Nombre del Producto Visible de un Inicio -->
-          <div class="mb-4" [class.has-error-input]="isFieldInvalid('name')">
-            <label class="form-label small fw-bold text-secondary mb-1"
-              >Nombre Comercial del Artículo o Servicio</label
-            >
-            <input
-              type="text"
-              class="form-control bg-light text-dark border-light fw-bold fs-6 py-2 shadow-none"
-              formControlName="name"
-              placeholder="Ej: Laptop Lenovo ThinkPad E14 Gen 4 Premium"
-            />
-            <small
-              class="text-danger extra-small-err"
-              *ngIf="isFieldInvalid('name')"
-              >El nombre del producto es obligatorio (mín. 3 letras).</small
-            >
-          </div>
-
-          <!-- 🧭 BARRA DE NAVEGACIÓN ENTRE PESTAÑAS (4 TABS BOOTSTRAP) -->
-          <ul
-            class="nav nav-tabs border-bottom mb-4 gap-1"
-            style="font-size: 13px; font-weight: 600"
-          >
-            <li class="nav-item">
-              <button
-                type="button"
-                class="nav-link border px-3 py-2 text-secondary"
-                [class.active]="activeTab === 'datos'"
-                [class.bg-primary]="activeTab === 'datos'"
-                [class.text-white]="activeTab === 'datos'"
-                (click)="activeTab = 'datos'"
-              >
-                <i class="bx bx-info-circle me-1"></i> Datos Base
-              </button>
-            </li>
-            <li class="nav-item">
-              <button
-                type="button"
-                class="nav-link border px-3 py-2 text-secondary"
-                [class.active]="activeTab === 'precios'"
-                [class.bg-primary]="activeTab === 'precios'"
-                [class.text-white]="activeTab === 'precios'"
-                (click)="activeTab = 'precios'"
-              >
-                <i class="bx bx-dollar-circle me-1"></i> Precios
-              </button>
-            </li>
-            <li class="nav-item">
-              <button
-                type="button"
-                class="nav-link border px-3 py-2 text-secondary"
-                [class.active]="activeTab === 'almacen'"
-                [class.bg-primary]="activeTab === 'almacen'"
-                [class.text-white]="activeTab === 'almacen'"
-                (click)="activeTab = 'almacen'"
-              >
-                <i class="bx bx-package me-1"></i> Almacén
-              </button>
-            </li>
-            <!-- 🌟 LA CUARTA PESTAÑA POLIMÓRFICA ADJUNTA -->
-            <li class="nav-item">
-              <button
-                type="button"
-                class="nav-link border px-3 py-2 text-secondary"
-                [class.active]="activeTab === 'adjuntos'"
-                [class.bg-primary]="activeTab === 'adjuntos'"
-                [class.text-white]="activeTab === 'adjuntos'"
-                (click)="activeTab = 'adjuntos'"
-              >
-                <i class="bx bx-images me-1"></i> Imágenes y Adjuntos
-              </button>
-            </li>
-          </ul>
-
-          <!-- ========================================================================= -->
-          <!-- 📦 CONTENIDO DE PESTAÑA 1: DATOS BASE DEL PRODUCTO                        -->
-          <!-- ========================================================================= -->
-          <div *ngIf="activeTab === 'datos'" class="tab-content-fade">
-            <div class="row g-3 mb-3">
-              <div
-                class="col-md-4"
-                [class.has-error-input]="isFieldInvalid('productCode')"
-              >
-                <label class="form-label small fw-bold text-secondary mb-1"
-                  >Código de Producto</label
-                >
-                <input
-                  type="text"
-                  class="form-control bg-light text-dark border-light fw-semibold font-monospace"
-                  formControlName="productCode"
-                  placeholder="Ej: PROD-LEN-001"
-                  [readOnly]="isEditing"
-                />
-                <small
-                  class="text-danger extra-small-err"
-                  *ngIf="isFieldInvalid('productCode')"
-                  >Mínimo 2 letras.</small
-                >
-              </div>
-
-              <div class="col-md-4" [class.has-error-input]="isFieldInvalid('categoryId')">
-                <label class="form-label small fw-bold text-secondary mb-1">Categoría del Producto</label>
-                <select class="form-select bg-light text-dark border-light fw-semibold"
-                        formControlName="categoryId"
-                        [class.is-invalid]="isFieldInvalid('categoryId')">
-                  <option value="" disabled selected>Seleccione Categoría...</option>
-                  <option *ngFor="let cat of categoriesList" [value]="cat.id">📁 {{ cat.name }}</option>
-                </select>
-                <!-- 🎯 CORRECCIÓN: Envolvemos el error en un *ngIf para que no se vea desde el inicio -->
-                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('categoryId')">
-                  La categoría es obligatoria para la organización del catálogo POS.
-                </small>
-              </div>
-
-               <div class="col-md-4" [class.has-error-input]="isFieldInvalid('brandId')">
-                <label class="form-label small fw-bold text-secondary mb-1">Marca / Fabricante</label>
-                <select class="form-select bg-light text-dark border-light fw-semibold"
-                        formControlName="brandId"
-                        [class.is-invalid]="isFieldInvalid('brandId')">
-                  <option value="" disabled selected>Seleccione Marca...</option>
-                  <option *ngFor="let brand of brandsList" [value]="brand.id">🏷️ {{ brand.name }}</option>
-                </select>
-                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('brandId')">
-                  Debe seleccionar una marca (o elegir 'Genérico').
-                </small>
-              </div>
+            <!-- 📌 Encabezado del Modal Saneado con RemixIcon sin Emojis -->
+            <div class="modal-header border-bottom border-light px-4 py-3 bg-light rounded-top d-flex align-items-center justify-content-between">
+                <h5 class="modal-title fw-bold text-dark fs-6 m-0 d-flex align-items-center gap-2">
+                    <i [className]="isEditing ? 'ri-edit-box-line text-warning fs-5' : 'ri-add-box-line text-primary fs-5'"></i>
+                    {{ isEditing ? "Modificar Ficha de Inventario" : "Registrar Nuevo Artículo / Servicio" }}
+                </h5>
+                <button type="button"
+                        class="btn-close shadow-none border-0 bg-transparent text-secondary fs-4"
+                        (click)="closeModal()">
+                    ×
+                </button>
             </div>
 
-            <div class="mb-2">
-              <label class="form-label small fw-bold text-secondary mb-1"
-                >Descripción del Producto / Glosa</label
-              >
-              <textarea
-                class="form-control bg-light text-dark border-light small"
-                rows="4"
-                formControlName="description"
-                placeholder="Añada características físicas, glosa para facturación o detalles complementarios..."
-              ></textarea>
-            </div>
-          </div>
+            <!-- 🚀 Formulario Reactivo Unificado -->
+            <form [formGroup]="productForm" (ngSubmit)="onFormSubmit()">
+                <div class="modal-body p-4 text-start">
 
-          <!-- ========================================================================= -->
-          <!-- 💰 CONTENIDO DE PESTAÑA 2: MATRIZ DE PRECIOS, VALORES E IMPUESTOS         -->
-          <!-- ========================================================================= -->
-          <div *ngIf="activeTab === 'precios'" class="tab-content-fade">
-            <div class="row g-3 mb-3">
-               <div class="col-md-6" [class.has-error-input]="isFieldInvalid('currencyParamId')">
+                    <!-- Banner de Captura de Errores del Backend Saneado -->
+                    <div class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2 tab-content-fade"
+                         *ngIf="formErrorMessage">
+                        <i class="ri-error-warning-fill fs-4 text-danger mt-0.5"></i>
+                        <div>
+                            <strong class="text-dark d-block mb-0.5">Control de Unicidad de Inventarios</strong>
+                            <span class="text-secondary small d-block" style="line-height: 1.4">{{ formErrorMessage }}</span>
+                        </div>
+                    </div>
+
+                    <!-- 🌟 CAMPO ESTÁTICO SUPERIOR: Nombre Comercial -->
+                    <div class="mb-4" [class.has-error-input]="isFieldInvalid('name')">
+                        <label class="form-label small fw-bold text-secondary mb-1">Nombre Comercial del Artículo o Servicio</label>
+                        <input type="text"
+                               class="form-control bg-light text-dark border-light fw-bold fs-6 py-2 shadow-none"
+                               formControlName="name"
+                               placeholder="Ej: Laptop Lenovo ThinkPad E14 Gen 4 Premium" />
+                        <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('name')">El nombre del producto es obligatorio (mín. 3 letras).</small>
+                    </div>
+
+                    <!-- 🧭 BARRA DE NAVEGACIÓN ENTRE PESTAÑAS (4 TABS EN REMIXICON) -->
+                    <ul class="nav nav-tabs border-bottom mb-4 gap-1" style="font-size: 13px; font-weight: 600">
+                        <li class="nav-item">
+                            <button type="button"
+                                    class="nav-link border px-3 py-2 text-secondary d-flex align-items-center gap-1.5"
+                                    [class.active]="activeTab === 'datos'"
+                                    [class.bg-primary]="activeTab === 'datos'"
+                                    [class.text-white]="activeTab === 'datos'"
+                                    (click)="activeTab = 'datos'">
+                                <i class="ri-information-line fs-5"></i> Datos Base
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button type="button"
+                                    class="nav-link border px-3 py-2 text-secondary d-flex align-items-center gap-1.5"
+                                    [class.active]="activeTab === 'precios'"
+                                    [class.bg-primary]="activeTab === 'precios'"
+                                    [class.text-white]="activeTab === 'precios'"
+                                    (click)="activeTab = 'precios'">
+                                <i class="ri-money-dollar-circle-line fs-5"></i> Precios
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button type="button"
+                                    class="nav-link border px-3 py-2 text-secondary d-flex align-items-center gap-1.5"
+                                    [class.active]="activeTab === 'almacen'"
+                                    [class.bg-primary]="activeTab === 'almacen'"
+                                    [class.text-white]="activeTab === 'almacen'"
+                                    (click)="activeTab = 'almacen'">
+                                <i class="ri-archive-stack-line fs-5"></i> Almacén
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button type="button"
+                                    class="nav-link border px-3 py-2 text-secondary d-flex align-items-center gap-1.5"
+                                    [class.active]="activeTab === 'adjuntos'"
+                                    [class.bg-primary]="activeTab === 'adjuntos'"
+                                    [class.text-white]="activeTab === 'adjuntos'"
+                                    (click)="activeTab = 'adjuntos'">
+                                <i class="ri-image-line fs-5"></i> Imágenes y Adjuntos
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- ========================================================================= -->
+                    <!-- 📦 CONTENIDO DE PESTAÑA 1: DATOS BASE DEL PRODUCTO                        -->
+                    <!-- ========================================================================= -->
+                    <div *ngIf="activeTab === 'datos'" class="tab-content-fade">
+                        <div class="row g-3 mb-3">
+                            <!-- Código de Producto -->
+                            <div class="col-md-4" [class.has-error-input]="isFieldInvalid('productCode')">
+                                <label class="form-label small fw-bold text-secondary mb-1">Código de Producto</label>
+                                <input type="text"
+                                       class="form-control bg-light text-dark border-light fw-semibold font-monospace"
+                                       formControlName="productCode"
+                                       placeholder="Ej: PROD-LEN-001"
+                                       [readOnly]="isEditing" />
+                                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('productCode')">Mínimo 2 letras.</small>
+                            </div>
+
+                            <!-- Categoría del Producto Multi-Company Saneada -->
+                            <div class="col-md-4" [class.has-error-input]="isFieldInvalid('categoryId')">
+                                <label class="form-label small fw-bold text-secondary mb-1">Categoría del Producto</label>
+                                <select class="form-select bg-light text-dark border-light fw-semibold"
+                                        formControlName="categoryId"
+                                        [class.is-invalid]="isFieldInvalid('categoryId')">
+                                    <option [ngValue]="''" disabled selected>Seleccione Categoría...</option>
+                                    <option *ngFor="let cat of categoriesList" [value]="cat.id">📁 {{ cat.name }}</option>
+                                </select>
+                                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('categoryId')">
+                                    La categoría es obligatoria para la organización del catálogo POS.
+                                </small>
+                            </div>
+
+                            <!-- Marca / Fabricante Multi-Company Saneada -->
+                            <div class="col-md-4" [class.has-error-input]="isFieldInvalid('brandId')">
+                                <label class="form-label small fw-bold text-secondary mb-1">Marca / Fabricante</label>
+                                <select class="form-select bg-light text-dark border-light fw-semibold"
+                                        formControlName="brandId"
+                                        [class.is-invalid]="isFieldInvalid('brandId')">
+                                    <option [ngValue]="''" disabled selected>Seleccione Marca...</option>
+                                    <option *ngFor="let brand of brandsList" [value]="brand.id">🏷️ {{ brand.name }}</option>
+                                </select>
+                                <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('brandId')">
+                                    Debe seleccionar una marca (o elegir 'Genérico').
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Descripción Larga / Glosa -->
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-secondary mb-1">Descripción del Producto / Glosa</label>
+                            <textarea class="form-control bg-light text-dark border-light small"
+                                      rows="4"
+                                      formControlName="description"
+                                      placeholder="Añada características físicas, glosa para facturación o detalles complementarios..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- ========================================================================= -->
+                    <!-- 💰 CONTENIDO DE PESTAÑA 2: MATRIZ DE PRECIOS, VALORES E IMPUESTOS         -->
+                    <!-- ========================================================================= -->
+                    <div *ngIf="activeTab === 'precios'" class="tab-content-fade">
+                        <div class="row g-3 mb-3">
+                            <!-- Moneda Comercial Transversal -->
+                            <div class="col-md-6" [class.has-error-input]="isFieldInvalid('currencyParamId')">
                                 <label class="form-label small fw-bold text-secondary mb-1">Moneda Comercial (PEN, USD, EUR)</label>
                                 <select class="form-select bg-light text-dark border-light fw-semibold"
                                         formControlName="currencyParamId"
                                         [class.is-invalid]="isFieldInvalid('currencyParamId')">
-                                    <option value="" disabled selected>Seleccione Moneda...</option>
+                                    <option [ngValue]="''" disabled selected>Seleccione Moneda...</option>
                                     <option *ngFor="let curr of currenciesList" [value]="curr.id">💰 {{ curr.code }} - {{ curr.name }}</option>
                                 </select>
-                                <!-- 🎯 CORRECCIÓN: Envolvemos en *ngIf amarrado a tu CSS de alerta -->
                                 <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('currencyParamId')">
                                     La selección de la moneda comercial es obligatoria para la consistencia contable.
                                 </small>
                             </div>
-             <div class="col-md-6" [class.has-error-input]="isFieldInvalid('taxTypeParamId')">
+
+                            <!-- Tipo de Afectación IGV Transversal -->
+                            <div class="col-md-6" [class.has-error-input]="isFieldInvalid('taxTypeParamId')">
                                 <label class="form-label small fw-bold text-secondary mb-1">Tipo de Afectación (Impuesto IGV)</label>
                                 <select class="form-select bg-light text-dark border-light fw-semibold"
                                         formControlName="taxTypeParamId"
                                         [class.is-invalid]="isFieldInvalid('taxTypeParamId')">
-                                    <option value="" disabled selected>Seleccione Impuesto IGV...</option>
+                                    <option [ngValue]="''" disabled selected>Seleccione Impuesto IGV...</option>
                                     <option *ngFor="let tax of taxesList" [value]="tax.id">⚖️ {{ tax.name }}</option>
                                 </select>
-                                <!-- 🎯 CORRECCIÓN: Envolvemos en *ngIf amarrado a tu CSS de alerta -->
                                 <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('taxTypeParamId')">
                                     El tipo de afectación tributaria es requerido por normativas de la SUNAT.
                                 </small>
                             </div>
-            </div>
+                        </div>
 
-            <div class="row g-3 mb-2">
-              <div
-                class="col-md-6"
-                [class.has-error-input]="isFieldInvalid('purchasePrice')"
-              >
-                <label class="form-label small fw-bold text-secondary mb-1"
-                  >Precio Compra Bruto (Con IGV)</label
-                >
-                <div class="input-group input-group-sm">
-                  <span
-                    class="input-group-text bg-light border-light-subtle text-secondary small"
-                    >S/</span
-                  >
-                  <input
-                    type="number"
-                    step="0.01"
-                    class="form-control bg-light text-dark border-light fw-semibold"
-                    formControlName="purchasePrice"
-                  />
-                </div>
-                <small
-                  class="text-muted opacity-70 d-block mt-1"
-                  style="font-size: 11px"
-                  >El sistema calculará automáticamente el Valor Compra neto sin
-                  impuestos.</small
-                >
-              </div>
+                        <div class="row g-3 mb-2">
+                            <!-- Precio Compra Bruto -->
+                            <div class="col-md-6" [class.has-error-input]="isFieldInvalid('purchasePrice')">
+                                <label class="form-label small fw-bold text-secondary mb-1">Precio Compra Bruto (Con IGV)</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light border-light-subtle text-secondary small">S/</span>
+                                    <input type="number"
+                                           step="0.01"
+                                           class="form-control bg-light text-dark border-light fw-semibold"
+                                           formControlName="purchasePrice" />
+                                </div>
+                                <small class="text-muted opacity-70 d-block mt-1" style="font-size: 11px">
+                                    El sistema calculará automáticamente el Valor Compra neto sin impuestos.
+                                </small>
+                            </div>
 
-              <div
-                class="col-md-6"
-                [class.has-error-input]="isFieldInvalid('salesPrice')"
-              >
-                <label class="form-label small fw-bold text-secondary mb-1"
-                  >Precio Venta Bruto (Con IGV)</label
-                >
-                <div class="input-group input-group-sm">
-                  <span
-                    class="input-group-text bg-light border-light-subtle text-secondary small"
-                    >S/</span
-                  >
-                  <input
-                    type="number"
-                    step="0.01"
-                    class="form-control bg-light text-dark border-light fw-bold text-primary"
-                    formControlName="salesPrice"
-                  />
-                </div>
-                <small
-                  class="text-muted opacity-70 d-block mt-1"
-                  style="font-size: 11px"
-                  >El sistema calculará automáticamente el Valor Venta neto
-                  comercial.</small
-                >
-              </div>
-            </div>
-          </div>
+                            <!-- Precio Venta Bruto -->
+                            <div class="col-md-6" [class.has-error-input]="isFieldInvalid('salesPrice')">
+                                <label class="form-label small fw-bold text-secondary mb-1">Precio Venta Bruto (Con IGV)</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light border-light-subtle text-secondary small">S/</span>
+                                    <input type="number"
+                                           step="0.01"
+                                           class="form-control bg-light text-dark border-light fw-bold text-primary"
+                                           formControlName="salesPrice" />
+                                </div>
+                                <small class="text-muted opacity-70 d-block mt-1" style="font-size: 11px">
+                                    El sistema calculará automáticamente el Valor Venta neto comercial.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
 
-          <!-- ========================================================================= -->
-          <!-- 📦 CONTENIDO DE PESTAÑA 3: ALMACÉN Y CONFIGURACIÓN BASE                   -->
-          <!-- ========================================================================= -->
-          <div *ngIf="activeTab === 'almacen'" class="tab-content-fade">
-            <div class="row g-3 mb-3">
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-secondary mb-1"
-                  >SKU Comercial de Almacén</label
-                >
-                <input
-                  type="text"
-                  class="form-control bg-light text-dark border-light fw-medium"
-                  formControlName="sku"
-                  placeholder="Ej: SKU-THINK-E14"
-                />
-              </div>
+                    <!-- ========================================================================= -->
+                    <!-- 📦 CONTENIDO DE PESTAÑA 3: ALMACÉN Y CONFIGURACIÓN BASE                   -->
+                    <!-- ========================================================================= -->
+                    <div *ngIf="activeTab === 'almacen'" class="tab-content-fade">
+                        <div class="row g-3 mb-3">
+                            <!-- SKU Comercial -->
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-secondary mb-1">SKU Comercial de Almacén</label>
+                                <input type="text"
+                                       class="form-control bg-light text-dark border-light fw-medium"
+                                       formControlName="sku"
+                                       placeholder="Ej: SKU-THINK-E14" />
+                            </div>
 
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-secondary mb-1"
-                  >Código de Barras Universal (EAN/UPC)</label
-                >
-                <input
-                  type="text"
-                  class="form-control bg-light text-dark border-light fw-medium font-monospace"
-                  formControlName="barCode"
-                  placeholder="Ej: 7701234567890"
-                />
-              </div>
-            </div>
+                            <!-- Código de Barras -->
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-secondary mb-1">Código de Barras Universal (EAN/UPC)</label>
+                                <input type="text"
+                                       class="form-control bg-light text-dark border-light fw-medium font-monospace"
+                                       formControlName="barCode"
+                                       placeholder="Ej: 7701234567890" />
+                            </div>
+                        </div>
 
-            <div class="row g-3 mb-3">
-              <div class="col-md-6" [class.has-error-input]="isFieldInvalid('unitMeasureParamId')">
+                        <div class="row g-3 mb-3">
+                            <!-- Unidad de Medida Transversal SUNAT -->
+                            <div class="col-md-6" [class.has-error-input]="isFieldInvalid('unitMeasureParamId')">
                                 <label class="form-label small fw-bold text-secondary mb-1">Unidad de Medida Comercial</label>
                                 <select class="form-select bg-light text-dark border-light fw-semibold"
                                         formControlName="unitMeasureParamId"
                                         [class.is-invalid]="isFieldInvalid('unitMeasureParamId')">
-                                    <option value="" disabled selected>Seleccione Unidad...</option>
+                                    <option [ngValue]="''" disabled selected>Seleccione Unidad...</option>
                                     <option *ngFor="let unit of unitsList" [value]="unit.id">⚖️ {{ unit.code }} - {{ unit.name }}</option>
                                 </select>
-                                <!-- 🎯 CORRECCIÓN: Envolvemos en *ngIf amarrado a tu CSS de alerta -->
                                 <small class="text-danger extra-small-err" *ngIf="isFieldInvalid('unitMeasureParamId')">
                                     La unidad de medida es obligatoria para la validez del XML UBL 2.1.
                                 </small>
                             </div>
 
-              <div
-                class="col-md-6"
-                [class.has-error-input]="isFieldInvalid('minimumStock')"
-              >
-                <label class="form-label small fw-bold text-secondary mb-1"
-                  >Stock Mínimo de Alerta</label
-                >
-                <input
-                  type="number"
-                  step="1"
-                  class="form-control bg-light text-dark border-light fw-semibold"
-                  formControlName="minimumStock"
-                />
-              </div>
-            </div>
+                            <!-- Stock Mínimo de Alerta -->
+                            <div class="col-md-6" [class.has-error-input]="isFieldInvalid('minimumStock')">
+                                <label class="form-label small fw-bold text-secondary mb-1">Stock Mínimo de Alerta</label>
+                                <input type="number"
+                                       step="1"
+                                       class="form-control bg-light text-dark border-light fw-semibold"
+                                       formControlName="minimumStock" />
+                            </div>
+                        </div>
 
-            <div
-              class="p-2.5 bg-light rounded-3 d-flex gap-5 align-items-center mb-2"
-              style="font-size: 13px"
-            >
-              <label
-                class="form-check-label text-dark cursor-pointer d-flex align-items-center gap-1.5 m-0 fw-medium"
-              >
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  formControlName="isPackage"
-                />
-                esPaquete (Agrupa productos)
-              </label>
-              <label
-                class="form-check-label text-dark cursor-pointer d-flex align-items-center gap-1.5 m-0 fw-medium"
-              >
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  formControlName="allowSearch"
-                />
-                Permitir búsqueda en el sistema
-              </label>
-            </div>
-          </div>
-
-          <!-- ========================================================================= -->
-          <!-- 🖼️ SOLAPA 4: GALERÍA DE IMÁGENES Y ADJUNTOS EN LA NUBE REPOTENCIADA (REMIXICON) -->
-          <!-- ========================================================================= -->
-          <div *ngIf="activeTab === 'adjuntos'" class="tab-content-fade">
-            <!-- 🚫 ESTADO CONTROLADO: Modo Creación bloquea subida por falta de ID Primary Key -->
-            <div
-              *ngIf="!isEditing"
-              class="p-4 text-center bg-light border rounded-3 mb-3 text-secondary"
-              style="font-size: 13px"
-            >
-              <i
-                class="ri-lock-2-line text-warning d-block mb-2"
-                style="font-size: 34px"
-              ></i>
-              <strong class="text-dark d-block mb-1"
-                >Carrete Multimedia Inhabilitado</strong
-              >
-              <span
-                >Primero inicialice la ficha técnica guardando el artículo en el
-                disco. Una vez generado el ID correlativo, podrá arrastrar
-                fotografías y catálogos PDF.</span
-              >
-            </div>
-
-            <div *ngIf="isEditing">
-              <!-- 📥 ZONA DE BOTÓN DE CARGA STREAM BINARIO MULTIPART -->
-              <div
-                class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 border mb-4"
-              >
-                <div>
-                  <strong class="text-dark d-block" style="font-size: 13.5px"
-                    >Panel Transversal de Archivos</strong
-                  >
-                  <span class="text-secondary small d-block"
-                    >Suba catálogos de hardware o fotos promocionales (Máx.
-                    10MB)</span
-                  >
-                </div>
-                <div>
-                  <label
-                    class="btn btn-sm btn-primary fw-bold text-white px-3 py-2 border-0 m-0 d-flex align-items-center gap-1.5"
-                    style="
-                      background-color: #2563eb;
-                      cursor: pointer;
-                      border-radius: 6px;
-                    "
-                    [class.disabled]="isUploadingFile"
-                  >
-                    <i
-                      [className]="
-                        isUploadingFile
-                          ? 'ri-loader-3-line spin-loader'
-                          : 'ri-upload-cloud-2-line fs-5'
-                      "
-                    ></i>
-                    {{ isUploadingFile ? "Subiendo..." : "Cargar Archivo" }}
-                    <input
-                      type="file"
-                      accept="image/*,application/pdf"
-                      style="display: none"
-                      (change)="onFileSelected($event)"
-                      [disabled]="isUploadingFile"
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <!-- 📂 CARRETE DE MINIATURAS VACÍO -->
-              <div
-                *ngIf="productImages.length === 0"
-                class="text-center py-4 border border-dashed rounded-3 mb-2 text-secondary bg-light"
-              >
-                <i
-                  class="ri-images-line text-muted opacity-25 d-block mb-1.5"
-                  style="font-size: 38px"
-                ></i>
-                <span class="small d-block fw-semibold"
-                  >No se han cargado imágenes para este artículo</span
-                >
-                <p class="text-muted extra-small-err m-0">
-                  El catálogo de punto de venta (POS) mostrará un icono
-                  genérico.
-                </p>
-              </div>
-
-              <!-- 🚀 CUADRÍCULA DE GALERÍA ACTIVA REPOTENCIADA (CLOUDFLARE R2 + REMIXICON) -->
-              <div
-                class="gallery-grid d-flex flex-wrap gap-3"
-                *ngIf="productImages.length > 0"
-              >
-                <div
-                  class="gallery-card shadow-sm border position-relative bg-white rounded-3 overflow-hidden"
-                  *ngFor="let img of productImages"
-                  [style.border-color]="img.isMainPhoto ? '#eab308' : '#e2e8f0'"
-                  style="width: 140px; transition: all 0.2s"
-                >
-                  <!-- 🎯 BOTÓN INTERACTIVO FLOTANTE DE PORTADA PRINCIPAL -->
-                  <div
-                    class="position-absolute top-0 start-0 p-1"
-                    style="z-index: 10"
-                  >
-                    <button
-                      type="button"
-                      class="btn p-1 bg-white bg-opacity-90 rounded-circle shadow-sm border-0 d-flex align-items-center justify-content-center"
-                      style="width: 24px; height: 24px"
-                      (click)="setMainPhoto(img.id)"
-                      [title]="
-                        img.isMainPhoto
-                          ? 'Foto Portada Principal'
-                          : 'Establecer como Portada'
-                      "
-                    >
-                      <i
-                        [className]="
-                          img.isMainPhoto
-                            ? 'ri-star-fill text-warning'
-                            : 'ri-star-line text-muted'
-                        "
-                        style="font-size: 14px"
-                      ></i>
-                    </button>
-                  </div>
-
-                  <!-- Contenedor Imagen / Documento -->
-                  <div
-                    class="gallery-img-wrapper bg-light d-flex align-items-center justify-content-center"
-                    style="height: 110px; overflow: hidden"
-                  >
-                    <!-- Si es imagen, pintamos la previsualización directa desde Cloudflare R2 -->
-                    <img
-                      *ngIf="img.fileExtension !== 'pdf'"
-                      [src]="img.fileUrl"
-                      class="w-100 h-100"
-                      style="object-fit: cover"
-                      alt="Vista previa"
-                    />
-
-                    <!-- Icono representativo si es un documento técnico PDF con RemixIcon -->
-                    <div
-                      *ngIf="img.fileExtension === 'pdf'"
-                      class="text-center"
-                    >
-                      <i
-                        class="ri-file-pdf-2-fill text-danger"
-                        style="font-size: 42px; color: #dc2626 !important"
-                      ></i>
-                      <span
-                        class="d-block text-muted font-monospace mt-1 text-truncate px-2"
-                        style="font-size: 9px; max-width: 130px"
-                        [title]="img.fileName"
-                      >
-                        {{ img.fileName }}
-                      </span>
+                        <!-- Checkboxes de Estado Configuración -->
+                        <div class="p-2.5 bg-light rounded-3 d-flex gap-5 align-items-center mb-2" style="font-size: 13px">
+                            <label class="form-check-label text-dark cursor-pointer d-flex align-items-center gap-1.5 m-0 fw-medium">
+                                <input type="checkbox" class="form-check-input" formControlName="isPackage" />
+                                esPaquete (Agrupa productos)
+                            </label>
+                            <label class="form-check-label text-dark cursor-pointer d-flex align-items-center gap-1.5 m-0 fw-medium">
+                                <input type="checkbox" class="form-check-input" formControlName="allowSearch" />
+                                Permitir búsqueda en el sistema
+                            </label>
+                        </div>
                     </div>
-                  </div>
 
-                  <!-- Barra de Detalles Inferior -->
-                  <div
-                    class="gallery-actions-bar p-2 bg-white border-top d-flex justify-content-between align-items-center"
-                    style="font-size: 11px"
-                  >
-                    <span
-                      class="text-dark font-monospace text-truncate d-block fw-semibold"
-                      style="max-width: 85px"
-                      [title]="img.fileName"
-                    >
-                      {{ img.fileName }}
-                    </span>
-                    <span
-                      class="badge text-uppercase font-monospace text-secondary bg-light border px-1"
-                      style="font-size: 8.5px; border-radius: 3px"
-                    >
-                      .{{ img.fileExtension }}
-                    </span>
-                  </div>
+                    <!-- ========================================================================= -->
+                    <!-- 🖼️ SOLAPA 4: GALERÍA DE IMÁGENES Y ADJUNTOS EN LA NUBE (CLOUDFLARE R2)    -->
+                    <!-- ========================================================================= -->
+                    <div *ngIf="activeTab === 'adjuntos'" class="tab-content-fade">
+
+                        <!-- 🚫 ESTADO CONTROLADO: Modo Creación bloquea subida por falta de ID Primary Key -->
+                        <div *ngIf="!isEditing"
+                             class="p-4 text-center bg-light border rounded-3 mb-3 text-secondary tab-content-fade"
+                             style="font-size: 13px">
+                            <i class="ri-lock-2-line text-warning d-block mb-2" style="font-size: 34px"></i>
+                            <strong class="text-dark d-block mb-1">Carrete Multimedia Inhabilitado</strong>
+                            <span>
+                                Primero inicialice la ficha técnica guardando el artículo en el disco. Una vez generado el ID correlativo, podrá arrastrar fotografías y catálogos PDF.
+                            </span>
+                        </div>
+
+                        <div *ngIf="isEditing" class="tab-content-fade">
+                            <!-- 📥 ZONA DE BOTÓN DE CARGA STREAM BINARIO MULTIPART -->
+                            <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 border mb-4">
+                                <div>
+                                    <strong class="text-dark d-block" style="font-size: 13.5px">Panel Transversal de Archivos</strong>
+                                    <span class="text-secondary small d-block">Suba catálogos de hardware o fotos promocionales (Máx. 10MB)</span>
+                                </div>
+                                <div>
+                                    <label class="btn btn-sm btn-primary fw-bold text-white px-3 py-2 border-0 m-0 d-flex align-items-center gap-1.5"
+                                           style="background-color: #2563eb; cursor: pointer; border-radius: 6px;"
+                                           [class.disabled]="isUploadingFile">
+                                        <i [className]="isUploadingFile ? 'ri-loader-3-line spin-loader' : 'ri-upload-cloud-2-line fs-5'"></i>
+                                        {{ isUploadingFile ? "Subiendo..." : "Cargar Archivo" }}
+                                        <input type="file"
+                                               accept="image/*,application/pdf"
+                                               style="display: none"
+                                               (change)="onFileSelected($event)"
+                                               [disabled]="isUploadingFile" />
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 📂 CARRETE DE MINIATURAS VACÍO -->
+                            <div *ngIf="productImages.length === 0"
+                                 class="text-center py-4 border border-dashed rounded-3 mb-2 text-secondary bg-light tab-content-fade">
+                                <i class="ri-images-line text-muted opacity-25 d-block mb-1.5" style="font-size: 38px"></i>
+                                <span class="small d-block fw-semibold">No se han cargado imágenes para este artículo</span>
+                                <p class="text-muted extra-small-err m-0">El catálogo de punto de venta (POS) mostrará un icono genérico.</p>
+                            </div>
+
+                            <!-- 🚀 CUADRÍCULA DE GALERÍA ACTIVA REPOTENCIADA (CLOUDFLARE R2 + REMIXICON) -->
+                            <div class="gallery-grid d-flex flex-wrap gap-3" *ngIf="productImages.length > 0">
+                                <div class="gallery-card shadow-sm border position-relative bg-white rounded-3 overflow-hidden"
+                                     *ngFor="let img of productImages"
+                                     [style.border-color]="img.isMainPhoto ? '#eab308' : '#e2e8f0'"
+                                     style="width: 140px; transition: all 0.2s">
+
+                                    <!-- 🎯 BOTÓN INTERACTIVO FLOTANTE DE PORTADA PRINCIPAL -->
+                                    <div class="position-absolute top-0 start-0 p-1" style="z-index: 10">
+                                        <button type="button"
+                                                class="btn p-1 bg-white bg-opacity-90 rounded-circle shadow-sm border-0 d-flex align-items-center justify-content-center"
+                                                style="width: 24px; height: 24px"
+                                                (click)="setMainPhoto(img.id)"
+                                                [title]="img.isMainPhoto ? 'Foto Portada Principal' : 'Establecer como Portada'">
+                                            <i [className]="img.isMainPhoto ? 'ri-star-fill text-warning' : 'ri-star-line text-muted'" style="font-size: 14px"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Contenedor Imagen / Documento -->
+                                    <div class="gallery-img-wrapper bg-light d-flex align-items-center justify-content-center" style="height: 110px; overflow: hidden">
+                                        <img *ngIf="img.fileExtension !== 'pdf'" [src]="img.fileUrl" class="w-100 h-100" style="object-fit: cover" alt="Vista previa" />
+
+                                        <!-- Icono representativo si es un documento técnico PDF con RemixIcon -->
+                                        <div *ngIf="img.fileExtension === 'pdf'" class="text-center">
+                                            <i class="ri-file-pdf-2-fill text-danger" style="font-size: 42px; color: #dc2626 !important"></i>
+                                            <span class="d-block text-muted font-monospace mt-1 text-truncate px-2" style="font-size: 9px; max-width: 130px" [title]="img.fileName">
+                                                {{ img.fileName }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Barra de Detalles Inferior -->
+                                    <div class="gallery-actions-bar p-2 bg-white border-top d-flex justify-content-between align-items-center" style="font-size: 11px">
+                                        <span class="text-dark font-monospace text-truncate d-block fw-semibold" style="max-width: 85px" [title]="img.fileName">
+                                            {{ img.fileName }}
+                                        </span>
+                                        <span class="badge text-uppercase font-monospace text-secondary bg-light border px-1" style="font-size: 8.5px; border-radius: 3px">
+                                            .{{ img.fileExtension }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Pie de página de acciones operativas del Formulario Modal -->
-        <div
-          class="modal-footer border-top border-light px-4 py-3 bg-light rounded-bottom d-flex justify-content-end gap-2"
-        >
-          <button
-            type="button"
-            class="btn btn-light btn-sm px-3 border text-secondary shadow-none"
-            style="border-radius: 6px"
-            (click)="closeModal()"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            class="btn btn-primary btn-sm px-4 text-white"
-            style="background-color: #2563eb; border-radius: 6px"
-            [disabled]="isLoading"
-          >
-            {{ isEditing ? "Guardar Cambios" : "Indexar Producto" }}
-          </button>
+                <!-- Pie de página de acciones operativas del Formulario Modal Saneado -->
+                <div class="modal-footer border-top border-light px-4 py-3 bg-light rounded-bottom d-flex justify-content-end gap-2">
+                    <button type="button"
+                            class="btn btn-light btn-sm px-3 border text-secondary shadow-none"
+                            style="border-radius: 6px"
+                            (click)="closeModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="btn btn-primary btn-sm px-4 text-white border-0 shadow-sm fw-bold d-flex align-items-center gap-1.5"
+                            style="background-color: #2563eb; border-radius: 6px; height: 32px;"
+                            [disabled]="isLoading">
+                        <i [className]="isLoading ? 'ri-loader-3-line spin-loader' : 'ri-save-3-line'"></i>
+                        {{ isEditing ? "Guardar Cambios" : "Indexar Producto" }}
+                    </button>
+                </div>
+            </form>
         </div>
-      </form>
     </div>
-  </div>
 </div>
 
 <div class="modal-backdrop fade show" *ngIf="showModal"></div>
