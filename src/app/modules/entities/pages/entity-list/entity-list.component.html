@@ -2,249 +2,328 @@
 <!-- 👥 MAESTRO DE ENTIDADES (CLIENTES/PROVEEDORES): REMIXICON PREMIUM (1 DE 2) -->
 <!-- ========================================================================= -->
 <div class="page-header-title mb-4">
-    <h1 class="h4 fw-bold text-dark mb-1">
-        <i class="ri-user-shared-2-line text-primary me-1"></i> Catálogo Maestro de Entidades
-    </h1>
-    <p class="text-muted small m-0">
-        Gestione la base de datos unificada de clientes y proveedores compartida de su Holding
-    </p>
+  <h1 class="h4 fw-bold text-dark mb-1">
+    <i class="ri-user-shared-2-line text-primary me-1"></i> Catálogo Maestro de
+    Entidades
+  </h1>
+  <p class="text-muted small m-0">
+    Gestione la base de datos unificada de clientes y proveedores compartida de
+    su Holding
+  </p>
 </div>
 
 <div class="table-container-wrapper shadow-sm border rounded-3 bg-white">
-    <!-- 🔍 BARRA DE FILTROS AVANZADOS INTEGRADOS (HORIZONTAL) -->
-    <div class="table-advanced-filters-toolbar p-3 bg-light rounded-top border-bottom">
-        <div class="row g-2 align-items-center">
+  <!-- 🔍 BARRA DE FILTROS AVANZADOS INTEGRADOS (HORIZONTAL) -->
+  <div
+    class="table-advanced-filters-toolbar p-3 bg-light rounded-top border-bottom"
+  >
+    <div class="row g-2 align-items-center">
+      <!-- Filtro 1: Tipo de Documento -->
+      <div class="col-md-2">
+        <select
+          class="form-select form-select-sm shadow-none border bg-white text-dark fw-semibold"
+          [(ngModel)]="filterDocumentType"
+          (change)="onFilterChange()"
+        >
+          <option value="">📁 Todos los Documentos</option>
+          <option *ngFor="let doc of identityTypesList" [value]="doc.code">
+            {{ doc.name }}
+          </option>
+        </select>
+      </div>
 
-            <!-- Filtro 1: Tipo de Documento -->
-            <div class="col-md-2">
-                <select class="form-select form-select-sm shadow-none border bg-white text-dark fw-semibold"
-                        [(ngModel)]="filterDocumentType"
-                        (change)="onFilterChange()">
-                    <option value="">📁 Todos los Documentos</option>
-<option *ngFor="let doc of identityTypesList" [value]="doc.code">
-                    {{ doc.name }}
-                    </option>
-                </select>
-            </div>
+      <!-- Filtro 2: Número de Documento -->
+      <div class="col-md-2">
+        <input
+          type="text"
+          class="form-control form-control-sm shadow-none border bg-white text-dark"
+          [(ngModel)]="filterDocumentNumber"
+          (input)="onFilterChange()"
+          placeholder="Nro Documento..."
+        />
+      </div>
 
-            <!-- Filtro 2: Número de Documento -->
-            <div class="col-md-2">
-                <input type="text"
-                       class="form-control form-control-sm shadow-none border bg-white text-dark"
-                       [(ngModel)]="filterDocumentNumber"
-                       (input)="onFilterChange()"
-                       placeholder="Nro Documento..." />
-            </div>
+      <!-- Filtro 3: Razón Social / Nombres -->
+      <div class="col-md-4">
+        <input
+          type="text"
+          class="form-control form-control-sm shadow-none border bg-white text-dark"
+          [(ngModel)]="filterName"
+          (input)="onFilterChange()"
+          placeholder="Buscar Razón Social o Nombres Completos..."
+        />
+      </div>
 
-            <!-- Filtro 3: Razón Social / Nombres -->
-            <div class="col-md-4">
-                <input type="text"
-                       class="form-control form-control-sm shadow-none border bg-white text-dark"
-                       [(ngModel)]="filterName"
-                       (input)="onFilterChange()"
-                       placeholder="Buscar Razón Social o Nombres Completos..." />
-            </div>
+      <!-- Filtro 4: Correo de Contacto -->
+      <div class="col-md-2">
+        <input
+          type="text"
+          class="form-control form-control-sm shadow-none border bg-white text-dark"
+          [(ngModel)]="filterEmail"
+          (input)="onFilterChange()"
+          placeholder="Buscar por Correo..."
+        />
+      </div>
 
-            <!-- Filtro 4: Correo de Contacto -->
-            <div class="col-md-2">
-                <input type="text"
-                       class="form-control form-control-sm shadow-none border bg-white text-dark"
-                       [(ngModel)]="filterEmail"
-                       (input)="onFilterChange()"
-                       placeholder="Buscar por Correo..." />
-            </div>
-
-            <!-- Acción: Botón Nuevo Registro Saneado con RemixIcon -->
-            <div class="col-md-2 text-end">
-                <button class="btn btn-primary btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1.5 border-0 shadow-sm"
-                        style="background-color: #2563eb; border-radius: 6px; height: 32px; font-size: 13px;"
-                        type="button"
-                        (click)="openCreateModal()">
-                    <i class="ri-user-add-line fs-5"></i> Nuevo Registro
-                </button>
-            </div>
-        </div>
+      <!-- Acción: Botón Nuevo Registro Saneado con RemixIcon -->
+      <div class="col-md-2 text-end">
+        <button
+          class="btn btn-primary btn-sm w-100 fw-bold d-flex align-items-center justify-content-center gap-1.5 border-0 shadow-sm"
+          style="
+            background-color: #2563eb;
+            border-radius: 6px;
+            height: 32px;
+            font-size: 13px;
+          "
+          type="button"
+          (click)="openCreateModal()"
+        >
+          <i class="ri-user-add-line fs-5"></i> Nuevo Registro
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- CONTENEDOR DE LA TABLA DINÁMICA CON REMIXICON -->
-    <div class="table-responsive text-start">
-        <table class="table table-hover align-middle m-0"
-               style="min-width: 900px; font-size: 13px">
-            <thead class="table-light text-secondary border-bottom">
-                <tr>
-                    <th (click)="changeOrder('id')"
-                        class="py-3 px-4 cursor-pointer"
-                        style="width: 90px; user-select: none">
-                        ID
-                        <i [className]="
+  <!-- CONTENEDOR DE LA TABLA DINÁMICA CON REMIXICON -->
+  <div class="table-responsive text-start">
+    <table
+      class="table table-hover align-middle m-0"
+      style="min-width: 900px; font-size: 13px"
+    >
+      <thead class="table-light text-secondary border-bottom">
+        <tr>
+          <th
+            (click)="changeOrder('id')"
+            class="py-3 px-4 cursor-pointer"
+            style="width: 90px; user-select: none"
+          >
+            ID
+            <i
+              [className]="
                 sortField === 'id'
                   ? sortOrder === 'asc'
                     ? 'ri-arrow-up-s-line text-primary fw-bold'
                     : 'ri-arrow-down-s-line text-primary fw-bold'
                   : 'ri-subtract-line opacity-25'
-              "></i>
-                    </th>
-                    <th (click)="changeOrder('name')"
-                        class="py-3 cursor-pointer"
-                        style="user-select: none">
-                        Entidad Comercial / Razón Social
-                        <i [className]="
+              "
+            ></i>
+          </th>
+          <th
+            (click)="changeOrder('name')"
+            class="py-3 cursor-pointer"
+            style="user-select: none"
+          >
+            Entidad Comercial / Razón Social
+            <i
+              [className]="
                 sortField === 'name'
                   ? sortOrder === 'asc'
                     ? 'ri-arrow-up-s-line text-primary fw-bold'
                     : 'ri-arrow-down-s-line text-primary fw-bold'
                   : 'ri-arrow-up-down-line opacity-25'
-              "></i>
-                    </th>
-                    <th style="width: 140px">Estructura</th>
-                    <th style="width: 130px">Documento</th>
-                    <th style="width: 160px">Identificación</th>
-                    <th>Canal de Contacto</th>
-                    <th class="text-center" style="width: 110px">Operaciones</th>
-                </tr>
-            </thead>
-            <tbody class="border-0">
-                <!-- ⏳ EFECTO VISUAL: EN ESPERA DE DATOS REPOTENCIADO -->
-                <tr *ngIf="isLoading">
-                    <td colspan="7" class="text-center py-5 text-muted">
-                        <i class="ri-loader-3-line spin-loader text-primary fs-3 d-block mb-2"></i>
-                        <span class="fw-semibold">Consultando catálogo maestro en MySQL...</span>
-                    </td>
-                </tr>
-                <!-- 📂 ESTADO VACÍO CON REMIXICON -->
-                <tr *ngIf="!isLoading && entities.length === 0">
-                    <td colspan="7" class="text-center py-5 bg-white tab-content-fade">
-                        <div class="py-4">
-                            <i class="ri-database-2-line text-muted opacity-25 d-block mb-2"
-                               style="font-size: 48px"></i>
-                            <h6 class="text-dark fw-bold m-0">
-                                No se encontraron entidades comerciales
-                            </h6>
-                            <p class="text-muted small m-0">
-                                Intente modificando los filtros de búsqueda avanzados o cambie de local.
-                            </p>
-                        </div>
-                    </td>
-                </tr>
+              "
+            ></i>
+          </th>
+          <th style="width: 140px">Estructura</th>
+          <th style="width: 130px">Documento</th>
+          <th style="width: 160px">Identificación</th>
+          <th>Canal de Contacto</th>
+          <th class="text-center" style="width: 110px">Operaciones</th>
+        </tr>
+      </thead>
+      <tbody class="border-0">
+        <!-- ⏳ EFECTO VISUAL: EN ESPERA DE DATOS REPOTENCIADO -->
+        <tr *ngIf="isLoading">
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i
+              class="ri-loader-3-line spin-loader text-primary fs-3 d-block mb-2"
+            ></i>
+            <span class="fw-semibold"
+              >Consultando catálogo maestro en MySQL...</span
+            >
+          </td>
+        </tr>
+        <!-- 📂 ESTADO VACÍO CON REMIXICON -->
+        <tr *ngIf="!isLoading && entities.length === 0">
+          <td colspan="7" class="text-center py-5 bg-white tab-content-fade">
+            <div class="py-4">
+              <i
+                class="ri-database-2-line text-muted opacity-25 d-block mb-2"
+                style="font-size: 48px"
+              ></i>
+              <h6 class="text-dark fw-bold m-0">
+                No se encontraron entidades comerciales
+              </h6>
+              <p class="text-muted small m-0">
+                Intente modificando los filtros de búsqueda avanzados o cambie
+                de local.
+              </p>
+            </div>
+          </td>
+        </tr>
 
-                <!-- 🚀 REGISTROS REALES EN VIVO (SANEADO CON REMIXICON) -->
-<tr *ngFor="let entity of entities">
-            <td class="px-4 text-secondary font-monospace">#{{ entity.id }}</td>
-            <td>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="text-dark fw-bold">{{ entity.name }}</span>
-                </div>
-            </td>
-            <td>
-                <span class="badge bg-light text-secondary border border-light-subtle px-2 py-0.5 text-uppercase fw-semibold" style="font-size: 11px;">
-                    {{ entity.entityType }}
-                </span>
-            </td>
-            <td>
-                <span class="text-muted text-uppercase fw-semibold font-monospace" style="font-size: 11.5px;">
-                    {{
-              entity.DocumentParameter?.name ||
-                (entity.documentType === "6" ? "RUC" : "DNI")
-                    }}
-                </span>
-            </td>
-            <td>
-                <span class="text-dark font-monospace fw-bold" style="letter-spacing: 0.3px;">
-                    {{ entity.documentNumber }}
-                </span>
-            </td>
-            <td>
-                <!-- ✅ ENLACE DE CONTACTO LIMPIO CON REMIXICON -->
-<span>
-                <i class="ri-mail-line text-muted me-1.5 fs-6"></i>{{ entity.email }}
-                </span>
-                <ng-template #sinCorreo>
-                    <span class="text-muted opacity-50 small d-inline-flex align-items-center">
-                        <i class="ri-mail-forbid-line me-1.5 fs-6"></i>Sin correo
-                    </span>
-                </ng-template>
-            </td>
-            <td class="text-center">
-                <div class="d-inline-flex gap-1.5">
-                    <!-- Botón Modificar Registro -->
-<button class="btn btn-sm btn-outline-secondary p-1 d-flex align-items-center justify-content-center shadow-none"
-style="width: 28px; height: 28px; border-radius: 6px;"        
-(click)="onEdit(entity)">
-                    <i class="ri-pencil-line text-warning fs-5"></i>
-                    </button>
-                    <!-- Botón Dar de Baja Lógica -->
-                    <button class="btn btn-sm btn-outline-secondary p-1 d-flex align-items-center justify-content-center shadow-none"
-                            style="width: 28px; height: 28px; border-radius: 6px;"
-                            type="button"
-                            title="Dar de Baja Lógica">
-                        <i class="ri-delete-bin-line text-danger fs-5"></i>
-                    </button>
-                </div>
-            </td>
-            </tr>
-            </tbody>
-        </table>
+        <!-- 🚀 REGISTROS REALES EN VIVO (SANEADO CON REMIXICON) -->
+        <tr *ngFor="let entity of entities">
+          <td class="px-4 text-secondary font-monospace">#{{ entity.id }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <span class="text-dark fw-bold">{{ entity.name }}</span>
+            </div>
+          </td>
+          <td>
+            <span
+              class="badge bg-light text-secondary border border-light-subtle px-2 py-0.5 text-uppercase fw-semibold"
+              style="font-size: 11px"
+            >
+              {{ entity.entityType }}
+            </span>
+          </td>
+          <td>
+            <span
+              class="text-muted text-uppercase fw-semibold font-monospace"
+              style="font-size: 11.5px"
+            >
+              {{
+                entity.DocumentParameter?.name ||
+                  (entity.documentType === "6" ? "RUC" : "DNI")
+              }}
+            </span>
+          </td>
+          <td>
+            <span
+              class="text-dark font-monospace fw-bold"
+              style="letter-spacing: 0.3px"
+            >
+              {{ entity.documentNumber }}
+            </span>
+          </td>
+          <td>
+            <!-- ✅ ENLACE DE CONTACTO LIMPIO CON REMIXICON -->
+            <span>
+              <i class="ri-mail-line text-muted me-1.5 fs-6"></i
+              >{{ entity.email }}
+            </span>
+            <ng-template #sinCorreo>
+              <span
+                class="text-muted opacity-50 small d-inline-flex align-items-center"
+              >
+                <i class="ri-mail-forbid-line me-1.5 fs-6"></i>Sin correo
+              </span>
+            </ng-template>
+          </td>
+          <td class="text-center">
+            <div class="d-inline-flex gap-1.5">
+              <!-- Botón Modificar Registro -->
+              <button
+                class="btn btn-sm btn-outline-secondary p-1 d-flex align-items-center justify-content-center shadow-none"
+                style="width: 28px; height: 28px; border-radius: 6px"
+                (click)="onEdit(entity)"
+              >
+                <i class="ri-pencil-line text-warning fs-5"></i>
+              </button>
+              <!-- Botón Dar de Baja Lógica -->
+              <button
+                class="btn btn-sm btn-outline-secondary p-1 d-flex align-items-center justify-content-center shadow-none"
+                style="width: 28px; height: 28px; border-radius: 6px"
+                type="button"
+                title="Dar de Baja Lógica"
+              >
+                <i class="ri-delete-bin-line text-danger fs-5"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 📑 PIE DE PAGINACIÓN PREMIUM CON SELECTOR DINÁMICO DE FILAS -->
+  <div
+    class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3"
+    *ngIf="totalRecords > 0"
+  >
+    <!-- Lado Izquierdo: Contador + Selector de Tamaño (10, 20, 30, 50) -->
+    <div
+      class="d-flex align-items-center gap-3 text-secondary"
+      style="font-size: 12px"
+    >
+      <div>
+        Mostrando
+        <span class="fw-bold text-dark">
+          {{ (currentPage - 1) * pageSize + 1 }}
+        </span>
+        al
+        <span class="fw-bold text-dark">
+          {{
+            currentPage * pageSize > totalRecords
+              ? totalRecords
+              : currentPage * pageSize
+          }}
+        </span>
+        de
+        <span
+          class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-2.5 py-1"
+          >{{ totalRecords }} registros</span
+        >
+      </div>
+
+      <div class="d-flex align-items-center gap-2 border-start ps-3">
+        <span>Filas por página:</span>
+        <select
+          class="form-select form-select-sm shadow-none border bg-white text-dark py-0.5"
+          style="
+            width: 65px;
+            font-size: 12px;
+            font-weight: 600;
+            height: 24px;
+            border-radius: 4px;
+          "
+          [ngModel]="pageSize"
+          (change)="onPageSizeChange(+$any($event.target).value)"
+        >
+          <option [value]="10">10</option>
+          <option [value]="20">20</option>
+          <option [value]="30">30</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
     </div>
 
-    <!-- 📑 PIE DE PAGINACIÓN PREMIUM CON SELECTOR DINÁMICO DE FILAS -->
-    <div class="p-3 bg-light rounded-bottom border-top d-flex align-items-center justify-content-between flex-wrap gap-3"
-         *ngIf="totalRecords > 0">
-        <!-- Lado Izquierdo: Contador + Selector de Tamaño (10, 20, 30, 50) -->
-        <div class="d-flex align-items-center gap-3 text-secondary" style="font-size: 12px">
-            <div>
-                Mostrando
-                <span class="fw-bold text-dark">
-                    {{ (currentPage - 1) * pageSize + 1 }}
-                </span>
-                al
-                <span class="fw-bold text-dark">
-                    {{ currentPage * pageSize > totalRecords ? totalRecords : currentPage * pageSize }}
-                </span>
-                de
-                <span class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-2.5 py-1">{{ totalRecords }} registros</span>
-            </div>
+    <!-- Lado Derecho: Controles Navigacionales con RemixIcon -->
+    <div class="d-flex align-items-center gap-2">
+      <!-- Botón Izquierdo (Retroceder) -->
+      <button
+        class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
+        [disabled]="currentPage === 1"
+        (click)="changePage(currentPage - 1)"
+        style="width: 32px; height: 32px; border-radius: 6px"
+      >
+        <i class="ri-arrow-left-s-line fs-4" style="line-height: 1"></i>
+      </button>
 
-            <div class="d-flex align-items-center gap-2 border-start ps-3">
-                <span>Filas por página:</span>
-                <select class="form-select form-select-sm shadow-none border bg-white text-dark py-0.5"
-                        style="width: 65px; font-size: 12px; font-weight: 600; height: 24px; border-radius: 4px;"
-                        [ngModel]="pageSize"
-                        (change)="onPageSizeChange(+$any($event.target).value)">
-                    <option [value]="10">10</option>
-                    <option [value]="20">20</option>
-                    <option [value]="30">30</option>
-                    <option [value]="50">50</option>
-                </select>
-            </div>
-        </div>
+      <div
+        class="text-secondary fw-semibold mx-1"
+        style="font-size: 12px; user-select: none"
+      >
+        Página <span class="text-dark fw-bold">{{ currentPage }}</span> de
+        {{ totalPages }}
+      </div>
 
-        <!-- Lado Derecho: Controles Navigacionales con RemixIcon -->
-        <div class="d-flex align-items-center gap-2">
-            <!-- Botón Izquierdo (Retroceder) -->
-            <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
-                    [disabled]="currentPage === 1"
-                    (click)="changePage(currentPage - 1)"
-                    style="width: 32px; height: 32px; border-radius: 6px;">
-                <i class="ri-arrow-left-s-line fs-4" style="line-height: 1"></i>
-            </button>
-
-            <div class="text-secondary fw-semibold mx-1" style="font-size: 12px; user-select: none">
-                Página <span class="text-dark fw-bold">{{ currentPage }}</span> de {{ totalPages }}
-            </div>
-
-            <!-- Botón Derecho (Avanzar) -->
-            <button class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
-                    [disabled]="currentPage === totalPages"
-                    (click)="changePage(currentPage + 1)"
-                    style="width: 32px; height: 32px; border-radius: 6px;">
-                <i class="ri-arrow-right-s-line fs-4" style="line-height: 1"></i>
-            </button>
-        </div>
+      <!-- Botón Derecho (Avanzar) -->
+      <button
+        class="btn btn-sm border bg-white text-dark shadow-none d-flex align-items-center justify-content-center p-2"
+        [disabled]="currentPage === totalPages"
+        (click)="changePage(currentPage + 1)"
+        style="width: 32px; height: 32px; border-radius: 6px"
+      >
+        <i class="ri-arrow-right-s-line fs-4" style="line-height: 1"></i>
+      </button>
     </div>
+  </div>
 </div>
 
 <!-- ========================================================================= -->
-<!-- 🚪 VENTANA MODAL EMERGENTE: FORMULARIO REACTIVO DE DATAENTRY (COMPLETO)    -->
+<!-- 🚪 VENTANA MODAL EMERGENTE: FORMULARIO REACTIVO DE DATAENTRY (1 DE 2)      -->
 <!-- ========================================================================= -->
 <div
   class="modal fade"
@@ -258,15 +337,24 @@ style="width: 28px; height: 28px; border-radius: 6px;"
     <div
       class="modal-content border-0 shadow-lg modal-premium-radius bg-white text-dark"
     >
-      <!-- Encabezado -->
+      <!-- Encabezado Saneado con RemixIcon sin Emojis -->
       <div
         class="modal-header border-bottom border-light px-4 py-3 bg-light rounded-top d-flex align-items-center justify-content-between"
       >
-        <h5 class="modal-title fw-bold text-dark fs-6 m-0">
+        <h5
+          class="modal-title fw-bold text-dark fs-6 m-0 d-flex align-items-center gap-2"
+        >
+          <i
+            [className]="
+              isEditing
+                ? 'ri-edit-box-line text-warning fs-5'
+                : 'ri-user-add-line text-primary fs-5'
+            "
+          ></i>
           {{
             isEditing
-              ? "📝 Modificar Ficha de Entidad"
-              : "🚀 Registrar Nueva Entidad Comercial"
+              ? "Modificar Ficha de Entidad"
+              : "Registrar Nueva Entidad Comercial"
           }}
         </h5>
         <button
@@ -279,14 +367,12 @@ style="width: 28px; height: 28px; border-radius: 6px;"
       <!-- Cuerpo del Formulario Reactivo -->
       <form [formGroup]="entityForm" (ngSubmit)="onFormSubmit()">
         <div class="modal-body p-4 text-start">
+          <!-- Banner de Alertas Saneado -->
           <div
-            class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2"
+            class="alert alert-danger p-3 border-0 mb-4 rounded-3 d-flex align-items-start gap-2 tab-content-fade"
             *ngIf="formErrorMessage"
           >
-            <i
-              class="bx bx-error-circle fs-4 mt-0.5"
-              style="color: #ef4444"
-            ></i>
+            <i class="ri-error-warning-fill fs-4 text-danger mt-0.5"></i>
             <div>
               <strong class="text-dark d-block mb-0.5"
                 >Validación de Registro Contable</strong
@@ -299,7 +385,7 @@ style="width: 28px; height: 28px; border-radius: 6px;"
             </div>
           </div>
 
-          <!-- 🔗 INTERFAZ DE LOS 2 LINKS COMPUESTOS: ESTRUCTURA COMERCIAL -->
+          <!-- 🔗 INTERFAZ DE LOS 2 LINKS COMPUESTOS: ESTRUCTURA COMERCIAL CON REMIXICON -->
           <label class="form-label small fw-bold text-secondary mb-1.5 d-block"
             >Seleccione Perfil / Estructura Comercial</label
           >
@@ -326,9 +412,10 @@ style="width: 28px; height: 28px; border-radius: 6px;"
                 "
                 (click)="changeEntityTypeMode('persona')"
               >
-                <i class="bx bx-user fs-5"></i> Persona Natural
+                <i class="ri-user-line fs-5"></i> Persona Natural
               </button>
             </li>
+
             <!-- Link 2: Persona Jurídica (Empresa) -->
             <li class="nav-item flex-fill text-center">
               <button
@@ -345,14 +432,16 @@ style="width: 28px; height: 28px; border-radius: 6px;"
                 [class.text-secondary]="
                   entityForm.get('entityType')?.value !== 'empresa'
                 "
-              (click)="changeEntityTypeMode('empresa')"
+                (click)="changeEntityTypeMode('empresa')"
               >
-                <i class="bx bx-briefcase fs-5"></i> Persona Jurídica (Empresa)
+                <i class="ri-briefcase-line fs-5"></i> Persona Jurídica
+                (Empresa)
               </button>
             </li>
           </ul>
 
-          <!-- Fila de Tipo de Documento y Número -->
+
+          <!-- Fila de Tipo de Documento y Validaciones Base -->
           <div class="row g-3 mb-3">
             <div class="col-md-5">
               <label class="form-label small fw-bold text-secondary mb-1"
@@ -370,37 +459,34 @@ style="width: 28px; height: 28px; border-radius: 6px;"
                 </option>
               </select>
             </div>
-            <div class="col-md-7 mb-3">
-              <label class="form-label small fw-bold text-secondary mb-1"
-                >Número de Documento Fiscal</label
-              >
-              <small
-                *ngIf="
-                  entityForm.get('documentNumber')?.invalid &&
-                  (entityForm.get('documentNumber')?.dirty ||
-                    entityForm.get('documentNumber')?.touched)
-                "
-              >
+                    <div class="col-md-7 mb-3">
+            <label class="form-label small fw-bold text-secondary mb-1">Número de Documento Fiscal</label>
+            <small *ngIf="
+  entityForm.get('documentNumber')?.invalid &&
+  (entityForm.get('documentNumber')?.dirty ||
+    entityForm.get('documentNumber')?.touched)
+">
                 <span *ngIf="entityForm.get('documentType')?.value === '6'">
-                  ⚠️ El RUC exige exactamente 11 caracteres numéricos.</span
-                >
+                    ⚠️ El RUC exige exactamente 11 caracteres numéricos.
+                </span>
                 <span *ngIf="entityForm.get('documentType')?.value === '1'">
-                  ⚠️ El DNI exige exactamente 8 caracteres numéricos
-                  puros.</span
-                >
-              </small>
-            </div>
+                    ⚠️ El DNI exige exactamente 8 caracteres numéricos
+                    puros.
+                </span>
+            </small>
+        </div>
 
+            <!-- Campo del Número de Identificación con Validadores Inyectados -->
             <div
               class="col-md-7"
               [class.has-error-input]="isFieldInvalid('documentNumber')"
             >
-              <label class="form-label small fw-bold text-secondary mb-1"
-                >Nro Identificación</label
+              <label class="form-label small fw-bold text-secondary mb-1">
+                Nro Identificación</label
               >
               <input
                 type="text"
-                class="form-control bg-light text-dark border-light fw-medium"
+                class="form-control bg-light text-dark border-light fw-medium font-monospace"
                 formControlName="documentNumber"
                 placeholder="Ej: 20604859321"
               />
@@ -413,7 +499,7 @@ style="width: 28px; height: 28px; border-radius: 6px;"
             </div>
           </div>
 
-          <!-- Nombre Dinámico Reactivo -->
+          <!-- Nombre Comercial o Razón Social Dinámica Reactiva -->
           <div class="mb-3" [class.has-error-input]="isFieldInvalid('name')">
             <label class="form-label small fw-bold text-secondary mb-1">
               {{
@@ -431,7 +517,8 @@ style="width: 28px; height: 28px; border-radius: 6px;"
             <small
               class="text-danger extra-small-err"
               *ngIf="isFieldInvalid('name')"
-              >El nombre comercial es obligatorio (mín. 3 letras).</small
+              >El nombre comercial o razón social es obligatorio (mín. 3
+              letras).</small
             >
           </div>
 
@@ -454,23 +541,29 @@ style="width: 28px; height: 28px; border-radius: 6px;"
           </div>
         </div>
 
-        <!-- Acciones del Modal -->
+        <!-- Acciones del Modal con Loader Reactivo de MySQL en Aiven -->
         <div
           class="modal-footer border-top border-light px-4 py-3 bg-light rounded-bottom d-flex justify-content-end gap-2"
         >
           <button
             type="button"
             class="btn btn-light btn-sm px-3 border text-secondary shadow-none"
+            style="border-radius: 6px"
             (click)="closeModal()"
           >
             Cancelar
           </button>
           <button
             type="submit"
-            class="btn btn-primary btn-sm px-4 text-white"
-            style="background-color: #2563eb; border-radius: 6px"
+            class="btn btn-primary btn-sm px-4 text-white border-0 shadow-sm fw-bold d-flex align-items-center gap-1.5"
+            style="background-color: #2563eb; border-radius: 6px; height: 32px"
             [disabled]="isLoading"
           >
+            <i
+              [className]="
+                isLoading ? 'ri-loader-3-line spin-loader' : 'ri-save-3-line'
+              "
+            ></i>
             {{ isEditing ? "Guardar Cambios" : "Registrar Entidad" }}
           </button>
         </div>
