@@ -56,7 +56,8 @@ export class InvoiceListComponent implements OnInit, OnDestroy {
   filterType = '';
   filterNumber = '';
   filterCustomer = '';
-
+  
+  public activeDropdownId: number | null = null;
   private searchSubject = new Subject<void>();
   private contextSubscription!: Subscription;
 
@@ -180,29 +181,38 @@ export class InvoiceListComponent implements OnInit, OnDestroy {
   executeRetrySunat(invoiceId: number, index: number): void {
     if (this.retryingIds[invoiceId]) return;
 
-    // Activamos el spinner animado de RemixIcon exclusivamente para esta fila
+    // 1. Encendemos el candado de control por ID
     this.retryingIds[invoiceId] = true;
-    this.cdr.detectChanges();
+
+    // 2. ⚡ MUTACIÓN PREVENTIVA: Forzamos temporalmente el estado en la fila para dar certeza al cajero
+    if (this.invoices[index]) {
+      this.invoices[index].sunatStatus = 'PROCESANDO';
+      this.invoices[index].sunatDescription = 'Conectando con los servidores de la SUNAT en la RAM...';
+    }
+    this.cdr.detectChanges(); // Pintamos el estado "PROCESANDO" al instante
 
     this.retrySunat(invoiceId).subscribe({
       next: (response) => {
         this.retryingIds[invoiceId] = false;
 
-        // Mutamos reactivamente el estado y descripción en la fila de la grilla al vuelo
+        // 3. Reemplazamos por el veredicto final real devuelto por tu orquestador backend
         if (this.invoices[index]) {
           this.invoices[index].sunatStatus = response.sunatStatus;
           this.invoices[index].sunatDescription = response.message;
         }
-
         this.cdr.detectChanges();
       },
       error: (err) => {
         this.retryingIds[invoiceId] = false;
-        alert(
-          err?.error?.message || 'Error al procesar el reenvío fiscal a SUNAT.',
-        );
+        
+        // Si se cae la red, regresamos a PENDIENTE para que pueda volver a intentar
+        if (this.invoices[index]) {
+          this.invoices[index].sunatStatus = 'PENDIENTE';
+          this.invoices[index].sunatDescription = err?.error?.message || 'Error de conexión.';
+        }
+        alert(err?.error?.message || 'Error al procesar el reenvío fiscal.');
         this.cdr.detectChanges();
-      },
+      }
     });
   }
 
@@ -210,27 +220,29 @@ export class InvoiceListComponent implements OnInit, OnDestroy {
     return `${this.API_URL}/${invoiceId}/download-xml`;
   }
 
-  public onPrintInvoiceTicket(invoiceId: number): void {
-    this.isLoading = true;
-    this.cdr.detectChanges();
-
-    // El endpoint /api/invoices/:id ahora responde un estado 200 perfecto con la data real
+   public onPrintInvoiceTicket(invoiceId: number): void {
+    // 🎯 SIN PARPADEOS: Quitamos this.isLoading = true y detectores globales
+    
     this.http.get<{ status: string; data: any }>(`${this.API_URL}/${invoiceId}`).subscribe({
       next: (res: any) => {
-        // Rompemos las envolturas del JSON según la estructura de tu controlador
         const fullInvoiceData = res?.data || res;
-        this.isLoading = false;
-        
-        // 🚀 Disparo directo al cabezal de tu ticketera térmica física de 80mm
+
+        console.log(JSON.stringify(fullInvoiceData));
+        // El iframe invisible se encarga de todo de forma silenciosa
         this.printerService.printThermalTicket(fullInvoiceData);
-        this.cdr.detectChanges();
       },
       error: (err) => {
-        this.isLoading = false;
-        alert(err?.error?.message || 'No se pudieron recuperar los detalles del comprobante para la impresión.');
-        this.cdr.detectChanges();
+        alert(err?.error?.message || 'No se pudieron recuperar los detalles del comprobante.');
       }
     });
   }
+
+  public toggleDropdown(invoiceId: number): void {
+  this.activeDropdownId = this.activeDropdownId === invoiceId ? null : invoiceId;
+}
+
+public closeDropdown(): void {
+  this.activeDropdownId = null;
+}
 
 }

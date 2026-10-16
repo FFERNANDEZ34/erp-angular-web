@@ -12,6 +12,9 @@ import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { combineLatest, of } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { catchError } from 'rxjs/operators';
+import { TicketPrinterService } from '../../../../core/services/ticket-printer.service';
+
+
 
 @Component({
   selector: 'app-invoice-form',
@@ -30,7 +33,7 @@ export class InvoiceFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
-
+  private printerService = inject(TicketPrinterService);
   private readonly API_URL = `${environment.apiUrl}/invoices`;
   private readonly SERIES_API = `${environment.apiUrl}/series`;
   private readonly ENTITIES_API = `${environment.apiUrl}/entities`;
@@ -1121,6 +1124,10 @@ export class InvoiceFormComponent implements OnInit {
       this.showPaymentModal = false;
       this.showSuccessToast = true;
       this.successToastMessage = 'Cobro y cuadre de caja consolidado con éxito.';
+      
+      const fullInvoicePaidData = res?.data || res;
+      
+      this.printerService.printThermalTicket(fullInvoicePaidData);
 
       // 🧹 Apagamos ambos interruptores y limpiamos el POS para la siguiente venta de la cola
       this.isSavingPayment = false;

@@ -220,61 +220,71 @@
               >
             </div>
           </td>
+          <!-- Dentro de tu celda de Acciones en la fila (*ngFor="let inv of invoices; let i = index") -->
           <td class="text-center">
-            <!-- Botón Único de Anulación Contable Segura con RemixIcon -->
-            <button
-              class="btn btn-sm border bg-white text-danger shadow-none p-1 d-flex align-items-center justify-content-center"
-              style="width: 28px; height: 28px; border-radius: 6px"
-              type="button"
-              [disabled]="
-                inv.paymentStatus === 'ANULADO' ||
-                inv.sunatStatus === 'ACEPTADO'
-              "
-              (click)="onCancelInvoice(inv.id, inv.fullDocumentNumber)"
-              title="Anular Comprobante Interno o Pendiente"
-            >
-              <i class="ri-close-circle-line fs-5"></i>
-            </button>
+            <div class="dropdown-pos-wrapper">
+              <button
+                class="btn-trigger-dropdown"
+                type="button"
+                (click)="toggleDropdown(inv.id)"
+                [disabled]="retryingIds[inv.id]"
+              >
+                <!-- Si la fila está procesando, el botón principal del menú también se transforma en feedback -->
+                <i
+                  [ngClass]="
+                    retryingIds[inv.id]
+                      ? 'ri-refresh-line animate-spin text-blue'
+                      : 'ri-more-2-fill'
+                  "
+                ></i>
+              </button>
 
-             <button (click)="onPrintInvoiceTicket(inv.id)"
-          [disabled]="isLoading"
-          class="btn-action-pos"
-          title="Imprimir Ticket POS (80mm)">
-    <i class="ri-printer-fill text-green"></i>
-  </button>
+              <div
+                class="dropdown-menu-pos"
+                [class.show-menu]="activeDropdownId === inv.id"
+              >
+                <!-- Opción 1: Imprimir Ticket (Llama de forma silenciosa sin parpadeos) -->
+                <button
+                  class="dropdown-item-pos text-green"
+                  (click)="onPrintInvoiceTicket(inv.id); closeDropdown()"
+                >
+                  <i class="ri-printer-fill"></i> Imprimir Ticket (80mm)
+                </button>
 
-  
-            <!-- 🔄 2. Botón Inteligente de Reenvío (Oculto automáticamente si ya está ACEPTADO) -->
-            <button
-              *ngIf="inv.sunatStatus !== 'ACEPTADO'"
-              (click)="executeRetrySunat(inv.id, i)"
-              [disabled]="retryingIds[inv.id] || isLoading"
-              class="btn-action-pos"
-              [title]="
-                retryingIds[inv.id]
-                  ? 'Procesando en servidores de SUNAT...'
-                  : 'Reenviar a SUNAT'
-              "
-            >
-              <!-- Si la fila está procesando, el icono gira en un spinner espectacular; si no, muestra el avión de despacho -->
-              <i
-                [ngClass]="
-                  retryingIds[inv.id]
-                    ? 'ri-refresh-line animate-spin text-gray'
-                    : 'ri-send-plane-fill text-warning'
-                "
-              ></i>
-            </button>
+                <!-- Opción 2: Descargar XML -->
+                <a
+                  [href]="getDownloadUrl(inv.id)"
+                  target="_blank"
+                  class="dropdown-item-pos text-blue"
+                  (click)="closeDropdown()"
+                >
+                  <i class="ri-download-cloud-fill"></i> Descargar XML
+                </a>
 
-            <!-- 📂 1. Descarga directa del XML firmado UBL 2.1 -->
-            <a
-              [href]="getDownloadUrl(inv.id)"
-              target="_blank"
-              class="btn-action-pos"
-              title="Descargar XML Firmado"
-            >
-              <i class="ri-download-cloud-fill text-blue"></i>
-            </a>
+                <!-- Opción 3: Reenviar a SUNAT (Mutará la grilla a azul de golpe) -->
+                <button
+                  *ngIf="inv.sunatStatus !== 'ACEPTADO'"
+                  class="dropdown-item-pos text-warning"
+                  [disabled]="retryingIds[inv.id]"
+                  (click)="executeRetrySunat(inv.id, i); closeDropdown()"
+                >
+                  <i class="ri-send-plane-fill"></i> Despachar a SUNAT
+                </button>
+
+                <div class="dropdown-divider-pos"></div>
+
+                <!-- Opción 4: Anulación Directa -->
+                <button
+                  class="dropdown-item-pos text-danger"
+                  (click)="
+                    onCancelInvoice(inv.id, inv.fullDocumentNumber);
+                    closeDropdown()
+                  "
+                >
+                  <i class="ri-delete-bin-7-line"></i> Anular Comprobante
+                </button>
+              </div>
+            </div>
           </td>
         </tr>
       </tbody>

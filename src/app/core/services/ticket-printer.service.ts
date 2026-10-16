@@ -29,6 +29,10 @@ export class TicketPrinterService {
       </tr>
     `).join('') || '';
 
+// 🎯 RECTIFICACIÓN MÁSTER DE COMPAÑÍA: Autodetecta los datos reales del holding
+    
+
+
     // 3. Vertemos el molde HTML/CSS peso pluma de 80mm sanitizado
     const ticketContent = `
 <!DOCTYPE html>
@@ -107,7 +111,7 @@ export class TicketPrinterService {
 
     // 4. Inyectamos el contenido en el documento del iframe
     const doc = iframe.contentWindow?.document || iframe.contentDocument;
-    
+
     if (doc) {
       doc.open();
       doc.write(ticketContent);

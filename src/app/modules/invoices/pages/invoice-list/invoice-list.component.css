@@ -10,3 +10,78 @@ body.dark-theme-mode .table-hover tbody tr:hover { background-color: #334155 !im
 body.dark-theme-mode .text-dark, body.dark-theme-mode h1.text-dark { color: #f8fafc !important; }
 body.dark-theme-mode .form-control, body.dark-theme-mode .form-select { background-color: #0f172a !important; border-color: #475569 !important; color: #f8fafc !important; }
 body.dark-theme-mode .page-header-title p { color: #94a3b8 !important; }
+
+/* Contenedor relativo de la celda */
+.dropdown-pos-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Botón Gatillo Minimalista */
+.btn-trigger-dropdown {
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+.btn-trigger-dropdown:hover {
+  background: #f1f5f9;
+}
+
+/* 🧱 Menú Flotante Oculto por defecto */
+.dropdown-menu-pos {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 1000;
+  min-width: 190px;
+  padding: 6px 0;
+  margin-top: 2px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  text-align: left;
+}
+
+/* Clase desencadenadora animada */
+.dropdown-menu-pos.show-menu {
+  display: block;
+  animation: fadeInDropdown 0.15s ease-out;
+}
+
+/* Ítems internos del Menú */
+.dropdown-item-pos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.dropdown-item-pos:hover {
+  background-color: #f8fafc;
+}
+.dropdown-item-pos i {
+  font-size: 14px;
+}
+
+.dropdown-divider-pos {
+  height: 1px;
+  margin: 4px 0;
+  background-color: #e2e8f0;
+}
+
+@keyframes fadeInDropdown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
