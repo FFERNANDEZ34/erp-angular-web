@@ -253,10 +253,8 @@
 
                 <!-- Opción 2: Descargar XML -->
                 <a
-                  [href]="getDownloadUrl(inv.id)"
-                  target="_blank"
                   class="dropdown-item-pos text-blue"
-                  (click)="closeDropdown()"
+                  (click)="onDownloadXml(inv.id, inv.fullDocumentNumber)"
                 >
                   <i class="ri-download-cloud-fill"></i> Descargar XML
                 </a>

@@ -216,11 +216,42 @@ export class InvoiceListComponent implements OnInit, OnDestroy {
     });
   }
 
-  public getDownloadUrl(invoiceId: number): string {
-    return `${this.API_URL}/${invoiceId}/download-xml`;
+  public getDownloadUrl(invoiceId: number): Observable<Blob> {
+    // 🎯 REINGENIERÍA TOTAL: Cambiamos de retornar un string plano a realizar una petición HTTP estructurada
+    // Al pasarle { responseType: 'blob' }, Angular entiende que recibirá un archivo (Stream de Bytes) y no un JSON
+    return this.http.get(`${this.API_URL}/${invoiceId}/download-xml`, {
+      responseType: 'blob'
+    });
+  }
+  public onDownloadXml(invoiceId: number, fullDocumentNumber: string): void {
+    console.log(`[ANGULAR] Solicitando XML firmado para el documento: ${fullDocumentNumber}`);
+
+    this.getDownloadUrl(invoiceId).subscribe({
+      next: (blob: Blob) => {
+        // 1. Generamos un enlace lógico volátil acoplado al stream binario
+        const windowUrl = window.URL.createObjectURL(blob);
+        const downloadLink = document.createElement('a');
+        
+        downloadLink.href = windowUrl;
+        // 2. Le inyectamos el nombre oficial (Ej: "B002-00000001.xml")
+        downloadLink.download = `${fullDocumentNumber}.xml`;
+        
+        // 3. Forzamos el click virtual del navegador en segundo plano
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        
+        // 4. Limpieza de hardware inmediata: liberamos memoria RAM
+        document.body.removeChild(downloadLink);
+        window.URL.revokeObjectURL(windowUrl);
+      },
+      error: (err) => {
+        console.error('🚨 Error al procesar la descarga binaria del XML:', err);
+        alert('No se pudo recuperar el archivo XML firmado desde los servidores de resguardo.');
+      }
+    });
   }
 
-   public onPrintInvoiceTicket(invoiceId: number): void {
+  public onPrintInvoiceTicket(invoiceId: number): void {
     // 🎯 SIN PARPADEOS: Quitamos this.isLoading = true y detectores globales
     
     this.http.get<{ status: string; data: any }>(`${this.API_URL}/${invoiceId}`).subscribe({
