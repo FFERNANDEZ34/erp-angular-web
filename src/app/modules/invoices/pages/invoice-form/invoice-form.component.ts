@@ -380,7 +380,7 @@ export class InvoiceFormComponent implements OnInit {
 
   private initForm(): void {
     this.invoiceForm = this.fb.group({
-      documentType: ['FACTURA', [Validators.required]],
+      documentType: ['BOLETA', [Validators.required]],
       seriesId: ['', [Validators.required]],
       customerId: ['', [Validators.required]],
       customerIdentityType: ['', [Validators.required]],
@@ -512,7 +512,7 @@ export class InvoiceFormComponent implements OnInit {
         ); // Evitamos disparos en cascada innecesarios en la carga inicial
         // =========================================================================
 
-        this.filterSeriesByDocType('FACTURA');
+        this.filterSeriesByDocType('BOLETA');
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -957,6 +957,26 @@ export class InvoiceFormComponent implements OnInit {
     if (this.invoiceForm.invalid) {
       this.invoiceForm.markAllAsTouched();
       return;
+    }
+
+    const formValues = this.invoiceForm.value;
+// 🛡️ VALIDACIÓN FISCAL SUNAT: Si es Factura, el cliente debe tener RUC
+    // (Ajusta los nombres de las propiedades según cómo los tengas en tu invoiceForm o objeto cliente)
+    const isFactura = formValues.documentType === 'FACTURA'; 
+    const clientDocType = formValues.customerIdentityType;
+    const clientDocNumber = formValues.customerIdentityNumber||'';
+
+    if (isFactura && (clientDocType !== '6' || clientDocNumber.trim().length !== 11)) {
+      this.formErrorMessage = 'Para emitir una Factura, el cliente seleccionado debe ser una empresa con RUC válido (11 dígitos).';
+      this.cdr.detectChanges();
+
+      if (this.errorBanner) {
+        this.errorBanner.nativeElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+      return; // Detenemos el envío al backend
     }
 
     // 🔒 CONGELAMOS EL BOTÓN: Inhabilitamos doble click para evitar duplicar facturas
