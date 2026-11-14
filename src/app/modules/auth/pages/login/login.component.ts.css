@@ -86,10 +86,27 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  animation: fadeInDown 0.25s ease-out;
+}
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px; /* Antes era 20px; el resto lo cubre .error-text */
+}
+
 .form-group label { font-size: 13px; font-weight: 600; color: #334155; }
 
 .input-wrapper { position: relative; display: flex; align-items: center; }
@@ -121,9 +138,32 @@
 .input-wrapper input:focus + .input-icon { color: #3b82f6; }
 
 /* Control de Errores Visuales */
-.form-group.has-error input { border-color: #ef4444; }
-.form-group.has-error input:focus { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
-.error-text { color: #ef4444; font-size: 12px; margin-top: 2px; }
+.form-group.has-error input {
+  border-color: #ef4444;
+}
+.form-group.has-error input:focus {
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+/* Cuando el padre tiene .has-error, aparece suavemente sin mover nada */
+.form-group.has-error .error-text {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+
+.error-text {
+  color: #ef4444;
+  font-size: 12px;
+  line-height: 1.3;
+  min-height: 18px; /* Reserva la altura exacta de una línea de error */
+  
+  /* Invisible por defecto, pero ocupando su lugar */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
 
 .form-actions-helper {
   display: flex;
@@ -160,3 +200,66 @@
 .form-footer { text-align: center; margin-top: 32px; font-size: 14px; color: #64748b; }
 .link-register { color: #2563eb; text-decoration: none; font-weight: 600; display: inline-block; margin-top: 4px; }
 .link-register:hover { text-decoration: underline; }
+
+/* Ajustamos el margen inferior porque ahora .error-text ya ocupa ese espacio */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px; /* Antes era 20px; el resto lo cubre .error-text */
+}
+
+/* Control de Errores Visuales sin Layout Shift */
+.form-group.has-error input {
+  border-color: #ef4444;
+}
+
+.form-group.has-error input:focus {
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+.error-text {
+  color: #ef4444;
+  font-size: 12px;
+  line-height: 1.3;
+  min-height: 18px; /* Reserva la altura exacta de una línea de error */
+  
+  /* Invisible por defecto, pero ocupando su lugar */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+/* Cuando el padre tiene .has-error, aparece suavemente sin mover nada */
+.form-group.has-error .error-text {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Animación suave para la alerta del servidor */
+.alert-error {
+  background-color: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  animation: fadeInDown 0.25s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

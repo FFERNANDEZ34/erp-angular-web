@@ -50,42 +50,41 @@
           class="tab-content-fade"
         >
           <!-- Campo: Email -->
-          <div class="form-group" [class.has-error]="isFieldInvalid('email')">
-            <label for="email">Correo Electrónico</label>
-            <div class="input-wrapper">
-              <i class="bx bx-envelope input-icon"></i>
-              <input
-                type="email"
-                id="email"
-                formControlName="email"
-                placeholder="ejemplo@holding.com"
-                autocomplete="email"
-              />
-            </div>
-            <span class="error-text" *ngIf="isFieldInvalid('email')">
-              Por favor, ingresa un correo electrónico válido.
-            </span>
-          </div>
+<div class="form-group" [class.has-error]="isFieldInvalid('email')">
+  <label for="email">Correo Electrónico</label>
+  <div class="input-wrapper">
+    <i class="bx bx-envelope input-icon"></i>
+    <input
+      type="email"
+      id="email"
+      formControlName="email"
+      placeholder="ejemplo@holding.com"
+      autocomplete="email"
+    />
+  </div>
+  <!-- Sin *ngIf: el espacio siempre está reservado -->
+  <span class="error-text" aria-live="polite">
+    Por favor, ingresa un correo electrónico válido.
+  </span>
+</div>
 
-          <!-- Campo: Password -->
-          <div
-            class="form-group"
-            [class.has-error]="isFieldInvalid('password')"
-          >
-            <label for="password">Contraseña</label>
-            <div class="input-wrapper">
-              <i class="bx bx-lock-alt input-icon"></i>
-              <input
-                type="password"
-                id="password"
-                formControlName="password"
-                placeholder="••••••••"
-              />
-            </div>
-            <span class="error-text" *ngIf="isFieldInvalid('password')">
-              La contraseña es obligatoria (Mínimo 6 caracteres).
-            </span>
-          </div>
+<!-- Campo: Password -->
+<div class="form-group" [class.has-error]="isFieldInvalid('password')">
+  <label for="password">Contraseña</label>
+  <div class="input-wrapper">
+    <i class="bx bx-lock-alt input-icon"></i>
+    <input
+      type="password"
+      id="password"
+      formControlName="password"
+      placeholder="••••••••"
+    />
+  </div>
+  <!-- Sin *ngIf: el espacio siempre está reservado -->
+  <span class="error-text" aria-live="polite">
+    La contraseña es obligatoria (Mínimo 6 caracteres).
+  </span>
+</div>
 
           <!-- Opciones extras (Alineación Ejecutiva) -->
           <div class="form-actions-helper d-flex flex-column gap-2 mb-3">
